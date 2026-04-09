@@ -270,7 +270,6 @@ func providerLabel(provider string) string {
 		"codex":    "Codex",
 		"gemini":   "Gemini",
 		"opencode": "OpenCode",
-		"droid":    "Droid",
 		"auto":     "Auto",
 	}
 	if label, ok := labels[key]; ok {

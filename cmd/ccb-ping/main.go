@@ -27,7 +27,6 @@ var providerComm = map[string]struct {
 	"gemini":   {label: "Gemini", sessionFile: ".gemini-session"},
 	"codex":    {label: "Codex", sessionFile: ".codex-session"},
 	"opencode": {label: "OpenCode", sessionFile: ".opencode-session"},
-	"droid":    {label: "Droid", sessionFile: ".droid-session"},
 	"claude":   {label: "Claude", sessionFile: ".claude-session"},
 }
 
@@ -37,14 +36,13 @@ var providerSpecs = map[string]providers.ProviderClientSpec{
 	"gemini":   providers.GaskClientSpec,
 	"opencode": providers.OaskClientSpec,
 	"claude":   providers.LaskClientSpec,
-	"droid":    providers.DaskClientSpec,
 }
 
 func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: ccb-ping <provider> [--session-file FILE] [--autostart]")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, droid, claude")
+	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, claude")
 }
 
 func main() {

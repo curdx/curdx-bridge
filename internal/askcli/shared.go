@@ -1,7 +1,7 @@
 // Package askcli provides shared CLI logic for all provider ask commands.
 // Source: claude_code_bridge/bin/cask (template), bin/gask, bin/oask, etc.
 //
-// Each provider CLI (cask, gask, oask, lask, dask, bask, hask, qask) follows the
+// Each provider CLI (cask, gask, oask, lask) follows the
 // same pattern:
 //  1. Parse CLI args (message from args or stdin)
 //  2. Resolve work_dir
@@ -52,7 +52,7 @@ type ProviderCLIConfig struct {
 	// Use -1.0 for cask/lask style, 3600.0 for others.
 	DefaultTimeout float64
 	// HasRetryLoop controls whether the CLI retries daemon connections
-	// (gask, oask, dask, bask, hask, qask pattern) or uses simpler logic (cask, lask).
+	// (gask, oask pattern) or uses simpler logic (cask, lask).
 	HasRetryLoop bool
 	// StartupWaitEnv is the env var for startup wait override (e.g. "CCB_GASKD_STARTUP_WAIT_S").
 	StartupWaitEnv string
@@ -676,7 +676,7 @@ func waitForDaemonReady(spec providers.ProviderClientSpec, timeoutS float64, sta
 	return false
 }
 
-// -- Retry loop for gask/oask/dask/bask/hask/qask --
+// -- Retry loop for gask/oask --
 
 func daemonStartupWaitS(cfg ProviderCLIConfig, timeout float64) float64 {
 	if cfg.StartupWaitEnv != "" {

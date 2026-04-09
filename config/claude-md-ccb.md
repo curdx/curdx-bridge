@@ -1,10 +1,10 @@
 <!-- CCB_CONFIG_START -->
 ## AI Collaboration
-Use `/ask <provider>` to consult other AI assistants (codex/gemini/opencode/droid).
+Use `/ask <provider>` to consult other AI assistants (codex/gemini/opencode).
 Use `/cping <provider>` to check connectivity.
 Use `/pend <provider>` to view latest replies.
 
-Providers: `codex`, `gemini`, `opencode`, `droid`, `claude`
+Providers: `codex`, `gemini`, `opencode`, `claude`
 
 ## Async Guardrail (MANDATORY)
 

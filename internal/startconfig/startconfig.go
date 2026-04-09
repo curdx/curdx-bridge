@@ -31,7 +31,6 @@ var allowedProviders = map[string]bool{
 	"gemini":   true,
 	"opencode": true,
 	"claude":   true,
-	"droid":    true,
 }
 
 // parseTokens extracts tokens from raw config text, stripping comments and delimiters.

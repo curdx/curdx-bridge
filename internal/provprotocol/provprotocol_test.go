@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// Source: claude_code_bridge/test/test_baskd_protocol.py, test_qaskd_protocol.py
+// Source: claude_code_bridge/test/test_protocol.py
 
 // makeTestReqID creates a fake req_id for testing.
 func makeTestReqID(n int) string {
@@ -25,47 +25,6 @@ func stubStripDone(text, reqID string) string {
 		result = append(result, ln)
 	}
 	return strings.TrimRight(strings.Join(result, "\n"), " \t\n\r")
-}
-
-func TestWrapCodeBuddyPromptStructure(t *testing.T) {
-	reqID := makeTestReqID(1)
-	prompt := WrapCodeBuddyPrompt("hello\nworld", reqID)
-
-	if !strings.Contains(prompt, ReqIDPrefix+" "+reqID) {
-		t.Error("should contain REQ_ID line")
-	}
-	if !strings.Contains(prompt, "IMPORTANT:") {
-		t.Error("should contain IMPORTANT")
-	}
-	if !strings.Contains(prompt, DonePrefix+" "+reqID) {
-		t.Error("should contain DONE line")
-	}
-	if !strings.HasSuffix(prompt, DonePrefix+" "+reqID+"\n") {
-		t.Error("should end with DONE line")
-	}
-}
-
-func TestWrapCodeBuddyPromptStripsTrailingWhitespace(t *testing.T) {
-	reqID := makeTestReqID(2)
-	prompt := WrapCodeBuddyPrompt("  test  \n\n", reqID)
-	if !strings.Contains(prompt, "  test") {
-		t.Error("should contain rstripped message")
-	}
-}
-
-func TestWrapQwenPromptStructure(t *testing.T) {
-	reqID := makeTestReqID(3)
-	prompt := WrapQwenPrompt("hello\nworld", reqID)
-
-	if !strings.Contains(prompt, ReqIDPrefix+" "+reqID) {
-		t.Error("should contain REQ_ID line")
-	}
-	if !strings.Contains(prompt, "IMPORTANT:") {
-		t.Error("should contain IMPORTANT")
-	}
-	if !strings.HasSuffix(prompt, DonePrefix+" "+reqID+"\n") {
-		t.Error("should end with DONE line")
-	}
 }
 
 func TestWrapGeminiPromptStructure(t *testing.T) {
@@ -176,7 +135,7 @@ func TestProviderResultDefaults(t *testing.T) {
 		ExitCode:   0,
 		Reply:      "test reply",
 		ReqID:      "abc123",
-		SessionKey: "qwen:xyz",
+		SessionKey: "codex:xyz",
 		DoneSeen:   true,
 	}
 	if result.ExitCode != 0 {

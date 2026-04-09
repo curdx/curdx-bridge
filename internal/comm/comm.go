@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -303,4 +304,146 @@ func newLineScanner(r io.Reader) *bufio.Scanner {
 	s := bufio.NewScanner(r)
 	s.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	return s
+}
+
+// ---------------------------------------------------------------------------
+// JSONL helpers (shared by Claude, Codex, OpenCode, Gemini log readers)
+// ---------------------------------------------------------------------------
+
+func strOrEmpty(v interface{}) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
+func coalesce(values ...string) string {
+	for _, v := range values {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+func coalesceIface(values ...interface{}) interface{} {
+	for _, v := range values {
+		if v != nil {
+			return v
+		}
+	}
+	return nil
+}
+
+func expandHome(path string) string {
+	if strings.HasPrefix(path, "~/") || path == "~" {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			if path == "~" {
+				return home
+			}
+			return filepath.Join(home, path[2:])
+		}
+	}
+	return path
+}
+
+// extractContentText extracts text from a JSON content field (string or list of blocks).
+func extractContentText(content interface{}) string {
+	if content == nil {
+		return ""
+	}
+	if s, ok := content.(string); ok {
+		return strings.TrimSpace(s)
+	}
+	items, ok := content.([]interface{})
+	if !ok {
+		return ""
+	}
+	var texts []string
+	for _, raw := range items {
+		item, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		itemType := strings.ToLower(strings.TrimSpace(strOrEmpty(item["type"])))
+		if itemType == "thinking" || itemType == "thinking_delta" {
+			continue
+		}
+		text := strOrEmpty(item["text"])
+		if text == "" && itemType == "text" {
+			text = strOrEmpty(item["content"])
+		}
+		if t := strings.TrimSpace(text); t != "" {
+			texts = append(texts, t)
+		}
+	}
+	if len(texts) == 0 {
+		return ""
+	}
+	return strings.TrimSpace(strings.Join(texts, "\n"))
+}
+
+func normalizePathForMatch(value string) string {
+	s := strings.TrimSpace(value)
+	s = strings.ReplaceAll(s, "\\", "/")
+	s = strings.TrimRight(s, "/")
+	return s
+}
+
+func pathIsSameOrParent(parent, child string) bool {
+	pn := normalizePathForMatch(parent)
+	cn := normalizePathForMatch(child)
+	if pn == "" || cn == "" {
+		return false
+	}
+	if pn == cn {
+		return true
+	}
+	if !strings.HasPrefix(cn, pn) {
+		return false
+	}
+	return cn[len(pn):len(pn)+1] == "/"
+}
+
+func indexByte(data []byte, b byte) int {
+	for i, c := range data {
+		if c == b {
+			return i
+		}
+	}
+	return -1
+}
+
+func splitByteLines(buf []byte) [][]byte {
+	return splitBytesBy(buf, '\n')
+}
+
+func splitBytesBy(buf []byte, sep byte) [][]byte {
+	var lines [][]byte
+	for {
+		idx := indexByte(buf, sep)
+		if idx < 0 {
+			lines = append(lines, buf)
+			break
+		}
+		lines = append(lines, buf[:idx])
+		buf = buf[idx+1:]
+	}
+	return lines
+}
+
+func readAllBytes(f *os.File) ([]byte, error) {
+	var buf []byte
+	tmp := make([]byte, 32*1024)
+	for {
+		n, err := f.Read(tmp)
+		if n > 0 {
+			buf = append(buf, tmp[:n]...)
+		}
+		if err != nil {
+			break
+		}
+	}
+	return buf, nil
 }

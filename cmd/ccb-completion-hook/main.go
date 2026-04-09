@@ -408,7 +408,6 @@ func run(argv []string) int {
 		"codex":    "Codex",
 		"gemini":   "Gemini",
 		"opencode": "OpenCode",
-		"droid":    "Droid",
 	}
 	providerDisplay := providerNames[provider]
 	if providerDisplay == "" {
@@ -446,7 +445,6 @@ func run(argv []string) int {
 			"codex":    ".codex-session",
 			"gemini":   ".gemini-session",
 			"opencode": ".opencode-session",
-			"droid":    ".droid-session",
 		}
 		sessionFilename := sessionFiles[caller]
 		if sessionFilename == "" {

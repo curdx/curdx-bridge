@@ -37,7 +37,7 @@ const (
 )
 
 var allowedProviders = map[string]bool{
-	"codex": true, "gemini": true, "opencode": true, "claude": true, "droid": true,
+	"codex": true, "gemini": true, "opencode": true, "claude": true,
 }
 
 // splitProviderTokens splits comma-separated and/or space-separated provider tokens.
@@ -77,8 +77,8 @@ func parseProviders(values []string, allowUnknown bool) []string {
 
 	if len(unknown) > 0 && !allowUnknown {
 		fmt.Fprintf(os.Stderr, "invalid provider(s): %s\n", strings.Join(unknown, ", "))
-		fmt.Fprintln(os.Stderr, "use: ccb codex gemini opencode claude droid  (spaces)  or  ccb codex,gemini,opencode,claude,droid  (commas)")
-		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, opencode, claude, droid")
+		fmt.Fprintln(os.Stderr, "use: ccb codex gemini opencode claude  (spaces)  or  ccb codex,gemini,opencode,claude  (commas)")
+		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, opencode, claude")
 		return nil
 	}
 
@@ -114,8 +114,8 @@ func parseProvidersWithCmd(values []string) ([]string, bool) {
 
 	if len(unknown) > 0 {
 		fmt.Fprintf(os.Stderr, "invalid provider(s): %s\n", strings.Join(unknown, ", "))
-		fmt.Fprintln(os.Stderr, "use: ccb codex gemini opencode claude droid cmd  (spaces)  or  ccb codex,gemini,opencode,claude,droid,cmd  (commas)")
-		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, opencode, claude, droid, cmd")
+		fmt.Fprintln(os.Stderr, "use: ccb codex gemini opencode claude cmd  (spaces)  or  ccb codex,gemini,opencode,claude,cmd  (commas)")
+		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, opencode, claude, cmd")
 		return nil, cmdEnabled
 	}
 
@@ -502,7 +502,7 @@ func findAllZombieSessions() []map[string]interface{} {
 		return nil
 	}
 
-	pattern := regexp.MustCompile(`^(codex|gemini|opencode|claude|droid)-(\d+)-`)
+	pattern := regexp.MustCompile(`^(codex|gemini|opencode|claude)-(\d+)-`)
 	var zombies []map[string]interface{}
 
 	out, err := exec.Command("tmux", "list-sessions", "-F", "#{session_name}").Output()
@@ -623,7 +623,7 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 
 	providers := parseProviders(providerArgs, true)
 	if providers == nil {
-		providers = []string{"codex", "gemini", "opencode", "claude", "droid"}
+		providers = []string{"codex", "gemini", "opencode", "claude"}
 	}
 
 	daemonSpecs := map[string]struct {
@@ -634,7 +634,6 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 		"gemini":   {"gask", "askd"},
 		"opencode": {"oask", "askd"},
 		"claude":   {"lask", "askd"},
-		"droid":    {"dask", "askd"},
 	}
 
 	cwd, _ := os.Getwd()
@@ -1098,8 +1097,6 @@ func (l *aiLauncher) getStartCmd(provider string) string {
 		cmd = l.buildGeminiStartCmd()
 	case "opencode":
 		cmd = l.buildOpenCodeStartCmd()
-	case "droid":
-		cmd = l.buildDroidStartCmd()
 	case "claude":
 		cmd = l.buildClaudeStartCmd()
 	default:
@@ -1145,18 +1142,6 @@ func (l *aiLauncher) buildOpenCodeStartCmd() string {
 	if l.resume {
 		cmd += " --continue"
 		fmt.Fprintf(os.Stderr, "Resuming OpenCode session\n")
-	}
-	return cmd
-}
-
-func (l *aiLauncher) buildDroidStartCmd() string {
-	cmd := strings.TrimSpace(os.Getenv("DROID_START_CMD"))
-	if cmd == "" {
-		cmd = "droid"
-	}
-	if l.resume {
-		cmd += " -r"
-		fmt.Fprintf(os.Stderr, "Resuming Droid session\n")
 	}
 	return cmd
 }
@@ -1225,18 +1210,6 @@ func (l *aiLauncher) claudeEnvOverrides() map[string]string {
 			env["OPENCODE_WEZTERM_PANE"] = paneID
 		} else {
 			env["OPENCODE_TMUX_SESSION"] = paneID
-		}
-	}
-	if contains(l.providers, "droid") {
-		rt := filepath.Join(runtimeBase, "droid")
-		env["DROID_SESSION_ID"] = l.sessionID
-		env["DROID_RUNTIME_DIR"] = rt
-		env["DROID_TERMINAL"] = l.terminalType
-		paneID := l.providerPaneID("droid")
-		if l.terminalType == "wezterm" {
-			env["DROID_WEZTERM_PANE"] = paneID
-		} else {
-			env["DROID_TMUX_SESSION"] = paneID
 		}
 	}
 	return env
@@ -1552,9 +1525,6 @@ func (l *aiLauncher) startClaudeInCurrentPane() int {
 	if contains(l.providers, "opencode") {
 		fmt.Fprintln(os.Stderr, "   oask/oping/opend - OpenCode communication")
 	}
-	if contains(l.providers, "droid") {
-		fmt.Fprintln(os.Stderr, "   dask/dping/dpend - Droid communication")
-	}
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintf(os.Stderr, "Executing: %s\n", strings.Join(cmdParts, " "))
 
@@ -1755,7 +1725,7 @@ func (l *aiLauncher) cleanup() {
 	}
 
 	// Mark session files inactive
-	for _, prov := range []string{"codex", "gemini", "opencode", "claude", "droid"} {
+	for _, prov := range []string{"codex", "gemini", "opencode", "claude"} {
 		sessionFile := l.projectSessionFile(fmt.Sprintf(".%s-session", prov))
 		if _, err := os.Stat(sessionFile); err != nil {
 			continue
@@ -2339,14 +2309,6 @@ func run(argv []string) int {
 		return 2
 	}
 
-	// Handle droid subcommands
-	if len(args) > 1 && args[0] == "droid" {
-		if args[1] == "setup-delegation" || args[1] == "test-delegation" {
-			fmt.Fprintf(os.Stderr, "ccb droid %s is not yet implemented in Go\n", args[1])
-			return 1
-		}
-	}
-
 	// Handle subcommands: kill, update, version, uninstall, reinstall
 	if len(args) > 0 {
 		switch args[0] {
@@ -2389,7 +2351,7 @@ func run(argv []string) int {
 	if help {
 		fmt.Println("Usage: ccb [providers...] [options]")
 		fmt.Println("")
-		fmt.Println("Providers: codex, gemini, opencode, claude, droid (space or comma separated)")
+		fmt.Println("Providers: codex, gemini, opencode, claude (space or comma separated)")
 		fmt.Println("")
 		fmt.Println("Options:")
 		fmt.Println("  -r, --resume, --restore    Resume context")

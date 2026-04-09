@@ -161,11 +161,14 @@ func claudeExtractMessage(entry map[string]interface{}, role string) string {
 
 // ---------------------------------------------------------------------------
 // ClaudeLogState tracks the read cursor for Claude JSONL sessions.
-// Using DroidLogState since the format is identical (JSONL with byte offset + carry).
 // ---------------------------------------------------------------------------
 
-// ClaudeLogState is an alias for DroidLogState since both use JSONL with byte offsets.
-type ClaudeLogState = DroidLogState
+// ClaudeLogState is the cursor into a Claude session JSONL file.
+type ClaudeLogState struct {
+	SessionPath string
+	Offset      int64
+	Carry       []byte // partial line from previous read
+}
 
 // ---------------------------------------------------------------------------
 // ClaudeLogReader reads Claude session logs.

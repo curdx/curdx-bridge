@@ -176,12 +176,6 @@ func extractConversationsForProvider(provider, workDir, sessionPath, sessionID, 
 		}
 		reader := comm.NewOpenCodeLogReader("", workDir, pid, opts...)
 		pairs = reader.LatestConversations(fetchN)
-	case "droid":
-		reader := comm.NewDroidLogReader("", workDir)
-		if sessionPath != "" {
-			reader.SetPreferredSession(sessionPath)
-		}
-		pairs = reader.LatestConversations(fetchN)
 	default:
 		return nil
 	}

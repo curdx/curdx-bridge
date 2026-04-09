@@ -113,18 +113,6 @@ SCRIPTS_TO_LINK=(
   bin/lask
   bin/lpend
   bin/lping
-  bin/dask
-  bin/dpend
-  bin/dping
-  bin/hask
-  bin/hpend
-  bin/hping
-  bin/bask
-  bin/bpend
-  bin/bping
-  bin/qask
-  bin/qpend
-  bin/qping
   bin/ask
   bin/ccb-ping
   bin/pend
@@ -154,7 +142,6 @@ LEGACY_SCRIPTS=(
   gaskd
   oaskd
   laskd
-  daskd
 )
 
 usage() {
@@ -167,8 +154,6 @@ Optional environment variables:
   CODEX_INSTALL_PREFIX     Install directory (default: ~/.local/share/codex-dual)
   CODEX_BIN_DIR            Executable directory (default: ~/.local/bin)
   CODEX_CLAUDE_COMMAND_DIR Custom Claude commands directory (default: auto-detect)
-  CCB_DROID_AUTOINSTALL    Auto-register Droid MCP tools if droid exists (default: 1)
-  CCB_DROID_AUTOINSTALL_FORCE Re-register Droid MCP tools (default: 0)
   CCB_CLAUDE_MD_MODE       CLAUDE.md injection mode: "inline" (default) or "route"
                            inline = full config in CLAUDE.md (~57 lines)
                            route  = minimal pointer in CLAUDE.md, full config in ~/.claude/rules/ccb-config.md
@@ -712,7 +697,7 @@ install_claude_commands() {
   mkdir -p "$claude_dir"
 
   # Clean up obsolete CCB commands (replaced by unified ask/ping/pend)
-  local obsolete_cmds="cask.md gask.md oask.md dask.md lask.md cpend.md gpend.md opend.md dpend.md lpend.md cping.md gping.md oping.md dping.md lping.md"
+  local obsolete_cmds="cask.md gask.md oask.md lask.md cpend.md gpend.md opend.md lpend.md cping.md gping.md oping.md lping.md"
   for obs_cmd in $obsolete_cmds; do
     if [[ -f "$claude_dir/$obs_cmd" ]]; then
       rm -f "$claude_dir/$obs_cmd"
@@ -739,7 +724,7 @@ install_claude_skills() {
   mkdir -p "$skills_dst"
 
   # Clean up obsolete CCB skills (replaced by unified ask/cping/pend)
-  local obsolete_skills="cask gask oask dask lask cpend gpend opend dpend lpend cping gping oping dping lping ping auto"
+  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
       rm -rf "$skills_dst/$obs_skill"
@@ -805,7 +790,7 @@ install_codex_skills() {
   mkdir -p "$skills_dst"
 
   # Clean up obsolete CCB skills (replaced by unified ask/ping/pend)
-  local obsolete_skills="cask gask oask dask lask cpend gpend opend dpend lpend cping gping oping dping lping"
+  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
       rm -rf "$skills_dst/$obs_skill"
@@ -845,84 +830,6 @@ install_codex_skills() {
     echo "  Updated Codex skill: $skill_name"
   done
   echo "Updated Codex skills directory: $skills_dst"
-}
-
-install_droid_skills() {
-  local skills_src="$REPO_ROOT/droid_skills"
-  local skills_dst="${FACTORY_HOME:-$HOME/.factory}/skills"
-
-  if [[ ! -d "$skills_src" ]]; then
-    return
-  fi
-
-  if ! command -v droid >/dev/null 2>&1; then
-    return
-  fi
-
-  mkdir -p "$skills_dst"
-
-  # Clean up obsolete CCB skills (replaced by unified ask/ping/pend)
-  local obsolete_skills="cask gask oask dask lask cpend gpend opend dpend lpend cping gping oping dping lping"
-  for obs_skill in $obsolete_skills; do
-    if [[ -d "$skills_dst/$obs_skill" ]]; then
-      rm -rf "$skills_dst/$obs_skill"
-      echo "  Removed obsolete skill: $obs_skill"
-    fi
-  done
-
-  echo "Installing Droid/Factory skills..."
-  for skill_dir in "$skills_src"/*/; do
-    [[ -d "$skill_dir" ]] || continue
-    local skill_name
-    skill_name=$(basename "$skill_dir")
-
-    local src_skill_md=""
-    if [[ -f "$skill_dir/SKILL.md" ]]; then
-      src_skill_md="$skill_dir/SKILL.md"
-    else
-      continue
-    fi
-
-    local dst_dir="$skills_dst/$skill_name"
-    local dst_skill_md="$dst_dir/SKILL.md"
-    mkdir -p "$dst_dir"
-    cp -f "$src_skill_md" "$dst_skill_md"
-
-    # Copy additional subdirectories (e.g., references/) if they exist
-    for subdir in "$skill_dir"*/; do
-      if [[ -d "$subdir" ]]; then
-        local subdir_name
-        subdir_name=$(basename "$subdir")
-        cp -rf "$subdir" "$dst_dir/$subdir_name"
-      fi
-    done
-
-    echo "  Updated Factory skill: $skill_name"
-  done
-  echo "Updated Factory skills directory: $skills_dst"
-}
-
-install_droid_delegation() {
-  if [[ "${CCB_DROID_AUTOINSTALL:-1}" == "0" ]]; then
-    return
-  fi
-  if ! command -v droid >/dev/null 2>&1; then
-    return
-  fi
-  local py
-  local server="$BIN_DIR/ccb-mcp-delegation"
-  if [[ ! -x "$server" ]]; then
-    echo "WARN: Droid MCP server binary not found at $server; skipping"
-    return
-  fi
-  if [[ "${CCB_DROID_AUTOINSTALL_FORCE:-0}" == "1" ]]; then
-    droid mcp remove ccb-delegation >/dev/null 2>&1 || true
-  fi
-  if droid mcp add ccb-delegation --type stdio "$server" >/dev/null 2>&1; then
-    echo "OK: Droid MCP delegation registered"
-  else
-    echo "WARN: Failed to register Droid MCP delegation (already registered or droid config unavailable)"
-  fi
 }
 
 CCB_START_MARKER="<!-- CCB_CONFIG_START -->"
@@ -1308,7 +1215,7 @@ cleanup_legacy_files() {
   local cleaned=0
 
   # Legacy daemon scripts in bin/
-  local legacy_daemons="caskd gaskd oaskd laskd daskd"
+  local legacy_daemons="caskd gaskd oaskd laskd"
   for daemon in $legacy_daemons; do
     if [[ -f "$BIN_DIR/$daemon" ]]; then
       rm -f "$BIN_DIR/$daemon"
@@ -1325,7 +1232,7 @@ cleanup_legacy_files() {
 
   # Legacy daemon state files in ~/.cache/ccb/
   local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/ccb"
-  local legacy_states="caskd.json gaskd.json oaskd.json laskd.json daskd.json"
+  local legacy_states="caskd.json gaskd.json oaskd.json laskd.json"
   for state in $legacy_states; do
     if [[ -f "$cache_dir/$state" ]]; then
       rm -f "$cache_dir/$state"
@@ -1335,7 +1242,7 @@ cleanup_legacy_files() {
   done
 
   # Legacy daemon module files in lib/
-  local legacy_modules="caskd_daemon.py gaskd_daemon.py oaskd_daemon.py laskd_daemon.py daskd_daemon.py"
+  local legacy_modules="caskd_daemon.py gaskd_daemon.py oaskd_daemon.py laskd_daemon.py"
   for module in $legacy_modules; do
     if [[ -f "$INSTALL_PREFIX/lib/$module" ]]; then
       rm -f "$INSTALL_PREFIX/lib/$module"
@@ -1363,8 +1270,6 @@ install_all() {
   install_claude_commands
   install_claude_skills
   install_codex_skills
-  install_droid_skills
-  install_droid_delegation
   install_claude_md_config
   install_agents_md_config
   install_clinerules_config
@@ -1484,51 +1389,6 @@ uninstall_codex_skills() {
   done
 }
 
-uninstall_droid_skills() {
-  local skills_dst="${FACTORY_HOME:-$HOME/.factory}/skills"
-  local ccb_skills="ask ping pend autonew mounted all-plan"
-
-  if [[ ! -d "$skills_dst" ]]; then
-    return
-  fi
-
-  echo "Removing CCB Droid skills..."
-  for skill in $ccb_skills; do
-    if [[ -d "$skills_dst/$skill" ]]; then
-      rm -rf "$skills_dst/$skill"
-      echo "  Removed skill: $skill"
-    fi
-  done
-}
-
-uninstall_droid_delegation() {
-  if ! command -v droid >/dev/null 2>&1; then
-    return
-  fi
-
-  echo "Removing Droid MCP delegation..."
-  if droid mcp remove ccb-delegation >/dev/null 2>&1; then
-    echo "  Removed ccb-delegation MCP"
-  fi
-}
-
-uninstall_droid_commands() {
-  local cmds_dst="${FACTORY_HOME:-$HOME/.factory}/commands"
-  local ccb_cmds="ask.md ping.md pend.md"
-
-  if [[ ! -d "$cmds_dst" ]]; then
-    return
-  fi
-
-  echo "Removing CCB Droid commands..."
-  for cmd in $ccb_cmds; do
-    if [[ -f "$cmds_dst/$cmd" ]]; then
-      rm -f "$cmds_dst/$cmd"
-      echo "  Removed command: $cmd"
-    fi
-  done
-}
-
 uninstall_all() {
   echo "INFO: Starting ccb uninstall..."
 
@@ -1580,15 +1440,6 @@ uninstall_all() {
 
   # 8. Remove Codex skills
   uninstall_codex_skills
-
-  # 9. Remove Droid skills
-  uninstall_droid_skills
-
-  # 10. Remove Droid MCP delegation
-  uninstall_droid_delegation
-
-  # 11. Remove Droid commands
-  uninstall_droid_commands
 
   echo "OK: Uninstall complete"
   echo "   NOTE: Dependencies (go, tmux, wezterm) were not removed"

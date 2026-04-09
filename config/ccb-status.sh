@@ -38,7 +38,6 @@ check_session() {
         codex)   session_file="$PWD/.ccb/.codex-session" ;;
         gemini)  session_file="$PWD/.ccb/.gemini-session" ;;
         opencode) session_file="$PWD/.ccb/.opencode-session" ;;
-        droid)   session_file="$PWD/.ccb/.droid-session" ;;
     esac
 
     # Backwards compatibility: legacy config dir or root-level session file.
@@ -118,9 +117,8 @@ main() {
             local codex_s=$(format_ai_status "cask" "X" "$C_GREEN")
             local gemini_s=$(format_ai_status "gask" "G" "$C_BLUE")
             local opencode_s=$(format_ai_status "oask" "O" "$C_PURPLE")
-            local droid_s=$(format_ai_status "dask" "D" "$C_YELLOW")
 
-            out=" ${claude_s}${codex_s}${gemini_s}${opencode_s}${droid_s} "
+            out=" ${claude_s}${codex_s}${gemini_s}${opencode_s} "
             ;;
 
         daemons)
@@ -203,13 +201,6 @@ main() {
                 output+="${C_DIM}○${C_RESET}"
             fi
 
-            # D - Droid (dask daemon)
-            if [[ $(check_daemon "dask") == "on" ]]; then
-                output+=" ${C_YELLOW}●${C_RESET}"
-            else
-                output+=" ${C_DIM}○${C_RESET}"
-            fi
-
             out="${output}"
             ;;
 
@@ -227,7 +218,6 @@ main() {
                     claude|codex) echo "${C_ORANGE}[$ai_name]${C_RESET}" ;;
                     gemini)       echo "${C_BLUE}[$ai_name]${C_RESET}" ;;
                     opencode)     echo "${C_PURPLE}[$ai_name]${C_RESET}" ;;
-                    droid)        echo "${C_YELLOW}[$ai_name]${C_RESET}" ;;
                     cmd)          echo "${C_TEAL}[$ai_name]${C_RESET}" ;;
                     *)            echo "[$ai_name]" ;;
                 esac

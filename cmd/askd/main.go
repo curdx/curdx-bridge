@@ -2,7 +2,7 @@
 // Source: claude_code_bridge/bin/askd
 //
 // This is the daemon entry point. It starts a unified daemon that handles
-// codex, gemini, opencode, droid, claude, copilot, codebuddy, and qwen.
+// codex, gemini, opencode, and claude.
 package main
 
 import (
@@ -20,7 +20,7 @@ import (
 	"github.com/anthropics/curdx-bridge/internal/terminal"
 )
 
-var allProviders = []string{"codex", "gemini", "opencode", "droid", "claude", "copilot", "codebuddy", "qwen"}
+var allProviders = []string{"codex", "gemini", "opencode", "claude"}
 
 func parseListen(value string) (string, int) {
 	value = strings.TrimSpace(value)
@@ -178,16 +178,8 @@ func adapterForProvider(name string) adapterPkg.BaseProviderAdapter {
 		return &adapterPkg.GeminiAdapter{}
 	case "opencode":
 		return &adapterPkg.OpenCodeAdapter{}
-	case "droid":
-		return &adapterPkg.DroidAdapter{}
 	case "claude":
 		return &adapterPkg.ClaudeAdapter{}
-	case "copilot":
-		return &adapterPkg.CopilotAdapter{}
-	case "codebuddy":
-		return &adapterPkg.CodebuddyAdapter{}
-	case "qwen":
-		return &adapterPkg.QwenAdapter{}
 	default:
 		return nil
 	}

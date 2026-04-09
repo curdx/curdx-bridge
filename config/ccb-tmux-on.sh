@@ -217,7 +217,6 @@ pane_format='#{?#{==:#{@ccb_agent},Claude},#[fg='${bg_main}']#[bg='${color_red}'
 pane_format+='#{?#{==:#{@ccb_agent},Codex},#[fg='${bg_main}']#[bg='${color_orange}']#[bold] #P Codex #[default],'
 pane_format+='#{?#{==:#{@ccb_agent},Gemini},#[fg='${bg_main}']#[bg='${color_green}']#[bold] #P Gemini #[default],'
 pane_format+='#{?#{==:#{@ccb_agent},OpenCode},#[fg='${bg_main}']#[bg='${color_purple}']#[bold] #P OpenCode #[default],'
-pane_format+='#{?#{==:#{@ccb_agent},Droid},#[fg='${bg_main}']#[bg='${color_yellow}']#[bold] #P Droid #[default],'
 pane_format+='#{?#{==:#{@ccb_agent},Cmd},#[fg='${bg_main}']#[bg='${color_teal}']#[bold] #P Cmd #[default],'
 pane_format+='#[fg='${pane_default_fg}'] #P #{pane_title} #[default]}}}}}}'
 

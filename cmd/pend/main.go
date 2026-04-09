@@ -19,7 +19,6 @@ var providerPends = map[string]string{
 	"gemini":   "gpend",
 	"codex":    "cpend",
 	"opencode": "opend",
-	"droid":    "dpend",
 	"claude":   "lpend",
 }
 
@@ -27,7 +26,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: pend <provider> [N] [--session-file FILE]")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, droid, claude")
+	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, claude")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Arguments:")
 	fmt.Fprintln(os.Stderr, "  N    Show the latest N conversations (default: 1)")

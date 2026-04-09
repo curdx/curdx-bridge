@@ -26,7 +26,6 @@ var providerDaemons = []providerDaemon{
 	{provider: "gemini", daemon: "gask"},
 	{provider: "opencode", daemon: "oask"},
 	{provider: "claude", daemon: "lask"},
-	{provider: "droid", daemon: "dask"},
 }
 
 func sessionFileExists(cwd, provider string) bool {
@@ -49,7 +48,7 @@ func getOnlineDaemons() map[string]bool {
 	if err != nil {
 		return online
 	}
-	for _, daemon := range []string{"caskd", "gaskd", "oaskd", "laskd", "daskd"} {
+	for _, daemon := range []string{"caskd", "gaskd", "oaskd", "laskd"} {
 		if strings.Contains(string(out), daemon) {
 			online[daemon] = true
 		}

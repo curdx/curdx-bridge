@@ -196,24 +196,3 @@ func TestComputeSessionKey(t *testing.T) {
 		t.Errorf("key = %q, want codex:auth:abc123", key)
 	}
 }
-
-func TestLoadSessionActiveCheck(t *testing.T) {
-	dir := t.TempDir()
-	ccbDir := filepath.Join(dir, ".ccb")
-	os.MkdirAll(ccbDir, 0o755)
-
-	// Write an inactive droid session.
-	data := map[string]interface{}{
-		"pane_id":  "%1",
-		"terminal": "tmux",
-		"work_dir": dir,
-		"active":   false,
-	}
-	raw, _ := json.MarshalIndent(data, "", "  ")
-	os.WriteFile(filepath.Join(ccbDir, ".droid-session"), raw, 0o644)
-
-	s := LoadDroidSession(dir, "")
-	if s != nil {
-		t.Error("inactive droid session should return nil")
-	}
-}

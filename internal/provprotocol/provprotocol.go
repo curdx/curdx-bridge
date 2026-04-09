@@ -74,102 +74,6 @@ func WrapOpenCodePrompt(message, reqID string) string {
 	)
 }
 
-// ── CodeBuddy (baskd_protocol.py) ──
-
-// WrapCodeBuddyPrompt wraps a prompt with CCB markers for CodeBuddy.
-func WrapCodeBuddyPrompt(message, reqID string) string {
-	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
-	return fmt.Sprintf(
-		"%s %s\n\n"+
-			"%s\n\n"+
-			"IMPORTANT:\n"+
-			"- Reply with an execution summary, in English. Do not stay silent.\n"+
-			"- End your reply with this exact final line (verbatim, on its own line):\n"+
-			"%s %s\n",
-		ReqIDPrefix, reqID,
-		message,
-		DonePrefix, reqID,
-	)
-}
-
-// ── Copilot (haskd_protocol.py) ──
-
-// WrapCopilotPrompt wraps a prompt with CCB markers for Copilot.
-func WrapCopilotPrompt(message, reqID string) string {
-	return WrapCodeBuddyPrompt(message, reqID) // Identical format
-}
-
-// ── Qwen (qaskd_protocol.py) ──
-
-// WrapQwenPrompt wraps a prompt with CCB markers for Qwen.
-func WrapQwenPrompt(message, reqID string) string {
-	return WrapCodeBuddyPrompt(message, reqID) // Identical format
-}
-
-// ── Droid (daskd_protocol.py) ──
-
-var (
-	droidSkillCache *string
-	droidSkillOnce  sync.Once
-)
-
-func loadDroidSkills() string {
-	droidSkillOnce.Do(func() {
-		s := ""
-		droidSkillCache = &s
-
-		if !envBool("CCB_DROID_SKILLS", true) {
-			return
-		}
-
-		// Find skills dir relative to executable
-		exe, err := os.Executable()
-		if err != nil {
-			return
-		}
-		skillsDir := filepath.Join(filepath.Dir(exe), "..", "droid_skills")
-		if info, err := os.Stat(skillsDir); err != nil || !info.IsDir() {
-			return
-		}
-
-		var parts []string
-		for _, name := range []string{"cask.md", "gask.md", "lask.md", "oask.md"} {
-			path := filepath.Join(skillsDir, name)
-			data, err := os.ReadFile(path)
-			if err != nil {
-				continue
-			}
-			text := strings.TrimSpace(string(data))
-			if text != "" {
-				parts = append(parts, text)
-			}
-		}
-		result := strings.TrimSpace(strings.Join(parts, "\n\n"))
-		droidSkillCache = &result
-	})
-	return *droidSkillCache
-}
-
-// WrapDroidPrompt wraps a prompt with CCB markers for Droid.
-func WrapDroidPrompt(message, reqID string) string {
-	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
-	skills := loadDroidSkills()
-	if skills != "" {
-		message = strings.TrimSpace(skills + "\n\n" + message)
-	}
-	return fmt.Sprintf(
-		"%s %s\n\n"+
-			"%s\n\n"+
-			"IMPORTANT:\n"+
-			"- Reply with an execution summary, in English. Do not stay silent.\n"+
-			"- End your reply with this exact final line (verbatim, on its own line):\n"+
-			"%s %s\n",
-		ReqIDPrefix, reqID,
-		message,
-		DonePrefix, reqID,
-	)
-}
-
 // ── Claude (laskd_protocol.py) ──
 
 var (
@@ -274,7 +178,7 @@ func WrapClaudePrompt(message, reqID string) string {
 // ── Common reply extraction ──
 
 // ExtractReplyStandard extracts the reply segment for reqID using the standard
-// algorithm shared by gemini, codebuddy, copilot, qwen, droid, opencode.
+// algorithm shared by gemini and opencode.
 // This is the common pattern from *askd_protocol.py.
 func ExtractReplyStandard(text, reqID string, stripDone func(string, string) string) string {
 	lines := splitLines(text)

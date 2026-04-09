@@ -29,11 +29,7 @@ var ProviderDaemons = map[string]string{
 	"gemini":    "gask",
 	"codex":     "cask",
 	"opencode":  "oask",
-	"droid":     "dask",
 	"claude":    "lask",
-	"copilot":   "hask",
-	"codebuddy": "bask",
-	"qwen":      "qask",
 }
 
 // ProviderDisplayNames maps provider names to their display names.
@@ -47,10 +43,6 @@ var CallerSessionFiles = map[string]string{
 	"codex":     ".codex-session",
 	"gemini":    ".gemini-session",
 	"opencode":  ".opencode-session",
-	"droid":     ".droid-session",
-	"copilot":   ".copilot-session",
-	"codebuddy": ".codebuddy-session",
-	"qwen":      ".qwen-session",
 }
 
 // CallerPaneEnvHints maps callers to env vars that may carry their pane info.
@@ -58,10 +50,6 @@ var CallerPaneEnvHints = map[string][2]string{
 	"codex":     {"CODEX_TMUX_SESSION", "CODEX_WEZTERM_PANE"},
 	"gemini":    {"GEMINI_TMUX_SESSION", "GEMINI_WEZTERM_PANE"},
 	"opencode":  {"OPENCODE_TMUX_SESSION", "OPENCODE_WEZTERM_PANE"},
-	"droid":     {"DROID_TMUX_SESSION", "DROID_WEZTERM_PANE"},
-	"copilot":   {"COPILOT_TMUX_SESSION", "COPILOT_WEZTERM_PANE"},
-	"codebuddy": {"CODEBUDDY_TMUX_SESSION", "CODEBUDDY_WEZTERM_PANE"},
-	"qwen":      {"QWEN_TMUX_SESSION", "QWEN_WEZTERM_PANE"},
 }
 
 // CallerEnvHints maps callers to env vars that indicate the caller is active.
@@ -69,15 +57,10 @@ var CallerEnvHints = map[string][2]string{
 	"codex":     {"CODEX_SESSION_ID", "CODEX_RUNTIME_DIR"},
 	"gemini":    {"GEMINI_SESSION_ID", "GEMINI_RUNTIME_DIR"},
 	"opencode":  {"OPENCODE_SESSION_ID", "OPENCODE_RUNTIME_DIR"},
-	"droid":     {"DROID_SESSION_ID", "DROID_RUNTIME_DIR"},
-	"copilot":   {"COPILOT_SESSION_ID", "COPILOT_RUNTIME_DIR"},
-	"codebuddy": {"CODEBUDDY_SESSION_ID", "CODEBUDDY_RUNTIME_DIR"},
-	"qwen":      {"QWEN_SESSION_ID", "QWEN_RUNTIME_DIR"},
 }
 
 var validCallers = map[string]bool{
 	"claude": true, "codex": true, "gemini": true, "opencode": true,
-	"droid": true, "copilot": true, "codebuddy": true, "qwen": true,
 	"email": true, "manual": true,
 }
 
@@ -547,7 +530,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: ask <provider> [options] <message>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, droid, claude, copilot, codebuddy, qwen")
+	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, claude")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Options:")
 	fmt.Fprintln(os.Stderr, "  -h, --help              Show this help message")

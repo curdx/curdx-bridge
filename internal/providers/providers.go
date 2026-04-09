@@ -66,45 +66,6 @@ var LaskdSpec = ProviderDaemonSpec{
 	LockName:       "laskd",
 }
 
-var DaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "daskd",
-	ProtocolPrefix: "dask",
-	StateFileName:  "daskd.json",
-	LogFileName:    "daskd.log",
-	IdleTimeoutEnv: "CCB_DASKD_IDLE_TIMEOUT_S",
-	LockName:       "daskd",
-}
-
-// Copilot (GitHub Copilot CLI)
-var HaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "haskd",
-	ProtocolPrefix: "hask",
-	StateFileName:  "haskd.json",
-	LogFileName:    "haskd.log",
-	IdleTimeoutEnv: "CCB_HASKD_IDLE_TIMEOUT_S",
-	LockName:       "haskd",
-}
-
-// CodeBuddy (Tencent CodeBuddy CLI)
-var BaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "baskd",
-	ProtocolPrefix: "bask",
-	StateFileName:  "baskd.json",
-	LogFileName:    "baskd.log",
-	IdleTimeoutEnv: "CCB_BASKD_IDLE_TIMEOUT_S",
-	LockName:       "baskd",
-}
-
-// Qwen (qwen-code CLI)
-var QaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "qaskd",
-	ProtocolPrefix: "qask",
-	StateFileName:  "qaskd.json",
-	LogFileName:    "qaskd.log",
-	IdleTimeoutEnv: "CCB_QASKD_IDLE_TIMEOUT_S",
-	LockName:       "qaskd",
-}
-
 // Client specs
 
 var CaskClientSpec = ProviderClientSpec{
@@ -147,50 +108,6 @@ var LaskClientSpec = ProviderClientSpec{
 	AutostartEnvLegacy:  "CCB_AUTO_LASKD",
 	StateFileEnv:        "CCB_LASKD_STATE_FILE",
 	SessionFilename:     ".claude-session",
-	DaemonBinName:       "askd",
-	DaemonModule:        "askd.daemon",
-}
-
-var DaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "dask",
-	EnabledEnv:          "CCB_DASKD",
-	AutostartEnvPrimary: "CCB_DASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_DASKD",
-	StateFileEnv:        "CCB_DASKD_STATE_FILE",
-	SessionFilename:     ".droid-session",
-	DaemonBinName:       "askd",
-	DaemonModule:        "askd.daemon",
-}
-
-var HaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "hask",
-	EnabledEnv:          "CCB_HASKD",
-	AutostartEnvPrimary: "CCB_HASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_HASKD",
-	StateFileEnv:        "CCB_HASKD_STATE_FILE",
-	SessionFilename:     ".copilot-session",
-	DaemonBinName:       "askd",
-	DaemonModule:        "askd.daemon",
-}
-
-var BaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "bask",
-	EnabledEnv:          "CCB_BASKD",
-	AutostartEnvPrimary: "CCB_BASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_BASKD",
-	StateFileEnv:        "CCB_BASKD_STATE_FILE",
-	SessionFilename:     ".codebuddy-session",
-	DaemonBinName:       "askd",
-	DaemonModule:        "askd.daemon",
-}
-
-var QaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "qask",
-	EnabledEnv:          "CCB_QASKD",
-	AutostartEnvPrimary: "CCB_QASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_QASKD",
-	StateFileEnv:        "CCB_QASKD_STATE_FILE",
-	SessionFilename:     ".qwen-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",
 }

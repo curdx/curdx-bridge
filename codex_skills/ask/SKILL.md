@@ -16,7 +16,6 @@ The first argument must be the provider name. The message MUST be provided via s
 - `gemini` - Send to Gemini
 - `claude` - Send to Claude
 - `opencode` - Send to OpenCode
-- `droid` - Send to Droid
 
 ## Execution (MANDATORY)
 

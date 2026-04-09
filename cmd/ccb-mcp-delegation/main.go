@@ -812,7 +812,7 @@ func main() {
 
 	ccbCaller = os.Getenv("CCB_CALLER")
 	if ccbCaller == "" {
-		ccbCaller = "droid"
+		ccbCaller = "claude"
 	}
 
 	cleanupCache()

@@ -4,7 +4,7 @@
 //
 //	autonew <provider>
 //
-// Providers: gemini, codex, opencode, droid, claude
+// Providers: gemini, codex, opencode, claude
 //
 // Source: claude_code_bridge/bin/autonew
 package main
@@ -24,7 +24,6 @@ var providerCommands = map[string]string{
 	"gemini":   "/clear",
 	"codex":    "/new",
 	"opencode": "/new",
-	"droid":    "/new",
 	"claude":   "/new",
 }
 
@@ -32,7 +31,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: autonew <provider>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, droid, claude")
+	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, claude")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Sends /new to the provider's pane to start a new session.")
 }

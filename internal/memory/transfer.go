@@ -28,16 +28,15 @@ type ContextTransfer struct {
 
 // Supported providers and sources.
 var (
-	SupportedProviders    = []string{"codex", "gemini", "opencode", "droid"}
-	SupportedSources      = []string{"auto", "claude", "codex", "gemini", "opencode", "droid"}
+	SupportedProviders    = []string{"codex", "gemini", "opencode"}
+	SupportedSources      = []string{"auto", "claude", "codex", "gemini", "opencode"}
 	SourceSessionFiles    = map[string]string{
 		"claude":   ".claude-session",
 		"codex":    ".codex-session",
 		"gemini":   ".gemini-session",
 		"opencode": ".opencode-session",
-		"droid":    ".droid-session",
 	}
-	DefaultSourceOrder    = []string{"claude", "codex", "gemini", "opencode", "droid"}
+	DefaultSourceOrder    = []string{"claude", "codex", "gemini", "opencode"}
 	DefaultFallbackPairs  = 50
 )
 
@@ -46,7 +45,6 @@ var providerCmdMap = map[string]string{
 	"codex":    "cask",
 	"gemini":   "gask",
 	"opencode": "oask",
-	"droid":    "dask",
 }
 
 // NewContextTransfer creates a new ContextTransfer.
@@ -300,8 +298,6 @@ func (ct *ContextTransfer) extractByProvider(
 		return ct.extractFromGeneric("gemini", sessionPath, lastN, sourceSessionID)
 	case "opencode":
 		return ct.extractFromGeneric("opencode", sessionPath, lastN, sourceSessionID)
-	case "droid":
-		return ct.extractFromGeneric("droid", sessionPath, lastN, sourceSessionID)
 	default:
 		return nil, &SessionNotFoundError{Msg: fmt.Sprintf("Unsupported source provider: %s", provider)}
 	}
@@ -356,7 +352,7 @@ func (ct *ContextTransfer) extractFromClaude(
 	}, nil
 }
 
-// extractFromGeneric handles codex, gemini, opencode, droid providers.
+// extractFromGeneric handles codex, gemini, opencode providers.
 // In the Go port, the per-provider log readers (CodexLogReader, GeminiLogReader, etc.)
 // are not available. We use the session data to find the log path and parse it
 // with the claude parser as a best-effort extraction, since the JSONL format
