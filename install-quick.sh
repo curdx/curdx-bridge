@@ -176,12 +176,143 @@ install_from_source() {
   ok "Built and installed $count binaries to $INSTALL_DIR"
 }
 
+# ── Install Claude skills to ~/.claude/skills/ ──
+install_claude_skills() {
+  local src="$SHARE_DIR/claude_skills"
+  local dst="$HOME/.claude/skills"
+
+  [[ -d "$src" ]] || return 0
+
+  mkdir -p "$dst"
+
+  # Clean obsolete skills
+  for obs in cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto; do
+    [[ -d "$dst/$obs" ]] && rm -rf "$dst/$obs"
+  done
+
+  local count=0
+  for skill_dir in "$src"/*/; do
+    [[ -d "$skill_dir" ]] || continue
+    local name
+    name="$(basename "$skill_dir")"
+    [[ "$name" == "docs" ]] && continue
+
+    local skill_md=""
+    if [[ -f "$skill_dir/SKILL.md.bash" ]]; then
+      skill_md="$skill_dir/SKILL.md.bash"
+    elif [[ -f "$skill_dir/SKILL.md" ]]; then
+      skill_md="$skill_dir/SKILL.md"
+    else
+      continue
+    fi
+
+    mkdir -p "$dst/$name"
+    cp -f "$skill_md" "$dst/$name/SKILL.md"
+
+    # Copy subdirectories (references/ etc.)
+    for subdir in "$skill_dir"*/; do
+      [[ -d "$subdir" ]] && cp -rf "$subdir" "$dst/$name/"
+    done
+    count=$((count + 1))
+  done
+
+  # Copy shared docs
+  [[ -d "$src/docs" ]] && { rm -rf "$dst/docs"; cp -r "$src/docs" "$dst/docs"; }
+
+  ok "Installed $count Claude skills to $dst"
+}
+
+# ── Install Codex skills to ~/.codex/skills/ ──
+install_codex_skills() {
+  local src="$SHARE_DIR/codex_skills"
+  local dst="${CODEX_HOME:-$HOME/.codex}/skills"
+
+  [[ -d "$src" ]] || return 0
+
+  mkdir -p "$dst"
+
+  # Clean obsolete skills
+  for obs in cask gask oask lask cpend gpend opend lpend cping gping oping lping; do
+    [[ -d "$dst/$obs" ]] && rm -rf "$dst/$obs"
+  done
+
+  local count=0
+  for skill_dir in "$src"/*/; do
+    [[ -d "$skill_dir" ]] || continue
+    local name
+    name="$(basename "$skill_dir")"
+
+    local skill_md=""
+    if [[ -f "$skill_dir/SKILL.md.bash" ]]; then
+      skill_md="$skill_dir/SKILL.md.bash"
+    elif [[ -f "$skill_dir/SKILL.md" ]]; then
+      skill_md="$skill_dir/SKILL.md"
+    else
+      continue
+    fi
+
+    mkdir -p "$dst/$name"
+    cp -f "$skill_md" "$dst/$name/SKILL.md"
+
+    for subdir in "$skill_dir"*/; do
+      [[ -d "$subdir" ]] && cp -rf "$subdir" "$dst/$name/"
+    done
+    count=$((count + 1))
+  done
+
+  ok "Installed $count Codex skills to $dst"
+}
+
+# ── Inject CCB config into ~/.claude/CLAUDE.md ──
+install_claude_md() {
+  local claude_md="$HOME/.claude/CLAUDE.md"
+  local template="$SHARE_DIR/config/claude-md-ccb.md"
+  local start_marker="<!-- CCB_CONFIG_START -->"
+  local end_marker="<!-- CCB_CONFIG_END -->"
+
+  [[ -f "$template" ]] || return 0
+
+  mkdir -p "$HOME/.claude"
+
+  if [[ -f "$claude_md" ]]; then
+    if grep -q "$start_marker" "$claude_md" 2>/dev/null; then
+      # Replace existing block using helper if available, otherwise sed
+      if [[ -x "$INSTALL_DIR/ccb-installer-helper" ]]; then
+        "$INSTALL_DIR/ccb-installer-helper" replace-block "$claude_md" "$template" "$start_marker" "$end_marker"
+      else
+        # Manual replacement: remove old block and append new
+        local tmpfile
+        tmpfile="$(mktemp)"
+        awk -v start="$start_marker" -v end="$end_marker" '
+          $0 == start { skip=1; next }
+          $0 == end   { skip=0; next }
+          !skip { print }
+        ' "$claude_md" > "$tmpfile"
+        cat "$template" >> "$tmpfile"
+        mv "$tmpfile" "$claude_md"
+      fi
+      ok "Updated CCB config in CLAUDE.md"
+    else
+      echo "" >> "$claude_md"
+      cat "$template" >> "$claude_md"
+      ok "Added CCB config to CLAUDE.md"
+    fi
+  else
+    cp "$template" "$claude_md"
+    ok "Created CLAUDE.md with CCB config"
+  fi
+}
+
 # ── Post-install setup ──
 post_install() {
-  # Run Claude skills installation if install.sh exists in share
-  if [[ -f "$SHARE_DIR/config/ccb-status.sh" ]]; then
-    ok "Config files installed to $SHARE_DIR"
-  fi
+  echo ""
+
+  # Install skills
+  install_claude_skills
+  install_codex_skills
+
+  # Inject CLAUDE.md config
+  install_claude_md
 
   # PATH check
   if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then

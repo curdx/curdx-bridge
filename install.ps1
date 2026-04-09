@@ -50,6 +50,87 @@ function Get-LatestVersion {
   }
 }
 
+function Install-Skills {
+  param(
+    [string]$SrcName,
+    [string]$DstDir
+  )
+  $src = Join-Path $ShareDir $SrcName
+  if (-not (Test-Path $src)) { return }
+
+  New-Item -ItemType Directory -Path $DstDir -Force | Out-Null
+
+  # Clean obsolete skills
+  foreach ($obs in @("cask","gask","oask","lask","cpend","gpend","opend","lpend","cping","gping","oping","lping","ping","auto")) {
+    $obsDir = Join-Path $DstDir $obs
+    if (Test-Path $obsDir) { Remove-Item $obsDir -Recurse -Force }
+  }
+
+  $count = 0
+  Get-ChildItem $src -Directory | ForEach-Object {
+    $skillName = $_.Name
+    if ($skillName -eq "docs") { return }
+
+    $skillMd = $null
+    $bashMd = Join-Path $_.FullName "SKILL.md.bash"
+    $plainMd = Join-Path $_.FullName "SKILL.md"
+    if (Test-Path $bashMd) { $skillMd = $bashMd }
+    elseif (Test-Path $plainMd) { $skillMd = $plainMd }
+    else { return }
+
+    $dstSkillDir = Join-Path $DstDir $skillName
+    New-Item -ItemType Directory -Path $dstSkillDir -Force | Out-Null
+    Copy-Item $skillMd -Destination (Join-Path $dstSkillDir "SKILL.md") -Force
+
+    # Copy subdirectories (references/ etc.)
+    Get-ChildItem $_.FullName -Directory | ForEach-Object {
+      Copy-Item $_.FullName -Destination (Join-Path $dstSkillDir $_.Name) -Recurse -Force
+    }
+    $count++
+  }
+
+  # Copy shared docs
+  $docsDir = Join-Path $src "docs"
+  if (Test-Path $docsDir) {
+    $dstDocs = Join-Path $DstDir "docs"
+    if (Test-Path $dstDocs) { Remove-Item $dstDocs -Recurse -Force }
+    Copy-Item $docsDir -Destination $dstDocs -Recurse
+  }
+
+  Write-Ok "Installed $count skills from $SrcName to $DstDir"
+}
+
+function Install-ClaudeMd {
+  $claudeMd = Join-Path $env:USERPROFILE ".claude\CLAUDE.md"
+  $template = Join-Path $ShareDir "config\claude-md-ccb.md"
+  $startMarker = "<!-- CCB_CONFIG_START -->"
+  $endMarker = "<!-- CCB_CONFIG_END -->"
+
+  if (-not (Test-Path $template)) { return }
+
+  $claudeDir = Join-Path $env:USERPROFILE ".claude"
+  New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
+
+  $templateContent = Get-Content $template -Raw
+
+  if (Test-Path $claudeMd) {
+    $content = Get-Content $claudeMd -Raw
+    if ($content -match [regex]::Escape($startMarker)) {
+      # Replace existing block
+      $pattern = [regex]::Escape($startMarker) + "[\s\S]*?" + [regex]::Escape($endMarker)
+      $content = [regex]::Replace($content, $pattern, $templateContent.TrimEnd())
+      Set-Content $claudeMd -Value $content -NoNewline
+      Write-Ok "Updated CCB config in CLAUDE.md"
+    } else {
+      Add-Content $claudeMd -Value ("`n" + $templateContent)
+      Write-Ok "Added CCB config to CLAUDE.md"
+    }
+  } else {
+    Set-Content $claudeMd -Value $templateContent
+    Write-Ok "Created CLAUDE.md with CCB config"
+  }
+}
+
 function Install-CCB {
   Write-Host ""
   Write-Host "  CCB Installer for Windows" -ForegroundColor White
@@ -107,6 +188,16 @@ function Install-CCB {
     }
 
     Write-Ok "Installed $count binaries to $InstallDir"
+
+    # Install Claude skills
+    Install-Skills -SrcName "claude_skills" -DstDir (Join-Path $env:USERPROFILE ".claude\skills")
+
+    # Install Codex skills
+    $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE ".codex" }
+    Install-Skills -SrcName "codex_skills" -DstDir (Join-Path $codexHome "skills")
+
+    # Inject CLAUDE.md config
+    Install-ClaudeMd
 
     # Add to PATH if needed
     $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
