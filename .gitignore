@@ -1,0 +1,34 @@
+# Build artifacts
+dist/
+*.exe
+
+# OS-compiled binaries in repo root (from cross-compilation)
+/ask
+/askd
+/autoloop
+/autonew
+/cask
+/ccb
+/ccb-arch
+/ccb-cleanup
+/ccb-completion-hook
+/ccb-installer-helper
+/ccb-mcp-delegation
+/ccb-mounted
+/ccb-ping
+/cpend
+/cping
+/ctx-transfer
+/gask
+/gpend
+/gping
+/lask
+/laskd
+/lpend
+/lping
+/oask
+/pend
+
+# OS
+.DS_Store
+Thumbs.db
