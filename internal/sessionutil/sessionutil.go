@@ -5,10 +5,7 @@ package sessionutil
 import (
 	"fmt"
 	"os"
-	"os/user"
 	"path/filepath"
-	"strconv"
-	"syscall"
 )
 
 const (
@@ -58,7 +55,6 @@ type CheckResult struct {
 }
 
 // CheckSessionWritable checks if a session file is writable.
-// Returns (writable, error_reason, fix_suggestion).
 func CheckSessionWritable(sessionFile string) CheckResult {
 	parent := filepath.Dir(sessionFile)
 
@@ -73,7 +69,7 @@ func CheckSessionWritable(sessionFile string) CheckResult {
 	}
 
 	// Check execute permission on parent
-	if err := syscall.Access(parent, 0x1); err != nil { // X_OK = 1
+	if !checkAccess(parent, accessExecute) {
 		return CheckResult{
 			Writable:      false,
 			ErrorReason:   fmt.Sprintf("Directory not accessible (missing x permission): %s", parent),
@@ -82,7 +78,7 @@ func CheckSessionWritable(sessionFile string) CheckResult {
 	}
 
 	// 2. Check if parent directory is writable
-	if err := syscall.Access(parent, 0x2); err != nil { // W_OK = 2
+	if !checkAccess(parent, accessWrite) {
 		return CheckResult{
 			Writable:      false,
 			ErrorReason:   fmt.Sprintf("Directory not writable: %s", parent),
@@ -122,29 +118,13 @@ func CheckSessionWritable(sessionFile string) CheckResult {
 		}
 	}
 
-	// 5. Check file ownership (POSIX only)
-	if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-		fileUID := stat.Uid
-		currentUID := uint32(os.Getuid())
-		if fileUID != currentUID {
-			ownerName := strconv.FormatUint(uint64(fileUID), 10)
-			if u, err := user.LookupId(ownerName); err == nil {
-				ownerName = u.Username
-			}
-			currentName := strconv.FormatUint(uint64(currentUID), 10)
-			if u, err := user.LookupId(currentName); err == nil {
-				currentName = u.Username
-			}
-			return CheckResult{
-				Writable:      false,
-				ErrorReason:   fmt.Sprintf("File owned by %s (current user: %s)", ownerName, currentName),
-				FixSuggestion: fmt.Sprintf("sudo chown %s:%s %s", currentName, currentName, sessionFile),
-			}
-		}
+	// 5. Check file ownership (platform-specific)
+	if result, checked := checkFileOwnership(sessionFile, fileInfo); checked && !result.Writable {
+		return result
 	}
 
 	// 6. Check if file is writable
-	if err := syscall.Access(sessionFile, 0x2); err != nil { // W_OK = 2
+	if !checkAccess(sessionFile, accessWrite) {
 		mode := fileInfo.Mode().String()
 		return CheckResult{
 			Writable:      false,
@@ -157,34 +137,31 @@ func CheckSessionWritable(sessionFile string) CheckResult {
 }
 
 // SafeWriteSession safely writes a session file, returning a friendly error on failure.
-// Returns (success, error_message).
 func SafeWriteSession(sessionFile string, content string) (bool, string) {
-	// Pre-check
 	result := CheckSessionWritable(sessionFile)
 	if !result.Writable {
 		base := filepath.Base(sessionFile)
-		return false, fmt.Sprintf("❌ Cannot write %s: %s\n💡 Fix: %s", base, result.ErrorReason, result.FixSuggestion)
+		return false, fmt.Sprintf("Cannot write %s: %s\nFix: %s", base, result.ErrorReason, result.FixSuggestion)
 	}
 
-	// Attempt atomic write
 	tmpFile := sessionFile + ".tmp"
 	err := os.WriteFile(tmpFile, []byte(content), 0o644)
 	if err != nil {
 		os.Remove(tmpFile)
 		if os.IsPermission(err) {
 			base := filepath.Base(sessionFile)
-			return false, fmt.Sprintf("❌ Cannot write %s: %s\n💡 Try: rm -f %s then retry", base, err, sessionFile)
+			return false, fmt.Sprintf("Cannot write %s: %s\nTry: rm -f %s then retry", base, err, sessionFile)
 		}
-		return false, fmt.Sprintf("❌ Write failed: %s", err)
+		return false, fmt.Sprintf("Write failed: %s", err)
 	}
 
 	if err := os.Rename(tmpFile, sessionFile); err != nil {
 		os.Remove(tmpFile)
 		if os.IsPermission(err) {
 			base := filepath.Base(sessionFile)
-			return false, fmt.Sprintf("❌ Cannot write %s: %s\n💡 Try: rm -f %s then retry", base, err, sessionFile)
+			return false, fmt.Sprintf("Cannot write %s: %s\nTry: rm -f %s then retry", base, err, sessionFile)
 		}
-		return false, fmt.Sprintf("❌ Write failed: %s", err)
+		return false, fmt.Sprintf("Write failed: %s", err)
 	}
 
 	return true, ""
@@ -200,46 +177,31 @@ func PrintSessionError(msg string, toStderr bool) {
 }
 
 // FindProjectSessionFile finds a session file for the given work_dir.
-//
-// Lookup walks upward from workDir to support calls from subdirectories:
-//  1. <dir>/.ccb/<sessionFilename>
-//  2. <dir>/.ccb_config/<sessionFilename>  (legacy)
-//  3. <dir>/<sessionFilename>  (legacy)
-//
-// The nearest match wins. Returns "" if not found.
 func FindProjectSessionFile(workDir string, sessionFilename string) string {
 	current, err := filepath.Abs(workDir)
 	if err != nil {
-		current, err = filepath.Abs(workDir)
-		if err != nil {
-			current = workDir
-		}
+		current = workDir
 	}
-	// Resolve symlinks like Python's Path.resolve()
 	if resolved, err := filepath.EvalSymlinks(current); err == nil {
 		current = resolved
 	}
 
 	for {
-		// Check .ccb/<sessionFilename>
 		candidate := filepath.Join(current, CCBProjectConfigDirname, sessionFilename)
 		if _, err := os.Stat(candidate); err == nil {
 			return candidate
 		}
 
-		// Check .ccb_config/<sessionFilename> (legacy)
 		legacyCandidate := filepath.Join(current, CCBProjectConfigLegacyDirname, sessionFilename)
 		if _, err := os.Stat(legacyCandidate); err == nil {
 			return legacyCandidate
 		}
 
-		// Check <dir>/<sessionFilename> (legacy)
 		legacy := filepath.Join(current, sessionFilename)
 		if _, err := os.Stat(legacy); err == nil {
 			return legacy
 		}
 
-		// Move to parent
 		parent := filepath.Dir(current)
 		if parent == current {
 			break

@@ -12,7 +12,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/anthropics/curdx-bridge/internal/cliutil"
@@ -298,7 +297,7 @@ func maybeStartUnifiedDaemon() bool {
 	cmd.Stdin = nil
 	cmd.Stdout = nil
 	cmd.Stderr = nil
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	setSysProcAttr(cmd)
 	if err := cmd.Start(); err != nil {
 		return false
 	}
@@ -784,7 +783,7 @@ exit "$rc"
 	proc.Stdin = nil
 	proc.Stdout = logHandle
 	proc.Stderr = logHandle
-	proc.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	setSysProcAttr(proc)
 	err = proc.Start()
 	logHandle.Close()
 	if err != nil {

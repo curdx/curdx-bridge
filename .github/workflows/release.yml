@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build binaries
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          EXT=""
+          if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
+
+          OUTDIR="ccb-${GOOS}-${GOARCH}"
+          mkdir -p "$OUTDIR"
+
+          for cmd in cmd/*/; do
+            name=$(basename "$cmd")
+            echo "Building $name..."
+            go build -trimpath \
+              -ldflags="-s -w -X main.Version=${VERSION} -X main.GitCommit=${GITHUB_SHA::7} -X main.GitDate=$(date -u +%Y-%m-%d)" \
+              -o "${OUTDIR}/${name}${EXT}" "./${cmd}"
+          done
+
+          # Include non-binary files
+          cp -r claude_skills codex_skills config "$OUTDIR/"
+          cp install.sh "$OUTDIR/"
+
+      - name: Package
+        run: |
+          DIR="ccb-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip -qr "${DIR}.zip" "$DIR"
+          else
+            tar czf "${DIR}.tar.gz" "$DIR"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccb-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ccb-${{ matrix.goos }}-${{ matrix.goarch }}.*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ccb-darwin-amd64.tar.gz
+            ccb-darwin-arm64.tar.gz
+            ccb-linux-amd64.tar.gz
+            ccb-linux-arm64.tar.gz
+            ccb-windows-amd64.zip

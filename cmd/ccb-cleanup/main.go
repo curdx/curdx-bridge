@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"syscall"
 )
 
 type daemonInfo struct {
@@ -28,8 +27,7 @@ func isPIDAlive(pid int) bool {
 	if pid <= 0 {
 		return false
 	}
-	err := syscall.Kill(pid, 0)
-	return err == nil
+	return isProcessAlive(pid)
 }
 
 func cleanupStaleStateFiles() []string {
@@ -199,7 +197,7 @@ func main() {
 		daemons := listRunningDaemons()
 		for _, d := range daemons {
 			if !d.ParentAlive {
-				err := syscall.Kill(d.PID, syscall.SIGTERM)
+				err := terminateProcess(d.PID)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Failed to kill PID %d: %s\n", d.PID, err)
 				} else {

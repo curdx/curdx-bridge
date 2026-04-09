@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -394,7 +393,7 @@ func spawnBackground(cmd []string, message string, metaFilePath string) *int {
 	c.Stdout = nil // /dev/null
 	c.Stderr = stderrFile
 	c.Env = env
-	c.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	setSysProcAttr(c)
 
 	if err := c.Start(); err != nil {
 		stderrFile.Close()
