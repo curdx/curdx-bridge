@@ -134,9 +134,6 @@ main() {
             if [[ $(check_daemon "oask") == "on" ]]; then
                 output+="${C_PURPLE}O${C_RESET}"
             fi
-            if [[ $(check_daemon "dask") == "on" ]]; then
-                output+="${C_YELLOW}D${C_RESET}"
-            fi
 
             if [[ -n "$output" ]]; then
                 out=" $output "
@@ -163,11 +160,6 @@ main() {
                 icons+="${C_PURPLE}●${C_RESET}"
             else
                 icons+="${C_DIM}○${C_RESET}"
-            fi
-            if [[ $(check_daemon "dask") == "on" ]]; then
-                icons+=" ${C_YELLOW}●${C_RESET}"
-            else
-                icons+=" ${C_DIM}○${C_RESET}"
             fi
 
             out="${output}${icons}"
