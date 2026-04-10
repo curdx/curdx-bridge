@@ -1,5 +1,5 @@
-// Package startconfig provides CCB start configuration loading and parsing.
-// Source: claude_code_bridge/lib/ccb_start_config.py
+// Package startconfig provides CURDX start configuration loading and parsing.
+// Source: claude_code_bridge/lib/curdx_start_config.py
 package startconfig
 
 import (
@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	ConfigFilename = "ccb.config"
+	ConfigFilename = "curdx.config"
 )
 
 // DefaultProviders is the default set of providers.
-var DefaultProviders = []string{"codex", "gemini", "opencode", "claude"}
+var DefaultProviders = []string{"claude", "codex", "gemini"}
 
 // StartConfig holds parsed start configuration data.
 type StartConfig struct {
@@ -27,10 +27,9 @@ type StartConfig struct {
 }
 
 var allowedProviders = map[string]bool{
-	"codex":    true,
-	"gemini":   true,
-	"opencode": true,
-	"claude":   true,
+	"codex":  true,
+	"gemini": true,
+	"claude": true,
 }
 
 // parseTokens extracts tokens from raw config text, stripping comments and delimiters.
@@ -203,7 +202,7 @@ func configPaths(workDir string) (string, string, string) {
 	if err != nil {
 		home = ""
 	}
-	globalPath := filepath.Join(home, ".ccb", ConfigFilename)
+	globalPath := filepath.Join(home, ".curdx", ConfigFilename)
 	return primary, legacy, globalPath
 }
 
