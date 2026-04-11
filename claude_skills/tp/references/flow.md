@@ -1,6 +1,6 @@
 # AutoFlow Plan
 
-Create executable plan artifacts: `.ccb/todo.md` + `.ccb/state.json` + `.ccb/plan_log.md`
+Create executable plan artifacts: `.curdx/todo.md` + `.curdx/state.json` + `.curdx/plan_log.md`
 
 **File formats**: See `~/.claude/skills/docs/formats.md`
 **Protocol**: See `~/.claude/skills/docs/protocol.md`
@@ -77,7 +77,7 @@ Call:
   "proto": "autoflow.fileops.v1",
   "id": "TP",
   "purpose": "write_plan_files",
-  "summary": "Initialize .ccb/todo.md/.ccb/state.json/.ccb/plan_log.md from confirmed plan",
+  "summary": "Initialize .curdx/todo.md/.curdx/state.json/.curdx/plan_log.md from confirmed plan",
   "done": ["Plan files exist and match formats"],
   "ops": [
     {
@@ -109,9 +109,9 @@ Codex returns `FileOpsRES` JSON only (via `/file-op`).
 
 ```
 Plan saved:
-- .ccb/todo.md
-- .ccb/state.json
-- .ccb/plan_log.md
+- .curdx/todo.md
+- .curdx/state.json
+- .curdx/plan_log.md
 
 Next: Use /tr to start execution
 ```

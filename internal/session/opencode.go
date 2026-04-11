@@ -3,7 +3,7 @@ package session
 import (
 	"strings"
 
-	"github.com/anthropics/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/projectid"
 )
 
 // OpenCodeProjectSession represents an OpenCode provider session.
@@ -19,17 +19,17 @@ func (s *OpenCodeProjectSession) WorkDir() string            { return getWorkDir
 func (s *OpenCodeProjectSession) RuntimeDir() string         { return getRuntimeDir(s.Data, s.SessionFile) }
 func (s *OpenCodeProjectSession) StartCmd() string           { return getString(s.Data, "start_cmd") }
 
-// SessionID returns the CCB session ID (legacy compat).
+// SessionID returns the CURDX session ID (legacy compat).
 func (s *OpenCodeProjectSession) SessionID() string {
-	v := getString(s.Data, "ccb_session_id")
+	v := getString(s.Data, "curdx_session_id")
 	if v == "" {
 		v = getString(s.Data, "session_id")
 	}
 	return v
 }
 
-// CCBSessionID is an alias for SessionID.
-func (s *OpenCodeProjectSession) CCBSessionID() string {
+// CURDXSessionID is an alias for SessionID.
+func (s *OpenCodeProjectSession) CURDXSessionID() string {
 	return s.SessionID()
 }
 
@@ -83,13 +83,13 @@ func (s *OpenCodeProjectSession) UpdateOpenCodeBinding(sessionID, projectID stri
 		updated = true
 	}
 
-	// Ensure ccb_project_id exists.
-	pid := getString(s.Data, "ccb_project_id")
+	// Ensure curdx_project_id exists.
+	pid := getString(s.Data, "curdx_project_id")
 	if pid == "" {
 		workDir := s.WorkDir()
-		computed := projectid.ComputeCCBProjectID(workDir)
+		computed := projectid.ComputeCURDXProjectID(workDir)
 		if computed != "" {
-			s.Data["ccb_project_id"] = computed
+			s.Data["curdx_project_id"] = computed
 			updated = true
 		}
 	}

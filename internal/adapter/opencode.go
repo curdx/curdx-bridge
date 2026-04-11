@@ -8,15 +8,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/comm"
-	"github.com/anthropics/curdx-bridge/internal/completionhook"
-	"github.com/anthropics/curdx-bridge/internal/processlock"
-	"github.com/anthropics/curdx-bridge/internal/protocol"
-	"github.com/anthropics/curdx-bridge/internal/provprotocol"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/comm"
+	"github.com/curdx/curdx-bridge/internal/completionhook"
+	"github.com/curdx/curdx-bridge/internal/processlock"
+	"github.com/curdx/curdx-bridge/internal/protocol"
+	"github.com/curdx/curdx-bridge/internal/provprotocol"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 // OpenCodeAdapter implements BaseProviderAdapter for the OpenCode provider.
@@ -175,7 +175,7 @@ func (a *OpenCodeAdapter) handleTaskLocked(task *QueuedTask, sess *session.OpenC
 	doneSeen := false
 	var doneMs *int
 
-	paneCheckInterval := envFloatDefault("CCB_OASKD_PANE_CHECK_INTERVAL", 2.0)
+	paneCheckInterval := envFloatDefault("CURDX_OASKD_PANE_CHECK_INTERVAL", 2.0)
 	lastPaneCheck := time.Now()
 
 	for {

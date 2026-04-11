@@ -5,8 +5,8 @@ package main
 import (
 	"os"
 
-	"github.com/anthropics/curdx-bridge/internal/askcli"
-	"github.com/anthropics/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/askcli"
+	"github.com/curdx/curdx-bridge/internal/providers"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		ProviderName: "Claude",
 		ProviderKey:  "claude",
 		Spec:         providers.LaskClientSpec,
-		AsyncGuardrail: `[CCB_ASYNC_SUBMITTED provider=claude]
+		AsyncGuardrail: `[CURDX_ASYNC_SUBMITTED provider=claude]
 IMPORTANT: Task submitted to Claude. You MUST:
 1. Tell user "Claude processing..."
 2. END YOUR TURN IMMEDIATELY
@@ -25,7 +25,7 @@ IMPORTANT: Task submitted to Claude. You MUST:
 		HasRetryLoop:           false,
 		HasAsyncMode:           true,
 		DaemonHint:             "laskd",
-		DaemonAutostartEnvHint: "CCB_LASKD_AUTOSTART=1",
-		SetupHint:              "`ccb claude`",
+		DaemonAutostartEnvHint: "CURDX_LASKD_AUTOSTART=1",
+		SetupHint:              "`curdx claude`",
 	}))
 }

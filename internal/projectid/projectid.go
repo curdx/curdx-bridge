@@ -92,9 +92,9 @@ func NormalizeWorkDir(value string) string {
 	return s
 }
 
-// FindCCBConfigRoot finds a .ccb/ (or legacy .ccb_config/) directory
+// FindCURDXConfigRoot finds a .curdx/ (or legacy .curdx_config/) directory
 // in the given directory only (no ancestor traversal).
-func FindCCBConfigRoot(startDir string) string {
+func FindCURDXConfigRoot(startDir string) string {
 	current := startDir
 	if current == "" {
 		var err error
@@ -124,14 +124,14 @@ func FindCCBConfigRoot(startDir string) string {
 		}
 	}
 
-	// Check for .ccb directory
-	ccb := current + "/.ccb"
-	if info, err := os.Stat(ccb); err == nil && info.IsDir() {
+	// Check for .curdx directory
+	curdx := current + "/.curdx"
+	if info, err := os.Stat(curdx); err == nil && info.IsDir() {
 		return current
 	}
 
-	// Check for legacy .ccb_config directory
-	legacy := current + "/.ccb_config"
+	// Check for legacy .curdx_config directory
+	legacy := current + "/.curdx_config"
 	if info, err := os.Stat(legacy); err == nil && info.IsDir() {
 		return current
 	}
@@ -139,12 +139,12 @@ func FindCCBConfigRoot(startDir string) string {
 	return ""
 }
 
-// ComputeCCBProjectID computes CCB's routing project id.
+// ComputeCURDXProjectID computes CURDX's routing project id.
 //
 // Priority:
-//   - Current directory containing .ccb/ (project anchor).
+//   - Current directory containing .curdx/ (project anchor).
 //   - Current work_dir (fallback).
-func ComputeCCBProjectID(workDir string) string {
+func ComputeCURDXProjectID(workDir string) string {
 	wd := workDir
 	if wd == "" {
 		var err error
@@ -154,8 +154,8 @@ func ComputeCCBProjectID(workDir string) string {
 		}
 	}
 
-	// Priority 1: Current directory .ccb/ only
-	base := FindCCBConfigRoot(wd)
+	// Priority 1: Current directory .curdx/ only
+	base := FindCURDXConfigRoot(wd)
 	if base == "" {
 		base = wd
 	}

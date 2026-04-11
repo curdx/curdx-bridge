@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/anthropics/curdx-bridge/internal/askcli"
+	"github.com/curdx/curdx-bridge/internal/askcli"
 )
 
 func main() {

@@ -20,7 +20,7 @@ The first argument must be the provider name:
 ## Execution (MANDATORY)
 
 ```bash
-ccb-ping $ARGUMENTS
+curdx-ping $ARGUMENTS
 ```
 
 ## Examples

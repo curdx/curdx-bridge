@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 const (

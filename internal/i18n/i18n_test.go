@@ -6,23 +6,23 @@ import (
 )
 
 func TestDetectLanguageZh(t *testing.T) {
-	os.Setenv("CCB_LANG", "zh")
-	defer os.Unsetenv("CCB_LANG")
+	os.Setenv("CURDX_LANG", "zh")
+	defer os.Unsetenv("CURDX_LANG")
 	if DetectLanguage() != "zh" {
-		t.Error("CCB_LANG=zh should detect zh")
+		t.Error("CURDX_LANG=zh should detect zh")
 	}
 }
 
 func TestDetectLanguageEn(t *testing.T) {
-	os.Setenv("CCB_LANG", "en")
-	defer os.Unsetenv("CCB_LANG")
+	os.Setenv("CURDX_LANG", "en")
+	defer os.Unsetenv("CURDX_LANG")
 	if DetectLanguage() != "en" {
-		t.Error("CCB_LANG=en should detect en")
+		t.Error("CURDX_LANG=en should detect en")
 	}
 }
 
 func TestDetectLanguageAutoFromLANG(t *testing.T) {
-	os.Unsetenv("CCB_LANG")
+	os.Unsetenv("CURDX_LANG")
 	os.Setenv("LANG", "zh_CN.UTF-8")
 	defer os.Unsetenv("LANG")
 	if DetectLanguage() != "zh" {
@@ -31,7 +31,7 @@ func TestDetectLanguageAutoFromLANG(t *testing.T) {
 }
 
 func TestDetectLanguageDefaultEn(t *testing.T) {
-	os.Unsetenv("CCB_LANG")
+	os.Unsetenv("CURDX_LANG")
 	os.Unsetenv("LANG")
 	os.Unsetenv("LC_ALL")
 	os.Unsetenv("LC_MESSAGES")

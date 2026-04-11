@@ -62,10 +62,10 @@ func TestNormalizeWorkDirDoubleSlashPrefix(t *testing.T) {
 	}
 }
 
-func TestComputeCCBProjectIDStableForSameDir(t *testing.T) {
+func TestComputeCURDXProjectIDStableForSameDir(t *testing.T) {
 	dir := t.TempDir()
-	pid1 := ComputeCCBProjectID(dir)
-	pid2 := ComputeCCBProjectID(dir)
+	pid1 := ComputeCURDXProjectID(dir)
+	pid2 := ComputeCURDXProjectID(dir)
 	if pid1 == "" {
 		t.Error("project ID should not be empty")
 	}
@@ -74,38 +74,38 @@ func TestComputeCCBProjectIDStableForSameDir(t *testing.T) {
 	}
 }
 
-func TestComputeCCBProjectIDUsesAnchorRoot(t *testing.T) {
+func TestComputeCURDXProjectIDUsesAnchorRoot(t *testing.T) {
 	dir := t.TempDir()
-	// Create .ccb anchor
-	os.Mkdir(filepath.Join(dir, ".ccb"), 0o755)
+	// Create .curdx anchor
+	os.Mkdir(filepath.Join(dir, ".curdx"), 0o755)
 	subdir := filepath.Join(dir, "a", "b")
 	os.MkdirAll(subdir, 0o755)
 
-	pidRoot := ComputeCCBProjectID(dir)
-	pidSub := ComputeCCBProjectID(subdir)
+	pidRoot := ComputeCURDXProjectID(dir)
+	pidSub := ComputeCURDXProjectID(subdir)
 	if pidRoot == "" || pidSub == "" {
 		t.Error("project IDs should not be empty")
 	}
-	// Subdir doesn't have .ccb, so it uses itself as base → different from root
+	// Subdir doesn't have .curdx, so it uses itself as base → different from root
 	if pidRoot == pidSub {
-		t.Error("root with .ccb anchor and subdir without should differ")
+		t.Error("root with .curdx anchor and subdir without should differ")
 	}
 }
 
-func TestComputeCCBProjectIDFallbackDiffForSubdirs(t *testing.T) {
+func TestComputeCURDXProjectIDFallbackDiffForSubdirs(t *testing.T) {
 	dir := t.TempDir()
 	subdir := filepath.Join(dir, "a", "b")
 	os.MkdirAll(subdir, 0o755)
-	pidRoot := ComputeCCBProjectID(dir)
-	pidSub := ComputeCCBProjectID(subdir)
+	pidRoot := ComputeCURDXProjectID(dir)
+	pidSub := ComputeCURDXProjectID(subdir)
 	if pidRoot == pidSub {
 		t.Error("different dirs without anchor should produce different IDs")
 	}
 }
 
-func TestComputeCCBProjectIDLength(t *testing.T) {
+func TestComputeCURDXProjectIDLength(t *testing.T) {
 	dir := t.TempDir()
-	pid := ComputeCCBProjectID(dir)
+	pid := ComputeCURDXProjectID(dir)
 	// SHA256 hex = 64 chars
 	if len(pid) != 64 {
 		t.Errorf("expected 64 char hex, got %d chars: %s", len(pid), pid)

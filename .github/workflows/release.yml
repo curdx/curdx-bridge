@@ -42,7 +42,7 @@ jobs:
           EXT=""
           if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
 
-          OUTDIR="ccb-${GOOS}-${GOARCH}"
+          OUTDIR="curdx-${GOOS}-${GOARCH}"
           mkdir -p "$OUTDIR"
 
           for cmd in cmd/*/; do
@@ -59,7 +59,7 @@ jobs:
 
       - name: Package
         run: |
-          DIR="ccb-${{ matrix.goos }}-${{ matrix.goarch }}"
+          DIR="curdx-${{ matrix.goos }}-${{ matrix.goarch }}"
           if [ "${{ matrix.goos }}" = "windows" ]; then
             zip -qr "${DIR}.zip" "$DIR"
           else
@@ -69,8 +69,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ccb-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ccb-${{ matrix.goos }}-${{ matrix.goarch }}.*
+          name: curdx-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: curdx-${{ matrix.goos }}-${{ matrix.goarch }}.*
 
   release:
     needs: build
@@ -85,8 +85,8 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            ccb-darwin-amd64.tar.gz
-            ccb-darwin-arm64.tar.gz
-            ccb-linux-amd64.tar.gz
-            ccb-linux-arm64.tar.gz
-            ccb-windows-amd64.zip
+            curdx-darwin-amd64.tar.gz
+            curdx-darwin-arm64.tar.gz
+            curdx-linux-amd64.tar.gz
+            curdx-linux-arm64.tar.gz
+            curdx-windows-amd64.zip

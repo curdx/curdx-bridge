@@ -5,8 +5,8 @@ package main
 import (
 	"os"
 
-	"github.com/anthropics/curdx-bridge/internal/askcli"
-	"github.com/anthropics/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/askcli"
+	"github.com/curdx/curdx-bridge/internal/providers"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		ProviderName: "Codex",
 		ProviderKey:  "codex",
 		Spec:         providers.CaskClientSpec,
-		AsyncGuardrail: `[CCB_ASYNC_SUBMITTED provider=codex]
+		AsyncGuardrail: `[CURDX_ASYNC_SUBMITTED provider=codex]
 IMPORTANT: Task submitted to Codex. You MUST:
 1. Tell user "Codex processing..."
 2. END YOUR TURN IMMEDIATELY
@@ -24,8 +24,8 @@ IMPORTANT: Task submitted to Codex. You MUST:
 		DefaultTimeout:         -1.0,
 		HasRetryLoop:           false,
 		DaemonHint:             "caskd",
-		DaemonAutostartEnvHint: "CCB_CASKD_AUTOSTART=1",
-		SetupHint:              "`ccb codex`",
+		DaemonAutostartEnvHint: "CURDX_CASKD_AUTOSTART=1",
+		SetupHint:              "`curdx codex`",
 		HasSupervisorMode:      true,
 	}))
 }

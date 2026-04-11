@@ -1,4 +1,4 @@
-module github.com/anthropics/curdx-bridge
+module github.com/curdx/curdx-bridge
 
 go 1.25.0
 

@@ -22,8 +22,8 @@ func NewWeztermBackend() *WeztermBackend {
 	return &WeztermBackend{}
 }
 
-// CCBTitleMarker is the default title marker.
-const CCBTitleMarker = "CCB"
+// CURDXTitleMarker is the default title marker.
+const CURDXTitleMarker = "CURDX"
 
 // LastListError returns the last error from list-panes.
 func (w *WeztermBackend) LastListError() string {
@@ -104,12 +104,12 @@ func (w *WeztermBackend) sendEnter(paneID string) {
 	if IsWindows() {
 		defaultDelay = 0.05
 	}
-	enterDelay := EnvFloat("CCB_WEZTERM_ENTER_DELAY", defaultDelay)
+	enterDelay := EnvFloat("CURDX_WEZTERM_ENTER_DELAY", defaultDelay)
 	if enterDelay > 0 {
 		time.Sleep(time.Duration(enterDelay * float64(time.Second)))
 	}
 
-	envMethod := os.Getenv("CCB_WEZTERM_ENTER_METHOD")
+	envMethod := os.Getenv("CURDX_WEZTERM_ENTER_METHOD")
 	defaultMethod := "auto"
 	method := strings.ToLower(strings.TrimSpace(envMethod))
 	if method == "" {
@@ -185,7 +185,7 @@ func (w *WeztermBackend) SendText(paneID string, text string) error {
 		return fmt.Errorf("wezterm send-text failed: %w", err)
 	}
 
-	pasteDelay := EnvFloat("CCB_WEZTERM_PASTE_DELAY", 0.1)
+	pasteDelay := EnvFloat("CURDX_WEZTERM_PASTE_DELAY", 0.1)
 	if pasteDelay > 0 {
 		time.Sleep(time.Duration(pasteDelay * float64(time.Second)))
 	}
@@ -641,7 +641,7 @@ func (w *WeztermBackend) Activate(paneID string) {
 func (w *WeztermBackend) CreatePane(cmdStr string, cwd string, direction string, percent int, parentPane string) (string, error) {
 	baseArgs := weztermCLIBaseArgs()
 	args := append(append([]string{}, baseArgs...), "split-pane")
-	forceWSL := strings.EqualFold(os.Getenv("CCB_BACKEND_ENV"), "wsl")
+	forceWSL := strings.EqualFold(os.Getenv("CURDX_BACKEND_ENV"), "wsl")
 	wslUncCwd := extractWSLPathFromUNCLikePath(cwd)
 
 	// If the caller is in a WSL UNC path, default to launching via wsl.exe.

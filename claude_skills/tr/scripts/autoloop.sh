@@ -6,8 +6,8 @@ set -euo pipefail
 
 WORKDIR="$(pwd)"
 
-PIDFILE="$WORKDIR/.ccb/autoloop.pid"
-LOGFILE="$WORKDIR/.ccb/autoloop.log"
+PIDFILE="$WORKDIR/.curdx/autoloop.pid"
+LOGFILE="$WORKDIR/.curdx/autoloop.log"
 
 # Resolve autoloop binary: prefer Go binary, fallback to Python script.
 autoloop_bin() {
@@ -43,7 +43,7 @@ start() {
     exit 1
   fi
 
-  mkdir -p "$WORKDIR/.ccb"
+  mkdir -p "$WORKDIR/.curdx"
 
   if is_running; then
     echo "autoloop already running (pid $(cat "$PIDFILE"))"

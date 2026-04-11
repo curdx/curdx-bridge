@@ -14,13 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/cliutil"
-	"github.com/anthropics/curdx-bridge/internal/compat"
-	"github.com/anthropics/curdx-bridge/internal/envutil"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/rpc"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/cliutil"
+	"github.com/curdx/curdx-bridge/internal/compat"
+	"github.com/curdx/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // ProviderDaemons maps provider names to their daemon command names.
@@ -98,7 +98,7 @@ func envInt(name string, defaultVal int) int {
 }
 
 func cleanupTaskLogs(logDir string) {
-	maxFiles := envInt("CCB_TASK_LOG_MAX_FILES", 100)
+	maxFiles := envInt("CURDX_TASK_LOG_MAX_FILES", 100)
 	if maxFiles <= 0 {
 		return
 	}
@@ -218,12 +218,12 @@ func inferCallerFromEnvHints() string {
 }
 
 func detectCaller() string {
-	direct := normalizeCaller(os.Getenv("CCB_CALLER"))
+	direct := normalizeCaller(os.Getenv("CURDX_CALLER"))
 	if direct != "" {
 		return direct
 	}
 
-	if strings.TrimSpace(os.Getenv("CCB_EMAIL_REQ_ID")) != "" {
+	if strings.TrimSpace(os.Getenv("CURDX_EMAIL_REQ_ID")) != "" {
 		return "email"
 	}
 
@@ -253,12 +253,12 @@ func appendTaskStatusLine(statusFile, line string) {
 }
 
 func useUnifiedDaemon() bool {
-	val := strings.ToLower(strings.TrimSpace(os.Getenv("CCB_UNIFIED_ASKD")))
+	val := strings.ToLower(strings.TrimSpace(os.Getenv("CURDX_UNIFIED_ASKD")))
 	return val != "0" && val != "false" && val != "no" && val != "off"
 }
 
 func maybeStartUnifiedDaemon() bool {
-	autostart := strings.ToLower(strings.TrimSpace(os.Getenv("CCB_ASKD_AUTOSTART")))
+	autostart := strings.ToLower(strings.TrimSpace(os.Getenv("CURDX_ASKD_AUTOSTART")))
 	if autostart == "0" || autostart == "false" || autostart == "no" || autostart == "off" {
 		return false
 	}
@@ -289,7 +289,7 @@ func maybeStartUnifiedDaemon() bool {
 	cmd := exec.Command(entry)
 	var filteredEnv []string
 	for _, e := range os.Environ() {
-		if !strings.HasPrefix(e, "CCB_PARENT_PID=") && !strings.HasPrefix(e, "CCB_MANAGED=") {
+		if !strings.HasPrefix(e, "CURDX_PARENT_PID=") && !strings.HasPrefix(e, "CURDX_MANAGED=") {
 			filteredEnv = append(filteredEnv, e)
 		}
 	}
@@ -378,9 +378,9 @@ func sendViaUnifiedDaemon(provider, message string, timeout float64, noWrap bool
 	}
 
 	if caller == "email" {
-		req["email_req_id"] = os.Getenv("CCB_EMAIL_REQ_ID")
-		req["email_msg_id"] = os.Getenv("CCB_EMAIL_MSG_ID")
-		req["email_from"] = os.Getenv("CCB_EMAIL_FROM")
+		req["email_req_id"] = os.Getenv("CURDX_EMAIL_REQ_ID")
+		req["email_msg_id"] = os.Getenv("CURDX_EMAIL_MSG_ID")
+		req["email_from"] = os.Getenv("CURDX_EMAIL_FROM")
 	}
 
 	// Try with one retry on connection failure
@@ -489,10 +489,10 @@ func getIntField(m map[string]interface{}, key string) int {
 }
 
 func defaultForeground() bool {
-	if envutil.EnvBool("CCB_ASK_BACKGROUND", false) {
+	if envutil.EnvBool("CURDX_ASK_BACKGROUND", false) {
 		return false
 	}
-	if envutil.EnvBool("CCB_ASK_FOREGROUND", false) {
+	if envutil.EnvBool("CURDX_ASK_FOREGROUND", false) {
 		return true
 	}
 	caller := detectCaller()
@@ -503,7 +503,7 @@ func defaultForeground() bool {
 }
 
 func shouldEmitAsyncGuardrail(caller string) bool {
-	raw := strings.ToLower(strings.TrimSpace(os.Getenv("CCB_ASK_EMIT_GUARDRAIL")))
+	raw := strings.ToLower(strings.TrimSpace(os.Getenv("CURDX_ASK_EMIT_GUARDRAIL")))
 	if raw != "" {
 		return raw != "0" && raw != "false" && raw != "no" && raw != "off"
 	}
@@ -515,12 +515,12 @@ func requireCaller() string {
 	if caller != "" {
 		return caller
 	}
-	defaultCaller := normalizeCaller(os.Getenv("CCB_CALLER_DEFAULT"))
+	defaultCaller := normalizeCaller(os.Getenv("CURDX_CALLER_DEFAULT"))
 	if defaultCaller == "" {
 		defaultCaller = "manual"
 	}
 	fmt.Fprintf(os.Stderr,
-		"[WARN] CCB_CALLER not set; using '%s'. Set CCB_CALLER explicitly to override.\n",
+		"[WARN] CURDX_CALLER not set; using '%s'. Set CURDX_CALLER explicitly to override.\n",
 		defaultCaller)
 	return defaultCaller
 }
@@ -537,7 +537,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  --notify                Sync send, no wait for reply (for notifications)")
 	fmt.Fprintln(os.Stderr, "  --foreground            Run in foreground (no nohup/background)")
 	fmt.Fprintln(os.Stderr, "  --background            Force background mode")
-	fmt.Fprintln(os.Stderr, "  --no-wrap               Don't wrap with CCB protocol markers")
+	fmt.Fprintln(os.Stderr, "  --no-wrap               Don't wrap with CURDX protocol markers")
 }
 
 func main() {
@@ -666,7 +666,7 @@ func run(argv []string) int {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		env := os.Environ()
-		env = append(env, "CCB_CALLER="+requireCaller())
+		env = append(env, "CURDX_CALLER="+requireCaller())
 		cmd.Env = env
 		if err := cmd.Run(); err != nil {
 			if cmd.ProcessState != nil {
@@ -688,7 +688,7 @@ func run(argv []string) int {
 	}
 
 	taskID := makeTaskID()
-	logDir := filepath.Join(os.TempDir(), "ccb-tasks")
+	logDir := filepath.Join(os.TempDir(), "curdx-tasks")
 	_ = os.MkdirAll(logDir, 0o755)
 	logFile := filepath.Join(logDir, fmt.Sprintf("ask-%s-%s.log", provider, taskID))
 	statusFile := filepath.Join(logDir, fmt.Sprintf("ask-%s-%s.status", provider, taskID))
@@ -709,15 +709,15 @@ func run(argv []string) int {
 	bgPaneID, bgTerminal := callerPaneInfo()
 	paneEnvLines := ""
 	if bgPaneID != "" {
-		paneEnvLines += fmt.Sprintf("export CCB_CALLER_PANE_ID=%s\n", shellQuote(bgPaneID))
+		paneEnvLines += fmt.Sprintf("export CURDX_CALLER_PANE_ID=%s\n", shellQuote(bgPaneID))
 	}
 	if bgTerminal != "" {
-		paneEnvLines += fmt.Sprintf("export CCB_CALLER_TERMINAL=%s\n", shellQuote(bgTerminal))
+		paneEnvLines += fmt.Sprintf("export CURDX_CALLER_TERMINAL=%s\n", shellQuote(bgTerminal))
 	}
 
 	emailEnvLines := ""
 	if caller == "email" {
-		for _, key := range []string{"CCB_EMAIL_REQ_ID", "CCB_EMAIL_MSG_ID", "CCB_EMAIL_FROM"} {
+		for _, key := range []string{"CURDX_EMAIL_REQ_ID", "CURDX_EMAIL_MSG_ID", "CURDX_EMAIL_FROM"} {
 			val := os.Getenv(key)
 			if val != "" {
 				emailEnvLines += fmt.Sprintf("export %s=%s\n", key, shellQuote(val))
@@ -725,10 +725,10 @@ func run(argv []string) int {
 		}
 	}
 
-	ccbRunDir := os.Getenv("CCB_RUN_DIR")
+	curdxRunDir := os.Getenv("CURDX_RUN_DIR")
 	runDirLine := ""
-	if ccbRunDir != "" {
-		runDirLine = fmt.Sprintf("export CCB_RUN_DIR=%s\n", shellQuote(ccbRunDir))
+	if curdxRunDir != "" {
+		runDirLine = fmt.Sprintf("export CURDX_RUN_DIR=%s\n", shellQuote(curdxRunDir))
 	}
 
 	// Generate a random heredoc delimiter to prevent injection when
@@ -743,15 +743,15 @@ _now() {
   date '+%%Y-%%m-%%dT%%H:%%M:%%S%%z'
 }
 echo "$(_now) running pid=$$" >> %s
-echo "[CCB_TASK_START] task=%s provider=%s caller=%s pid=$$"
-export CCB_REQ_ID=%s
-export CCB_CALLER=%s
-export CCB_WORK_DIR=%s
+echo "[CURDX_TASK_START] task=%s provider=%s caller=%s pid=$$"
+export CURDX_REQ_ID=%s
+export CURDX_CALLER=%s
+export CURDX_WORK_DIR=%s
 %s%s%s%s %s --foreground --timeout %g <<'`+heredocDelim+`'
 %s
 `+heredocDelim+`
 rc=$?
-echo "[CCB_TASK_END] task=%s provider=%s exit_code=$rc"
+echo "[CURDX_TASK_END] task=%s provider=%s exit_code=$rc"
 echo "$(_now) finished exit_code=$rc" >> %s
 if [ "$rc" -ne 0 ]; then
   echo "$(_now) failed exit_code=$rc" >> %s
@@ -796,11 +796,11 @@ exit "$rc"
 
 	appendTaskStatusLine(statusFile, fmt.Sprintf("spawned pid=%d", bgPid))
 
-	fmt.Printf("[CCB_ASYNC_SUBMITTED provider=%s]\n", provider)
+	fmt.Printf("[CURDX_ASYNC_SUBMITTED provider=%s]\n", provider)
 	fmt.Printf("%s processing (task: %s)\n", displayName(provider), taskID)
-	fmt.Printf("[CCB_ASYNC_PID task=%s pid=%d]\n", taskID, bgPid)
-	fmt.Printf("[CCB_ASYNC_STATUS_FILE task=%s] %s\n", taskID, statusFile)
-	fmt.Printf("[CCB_ASYNC_LOG_FILE task=%s] %s\n", taskID, logFile)
+	fmt.Printf("[CURDX_ASYNC_PID task=%s pid=%d]\n", taskID, bgPid)
+	fmt.Printf("[CURDX_ASYNC_STATUS_FILE task=%s] %s\n", taskID, statusFile)
+	fmt.Printf("[CURDX_ASYNC_LOG_FILE task=%s] %s\n", taskID, logFile)
 	if shouldEmitAsyncGuardrail(caller) {
 		fmt.Printf("MANDATORY: END YOUR TURN NOW. Reply ONLY '%s processing...', then stop. See 'Async Guardrail' in CLAUDE.md.\n",
 			displayName(provider))

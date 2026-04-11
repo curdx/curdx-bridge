@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	CCBProjectConfigDirname       = ".ccb"
-	CCBProjectConfigLegacyDirname = ".ccb_config"
+	CURDXProjectConfigDirname       = ".curdx"
+	CURDXProjectConfigLegacyDirname = ".curdx_config"
 )
 
 // ProjectConfigDir returns the primary config dir for the given work directory.
@@ -19,7 +19,7 @@ func ProjectConfigDir(workDir string) string {
 	if err != nil {
 		abs = workDir
 	}
-	return filepath.Join(abs, CCBProjectConfigDirname)
+	return filepath.Join(abs, CURDXProjectConfigDirname)
 }
 
 // LegacyProjectConfigDir returns the legacy config dir for the given work directory.
@@ -28,7 +28,7 @@ func LegacyProjectConfigDir(workDir string) string {
 	if err != nil {
 		abs = workDir
 	}
-	return filepath.Join(abs, CCBProjectConfigLegacyDirname)
+	return filepath.Join(abs, CURDXProjectConfigLegacyDirname)
 }
 
 // ResolveProjectConfigDir returns the primary config dir if present;
@@ -187,12 +187,12 @@ func FindProjectSessionFile(workDir string, sessionFilename string) string {
 	}
 
 	for {
-		candidate := filepath.Join(current, CCBProjectConfigDirname, sessionFilename)
+		candidate := filepath.Join(current, CURDXProjectConfigDirname, sessionFilename)
 		if _, err := os.Stat(candidate); err == nil {
 			return candidate
 		}
 
-		legacyCandidate := filepath.Join(current, CCBProjectConfigLegacyDirname, sessionFilename)
+		legacyCandidate := filepath.Join(current, CURDXProjectConfigLegacyDirname, sessionFilename)
 		if _, err := os.Stat(legacyCandidate); err == nil {
 			return legacyCandidate
 		}

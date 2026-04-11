@@ -1,8 +1,8 @@
-// Package i18n provides internationalization support for CCB.
+// Package i18n provides internationalization support for CURDX.
 // Source: claude_code_bridge/lib/i18n.py
 //
 // Language detection priority:
-//  1. CCB_LANG environment variable (zh/en/auto)
+//  1. CURDX_LANG environment variable (zh/en/auto)
 //  2. System locale (LANG/LC_ALL/LC_MESSAGES)
 //  3. Default to English
 package i18n
@@ -27,8 +27,8 @@ var Messages = map[string]map[string]string{
 		"solutions":                 "Solutions:",
 		"install_wezterm":           "Install WezTerm (recommended): https://wezfurlong.org/wezterm/",
 		"or_install_tmux":           "Or install tmux",
-		"tmux_installed_not_inside": "tmux is installed, but you're not inside a tmux session (run `tmux` first, then run `ccb` inside tmux)",
-		"or_set_ccb_terminal":       "Or set CCB_TERMINAL=wezterm and configure CODEX_WEZTERM_BIN",
+		"tmux_installed_not_inside": "tmux is installed, but you're not inside a tmux session (run `tmux` first, then run `curdx` inside tmux)",
+		"or_set_curdx_terminal":       "Or set CURDX_TERMINAL=wezterm and configure CODEX_WEZTERM_BIN",
 		"tmux_not_installed":        "tmux not installed and WezTerm unavailable",
 		"install_wezterm_or_tmux":   "Solution: Install WezTerm (recommended) or tmux",
 		"creating_tmux_session":     "Creating tmux session: {session}",
@@ -99,8 +99,8 @@ var Messages = map[string]map[string]string{
 		"solutions":                 "解决方案：",
 		"install_wezterm":           "安装 WezTerm (推荐): https://wezfurlong.org/wezterm/",
 		"or_install_tmux":           "或安装 tmux",
-		"tmux_installed_not_inside": "已安装 tmux，但当前不在 tmux 会话中（请先运行 `tmux`，再在 tmux 内执行 `ccb`）",
-		"or_set_ccb_terminal":       "或设置 CCB_TERMINAL=wezterm 并配置 CODEX_WEZTERM_BIN",
+		"tmux_installed_not_inside": "已安装 tmux，但当前不在 tmux 会话中（请先运行 `tmux`，再在 tmux 内执行 `curdx`）",
+		"or_set_curdx_terminal":       "或设置 CURDX_TERMINAL=wezterm 并配置 CODEX_WEZTERM_BIN",
 		"tmux_not_installed":        "tmux 未安装且 WezTerm 不可用",
 		"install_wezterm_or_tmux":   "解决方案：安装 WezTerm (推荐) 或 tmux",
 		"creating_tmux_session":     "正在创建 tmux 会话: {session}",
@@ -169,12 +169,12 @@ var Messages = map[string]map[string]string{
 
 // DetectLanguage detects language from environment.
 func DetectLanguage() string {
-	ccbLang := strings.ToLower(os.Getenv("CCB_LANG"))
-	if ccbLang == "" {
-		ccbLang = "auto"
+	curdxLang := strings.ToLower(os.Getenv("CURDX_LANG"))
+	if curdxLang == "" {
+		curdxLang = "auto"
 	}
 
-	switch ccbLang {
+	switch curdxLang {
 	case "zh", "cn", "chinese":
 		return "zh"
 	case "en", "english":

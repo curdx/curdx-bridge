@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	ccbruntime "github.com/anthropics/curdx-bridge/internal/runtime"
+	curdxruntime "github.com/curdx/curdx-bridge/internal/runtime"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 
 // PaneLogRoot returns the root directory for pane logs.
 func PaneLogRoot() string {
-	runDir := ccbruntime.RunDir()
+	runDir := curdxruntime.RunDir()
 	return filepath.Join(runDir, "pane-logs")
 }
 
@@ -56,7 +56,7 @@ func PaneLogPathFor(paneID string, backend string, socketName string) string {
 
 // MaybeTrimLog trims a log file to the last max_bytes if it exceeds the limit.
 func MaybeTrimLog(path string) {
-	maxBytes := EnvInt("CCB_PANE_LOG_MAX_BYTES", 10*1024*1024)
+	maxBytes := EnvInt("CURDX_PANE_LOG_MAX_BYTES", 10*1024*1024)
 	if maxBytes <= 0 {
 		return
 	}
@@ -106,7 +106,7 @@ func MaybeTrimLog(path string) {
 // CleanupPaneLogs removes old pane log files based on TTL and max file count.
 func CleanupPaneLogs(dirPath string) {
 	lastPaneLogCleanMu.Lock()
-	intervalS := EnvFloat("CCB_PANE_LOG_CLEAN_INTERVAL_S", 600.0)
+	intervalS := EnvFloat("CURDX_PANE_LOG_CLEAN_INTERVAL_S", 600.0)
 	now := float64(time.Now().Unix())
 	if intervalS > 0 && (now-lastPaneLogClean) < intervalS {
 		lastPaneLogCleanMu.Unlock()
@@ -115,8 +115,8 @@ func CleanupPaneLogs(dirPath string) {
 	lastPaneLogClean = now
 	lastPaneLogCleanMu.Unlock()
 
-	ttlDays := EnvInt("CCB_PANE_LOG_TTL_DAYS", 7)
-	maxFiles := EnvInt("CCB_PANE_LOG_MAX_FILES", 200)
+	ttlDays := EnvInt("CURDX_PANE_LOG_TTL_DAYS", 7)
+	maxFiles := EnvInt("CURDX_PANE_LOG_MAX_FILES", 200)
 	if ttlDays <= 0 && maxFiles <= 0 {
 		return
 	}

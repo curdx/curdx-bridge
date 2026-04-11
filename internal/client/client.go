@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/envutil"
-	"github.com/anthropics/curdx-bridge/internal/paneregistry"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/rpc"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/paneregistry"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // ResolveWorkDir resolves the work directory for a provider.
@@ -57,7 +57,7 @@ func ResolveWorkDir(spec providers.ProviderClientSpec, cliSessionFile, envSessio
 	}
 
 	parent := filepath.Base(filepath.Dir(absPath))
-	if parent == sessionutil.CCBProjectConfigDirname || parent == sessionutil.CCBProjectConfigLegacyDirname {
+	if parent == sessionutil.CURDXProjectConfigDirname || parent == sessionutil.CURDXProjectConfigLegacyDirname {
 		return filepath.Dir(filepath.Dir(absPath)), absPath, nil
 	}
 	return filepath.Dir(absPath), absPath, nil
@@ -65,7 +65,7 @@ func ResolveWorkDir(spec providers.ProviderClientSpec, cliSessionFile, envSessio
 
 // ResolveWorkDirWithRegistry resolves work_dir using registry fallback.
 func ResolveWorkDirWithRegistry(spec providers.ProviderClientSpec, provider, cliSessionFile string) (string, string, error) {
-	workDir, sessionFile, err := ResolveWorkDir(spec, cliSessionFile, os.Getenv("CCB_SESSION_FILE"))
+	workDir, sessionFile, err := ResolveWorkDir(spec, cliSessionFile, os.Getenv("CURDX_SESSION_FILE"))
 	if err != nil {
 		return "", "", err
 	}
@@ -80,7 +80,7 @@ func ResolveWorkDirWithRegistry(spec providers.ProviderClientSpec, provider, cli
 	}
 
 	// Try registry
-	pid := projectid.ComputeCCBProjectID(workDir)
+	pid := projectid.ComputeCURDXProjectID(workDir)
 	if pid != "" {
 		record := paneregistry.LoadRegistryByProjectID(pid, provider)
 		if record != nil {
@@ -207,6 +207,6 @@ func CheckBackgroundMode(forceBackground, forceForeground bool) bool {
 	if forceBackground {
 		return true
 	}
-	// Default: background if CCB_ALLOW_FOREGROUND is not set
-	return !envutil.EnvBool("CCB_ALLOW_FOREGROUND", false)
+	// Default: background if CURDX_ALLOW_FOREGROUND is not set
+	return !envutil.EnvBool("CURDX_ALLOW_FOREGROUND", false)
 }

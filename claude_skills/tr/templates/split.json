@@ -3,7 +3,7 @@
   "id": "TR-SPLIT",
   "purpose": "split_step",
   "summary": "Apply substeps and regenerate todo.md",
-  "done": [".ccb/state.json updated with substeps", ".ccb/todo.md regenerated"],
+  "done": [".curdx/state.json updated with substeps", ".curdx/todo.md regenerated"],
   "ops": [
     {
       "op": "autoflow_state_apply_split",

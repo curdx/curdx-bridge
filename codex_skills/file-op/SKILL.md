@@ -1,6 +1,6 @@
 ---
 name: file-op
-description: Execute FileOpsREQ protocol requests. Handles autoflow domain ops for .ccb/ state management.
+description: Execute FileOpsREQ protocol requests. Handles autoflow domain ops for .curdx/ state management.
 ---
 
 # FileOps Executor (Codex Side)
@@ -20,14 +20,14 @@ See `~/.claude/skills/docs/protocol.md` for full FileOpsREQ/FileOpsRES schema.
 
 ## AutoFlow Domain Ops Implementation
 
-All state files live under `.ccb/` directory relative to repo root.
+All state files live under `.curdx/` directory relative to repo root.
 
 ### `autoflow_plan_init`
 
 Input: `plan` object with taskName, objective, context, constraints, steps[], finalDone[]
 
 Actions:
-1. Create `.ccb/` directory if not exists
+1. Create `.curdx/` directory if not exists
 2. Build `state.json` from plan:
    ```json
    {
@@ -40,22 +40,22 @@ Actions:
      "finalDone": plan.finalDone
    }
    ```
-3. Write `.ccb/state.json`
-4. Generate `.ccb/todo.md` from state (see formats.md)
-5. Generate `.ccb/plan_log.md` with initial plan entry
+3. Write `.curdx/state.json`
+4. Generate `.curdx/todo.md` from state (see formats.md)
+5. Generate `.curdx/plan_log.md` with initial plan entry
 
 ### `autoflow_state_preflight`
 
-Input: `path` (default `.ccb/state.json`), `maxAttempts` (default 2)
+Input: `path` (default `.curdx/state.json`), `maxAttempts` (default 2)
 
 Actions:
-1. Read `.ccb/state.json`
+1. Read `.curdx/state.json`
 2. If file missing → return fail status with "No plan. Use /tp first."
 3. Validate `current` pointer
 4. If `current.type == "none"` → return ok with taskComplete flag
 5. Get current step/substep, check attempts < maxAttempts
 6. If attempts exceeded → return fail with "Max attempts exceeded"
-7. Increment attempts, write back `.ccb/state.json`
+7. Increment attempts, write back `.curdx/state.json`
 8. Return ok with `data.state` (current pointer) and `data.stepContext` (step title, objective, relevant info)
 
 ### `autoflow_state_apply_split`
@@ -63,38 +63,38 @@ Actions:
 Input: `stepIndex`, `substeps` (array of 3-7 title strings)
 
 Actions:
-1. Read `.ccb/state.json`
+1. Read `.curdx/state.json`
 2. Find step by stepIndex
 3. Set step.substeps = substeps mapped to `{ index: i+1, title: t, status: "todo" }`, first one "doing"
 4. Set `current = { type: "substep", stepIndex: stepIndex, subIndex: 1 }`
-5. Write `.ccb/state.json`
-6. Regenerate `.ccb/todo.md`
+5. Write `.curdx/state.json`
+6. Regenerate `.curdx/todo.md`
 
 ### `autoflow_state_finalize`
 
 Input: `verification` (string), `changedFiles` (optional array)
 
 Actions:
-1. Read `.ccb/state.json`
+1. Read `.curdx/state.json`
 2. Mark current step/substep status = "done"
 3. Advance `current` to next todo step/substep:
    - If substeps remain in current step → next substep
    - If no substeps remain → next step
    - If no steps remain → set `current = { type: "none", stepIndex: null, subIndex: null }`
 4. If next item exists, set its status to "doing"
-5. Write `.ccb/state.json`
-6. Regenerate `.ccb/todo.md`
-7. Append completion entry to `.ccb/plan_log.md`
+5. Write `.curdx/state.json`
+6. Regenerate `.curdx/todo.md`
+7. Append completion entry to `.curdx/plan_log.md`
 
 ### `autoflow_state_mark_blocked`
 
 Input: `reason` (string)
 
 Actions:
-1. Read `.ccb/state.json`
+1. Read `.curdx/state.json`
 2. Mark current step/substep status = "blocked"
-3. Write `.ccb/state.json`
-4. Regenerate `.ccb/todo.md`
+3. Write `.curdx/state.json`
+4. Regenerate `.curdx/todo.md`
 
 ### `autoflow_state_append_steps`
 
@@ -103,13 +103,13 @@ Input: `steps` (array of 1-2 title strings), `maxAllowed` (default 2)
 Precondition: `current.type == "none"` (task completed)
 
 Actions:
-1. Read `.ccb/state.json`
+1. Read `.curdx/state.json`
 2. If steps.length > maxAllowed → return fail
 3. Append new steps to steps array
 4. Set `current` to first new step, mark it "doing"
-5. Write `.ccb/state.json`
-6. Regenerate `.ccb/todo.md`
-7. Append to `.ccb/plan_log.md`
+5. Write `.curdx/state.json`
+6. Regenerate `.curdx/todo.md`
+7. Append to `.curdx/plan_log.md`
 
 ## Output Format
 

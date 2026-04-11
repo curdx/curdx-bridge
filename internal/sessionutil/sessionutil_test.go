@@ -40,14 +40,14 @@ func TestFindProjectSessionFileWalksUpward(t *testing.T) {
 	}
 }
 
-func TestFindProjectSessionFilePrefersCCBConfig(t *testing.T) {
+func TestFindProjectSessionFilePrefersCURDXConfig(t *testing.T) {
 	tmpDir := resolveDir(t.TempDir())
 	root := filepath.Join(tmpDir, "repo")
 	if err := os.MkdirAll(root, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
-	cfg := filepath.Join(root, ".ccb")
+	cfg := filepath.Join(root, ".curdx")
 	if err := os.MkdirAll(cfg, 0o755); err != nil {
 		t.Fatal(err)
 	}

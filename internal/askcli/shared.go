@@ -24,16 +24,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/cliutil"
-	"github.com/anthropics/curdx-bridge/internal/compat"
-	"github.com/anthropics/curdx-bridge/internal/envutil"
-	"github.com/anthropics/curdx-bridge/internal/paneregistry"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/protocol"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/rpc"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/cliutil"
+	"github.com/curdx/curdx-bridge/internal/compat"
+	"github.com/curdx/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/paneregistry"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/protocol"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // ProviderCLIConfig holds per-provider configuration for the shared CLI logic.
@@ -48,21 +48,21 @@ type ProviderCLIConfig struct {
 	Spec providers.ProviderClientSpec
 	// AsyncGuardrail is the guardrail message printed to stderr.
 	AsyncGuardrail string
-	// DefaultTimeout is the default timeout from CCB_SYNC_TIMEOUT.
+	// DefaultTimeout is the default timeout from CURDX_SYNC_TIMEOUT.
 	// Use -1.0 for cask/lask style, 3600.0 for others.
 	DefaultTimeout float64
 	// HasRetryLoop controls whether the CLI retries daemon connections
 	// (gask, oask pattern) or uses simpler logic (cask, lask).
 	HasRetryLoop bool
-	// StartupWaitEnv is the env var for startup wait override (e.g. "CCB_GASKD_STARTUP_WAIT_S").
+	// StartupWaitEnv is the env var for startup wait override (e.g. "CURDX_GASKD_STARTUP_WAIT_S").
 	StartupWaitEnv string
-	// RetryWaitEnv is the env var for retry wait override (e.g. "CCB_GASKD_RETRY_WAIT_S").
+	// RetryWaitEnv is the env var for retry wait override (e.g. "CURDX_GASKD_RETRY_WAIT_S").
 	RetryWaitEnv string
 	// DaemonHint is the hint for how to start the daemon (e.g. "caskd", "gaskd", "askd").
 	DaemonHint string
-	// DaemonAutostartEnvHint (e.g. "CCB_CASKD_AUTOSTART=1").
+	// DaemonAutostartEnvHint (e.g. "CURDX_CASKD_AUTOSTART=1").
 	DaemonAutostartEnvHint string
-	// SetupHint is the setup command hint (e.g. "`ccb codex`").
+	// SetupHint is the setup command hint (e.g. "`curdx codex`").
 	SetupHint string
 	// HasSupervisorMode enables the codex+opencode supervisor prompt (cask only).
 	HasSupervisorMode bool
@@ -127,7 +127,7 @@ func run(cfg ProviderCLIConfig, argv []string) int {
 		cfg.Spec,
 		cfg.ProviderKey,
 		args.sessionFile,
-		os.Getenv("CCB_SESSION_FILE"),
+		os.Getenv("CURDX_SESSION_FILE"),
 	)
 
 	var daemonResult *daemonResponse
@@ -173,7 +173,7 @@ func run(cfg ProviderCLIConfig, argv []string) int {
 	}
 	if sessionutil.FindProjectSessionFile(workDir, cfg.Spec.SessionFilename) == "" {
 		fmt.Fprintf(os.Stderr, "[ERROR] No active %s session found for this directory.\n", cfg.ProviderName)
-		fmt.Fprintf(os.Stderr, "Run %s (or add %s to ccb.config) in this project first.\n", cfg.SetupHint, cfg.ProviderKey)
+		fmt.Fprintf(os.Stderr, "Run %s (or add %s to curdx.config) in this project first.\n", cfg.SetupHint, cfg.ProviderKey)
 		return cliutil.ExitError
 	}
 	fmt.Fprintf(os.Stderr, "[ERROR] %s daemon required but not available.\n", cfg.CmdName)
@@ -242,7 +242,7 @@ func parseArgs(cfg ProviderCLIConfig, argv []string) (*parsedArgs, error) {
 	args.message = strings.TrimSpace(strings.Join(parts, " "))
 
 	if args.timeout == 0 {
-		envVal := os.Getenv("CCB_SYNC_TIMEOUT")
+		envVal := os.Getenv("CURDX_SYNC_TIMEOUT")
 		if envVal != "" {
 			v, err := strconv.ParseFloat(envVal, 64)
 			if err == nil {
@@ -317,7 +317,7 @@ func resolveWorkDir(
 	}
 
 	parent := filepath.Base(filepath.Dir(sessionPath))
-	if parent == sessionutil.CCBProjectConfigDirname || parent == sessionutil.CCBProjectConfigLegacyDirname {
+	if parent == sessionutil.CURDXProjectConfigDirname || parent == sessionutil.CURDXProjectConfigLegacyDirname {
 		return filepath.Dir(filepath.Dir(sessionPath)), sessionPath
 	}
 	return filepath.Dir(sessionPath), sessionPath
@@ -356,7 +356,7 @@ func resolveWorkDirWithRegistry(
 	pid := ""
 	func() {
 		defer func() { recover() }()
-		pid = projectid.ComputeCCBProjectID(cwd)
+		pid = projectid.ComputeCURDXProjectID(cwd)
 	}()
 	if pid != "" {
 		rec := paneregistry.LoadRegistryByProjectID(pid, provider)
@@ -397,8 +397,8 @@ func resolveWorkDirWithRegistry(
 		}
 	}
 
-	if envutil.EnvBool("CCB_REGISTRY_ONLY", false) {
-		panic(fmt.Sprintf("CCB_REGISTRY_ONLY=1: registry routing failed for provider=%q cwd=%s", provider, cwd))
+	if envutil.EnvBool("CURDX_REGISTRY_ONLY", false) {
+		panic(fmt.Sprintf("CURDX_REGISTRY_ONLY=1: registry routing failed for provider=%q cwd=%s", provider, cwd))
 	}
 
 	return cwd, ""
@@ -449,9 +449,9 @@ func tryDaemonRequest(
 
 	st := readState(stateFile)
 
-	// If state not found and CCB_RUN_DIR is set, try project-specific state file
+	// If state not found and CURDX_RUN_DIR is set, try project-specific state file
 	if st == nil {
-		runDir := strings.TrimSpace(os.Getenv("CCB_RUN_DIR"))
+		runDir := strings.TrimSpace(os.Getenv("CURDX_RUN_DIR"))
 		if runDir != "" {
 			stateFilename := spec.ProtocolPrefix + "d.json"
 			projectState := filepath.Join(runDir, stateFilename)
@@ -514,13 +514,13 @@ func tryDaemonRequest(
 	if outputPath != "" {
 		payload["output_path"] = outputPath
 	}
-	if reqID := strings.TrimSpace(os.Getenv("CCB_REQ_ID")); reqID != "" {
+	if reqID := strings.TrimSpace(os.Getenv("CURDX_REQ_ID")); reqID != "" {
 		payload["req_id"] = reqID
 	}
-	if noWrap := strings.TrimSpace(os.Getenv("CCB_NO_WRAP")); noWrap == "1" || noWrap == "true" || noWrap == "yes" {
+	if noWrap := strings.TrimSpace(os.Getenv("CURDX_NO_WRAP")); noWrap == "1" || noWrap == "true" || noWrap == "yes" {
 		payload["no_wrap"] = true
 	}
-	if caller := strings.TrimSpace(os.Getenv("CCB_CALLER")); caller != "" {
+	if caller := strings.TrimSpace(os.Getenv("CURDX_CALLER")); caller != "" {
 		payload["caller"] = caller
 	}
 
@@ -774,10 +774,10 @@ func getExecutorFromRoles() string {
 	candidates := []string{
 		".autoflow/roles.session.json",
 		".autoflow/roles.json",
-		filepath.Join(home, ".config", "ccb", "roles.json"),
+		filepath.Join(home, ".config", "curdx", "roles.json"),
 	}
 	if xdg := strings.TrimSpace(os.Getenv("XDG_CONFIG_HOME")); xdg != "" {
-		candidates = append(candidates, filepath.Join(xdg, "ccb", "roles.json"))
+		candidates = append(candidates, filepath.Join(xdg, "curdx", "roles.json"))
 	}
 
 	for _, cfgPath := range candidates {
@@ -827,7 +827,7 @@ func RunPing(cfg ProviderPingConfig) int {
 		return 1
 	}
 	if *sessionFileFlag != "" {
-		os.Setenv("CCB_SESSION_FILE", *sessionFileFlag)
+		os.Setenv("CURDX_SESSION_FILE", *sessionFileFlag)
 	}
 	healthy, message := checkPingHealth(cfg, *sessionFileFlag)
 	fmt.Println(message)
@@ -840,7 +840,7 @@ func RunPing(cfg ProviderPingConfig) int {
 func checkPingHealth(cfg ProviderPingConfig, sfOverride string) (bool, string) {
 	sfPath := sfOverride
 	if sfPath == "" {
-		sfPath = os.Getenv("CCB_SESSION_FILE")
+		sfPath = os.Getenv("CURDX_SESSION_FILE")
 	}
 	if sfPath == "" {
 		wd, _ := os.Getwd()
@@ -883,7 +883,7 @@ func ResolveWorkDir(sessionFile string) string {
 		sessionFile = abs
 	}
 	parent := filepath.Base(filepath.Dir(sessionFile))
-	if parent == sessionutil.CCBProjectConfigDirname || parent == sessionutil.CCBProjectConfigLegacyDirname {
+	if parent == sessionutil.CURDXProjectConfigDirname || parent == sessionutil.CURDXProjectConfigLegacyDirname {
 		return filepath.Dir(filepath.Dir(sessionFile))
 	}
 	return filepath.Dir(sessionFile)
@@ -936,12 +936,12 @@ func RunPend(cfg ProviderPendConfig) int {
 	}
 
 	if *sessionFileFlag != "" {
-		os.Setenv("CCB_SESSION_FILE", *sessionFileFlag)
+		os.Setenv("CURDX_SESSION_FILE", *sessionFileFlag)
 	}
 
 	sfPath := *sessionFileFlag
 	if sfPath == "" {
-		sfPath = os.Getenv("CCB_SESSION_FILE")
+		sfPath = os.Getenv("CURDX_SESSION_FILE")
 	}
 	if sfPath == "" {
 		wd, _ := os.Getwd()

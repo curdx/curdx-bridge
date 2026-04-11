@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-compile all CCB binaries for multiple platforms.
+# Cross-compile all CURDX binaries for multiple platforms.
 # Usage: ./scripts/build-all.sh [output_dir]
 set -euo pipefail
 
@@ -28,7 +28,7 @@ for platform in "${PLATFORMS[@]}"; do
     EXT=".exe"
   fi
 
-  PLATFORM_DIR="$OUT_DIR/ccb-${GOOS}-${GOARCH}"
+  PLATFORM_DIR="$OUT_DIR/curdx-${GOOS}-${GOARCH}"
   mkdir -p "$PLATFORM_DIR"
 
   echo "  ${GOOS}/${GOARCH}:"
@@ -48,7 +48,7 @@ for platform in "${PLATFORMS[@]}"; do
   cp "$REPO_ROOT/install.sh" "$PLATFORM_DIR/"
 
   # Package
-  ARCHIVE_NAME="ccb-${GOOS}-${GOARCH}"
+  ARCHIVE_NAME="curdx-${GOOS}-${GOARCH}"
   cd "$OUT_DIR"
   if [[ "$GOOS" == "windows" ]]; then
     zip -qr "${ARCHIVE_NAME}.zip" "$(basename "$PLATFORM_DIR")"

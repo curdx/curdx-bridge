@@ -5,8 +5,8 @@ package main
 import (
 	"os"
 
-	"github.com/anthropics/curdx-bridge/internal/askcli"
-	"github.com/anthropics/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/askcli"
+	"github.com/curdx/curdx-bridge/internal/providers"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		ProviderName: "OpenCode",
 		ProviderKey:  "opencode",
 		Spec:         providers.OaskClientSpec,
-		AsyncGuardrail: `[CCB_ASYNC_SUBMITTED provider=opencode]
+		AsyncGuardrail: `[CURDX_ASYNC_SUBMITTED provider=opencode]
 IMPORTANT: Task submitted to OpenCode. You MUST:
 1. Tell user "OpenCode processing..."
 2. END YOUR TURN IMMEDIATELY
@@ -24,10 +24,10 @@ IMPORTANT: Task submitted to OpenCode. You MUST:
 		DefaultTimeout:         3600.0,
 		HasRetryLoop:           true,
 		HasAsyncMode:           true,
-		StartupWaitEnv:         "CCB_OASKD_STARTUP_WAIT_S",
-		RetryWaitEnv:           "CCB_OASKD_RETRY_WAIT_S",
+		StartupWaitEnv:         "CURDX_OASKD_STARTUP_WAIT_S",
+		RetryWaitEnv:           "CURDX_OASKD_RETRY_WAIT_S",
 		DaemonHint:             "oaskd",
-		DaemonAutostartEnvHint: "CCB_OASKD_AUTOSTART=1",
-		SetupHint:              "`ccb opencode`",
+		DaemonAutostartEnvHint: "CURDX_OASKD_AUTOSTART=1",
+		SetupHint:              "`curdx opencode`",
 	}))
 }

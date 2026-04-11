@@ -14,10 +14,10 @@ Execute current step while Claude stays in plan mode and Codex performs all file
 ### 1. Sync Current State (Codex)
 
 Claude does not read/modify repo files directly. Request Codex to:
-1) read `.ccb/state.json`
+1) read `.curdx/state.json`
 2) validate `current`
 3) enforce attempt limits
-4) (if proceeding) increment attempts and persist back to `.ccb/state.json`
+4) (if proceeding) increment attempts and persist back to `.curdx/state.json`
 5) return a compact step context for design
 
 Call `/file-op` with `FileOpsREQ`:
@@ -128,7 +128,7 @@ Send the constructed FileOpsREQ via `/file-op`:
 /file-op <the FileOpsREQ JSON>
 ```
 
-(`/file-op` handles routing to Codex via `CCB_CALLER=claude ask codex`)
+(`/file-op` handles routing to Codex via `CURDX_CALLER=claude ask codex`)
 
 ### 6. Execute (Executor Routing)
 
@@ -179,7 +179,7 @@ Output: Review result with verdict (PASS/FIX/BLOCKED).
 If testing is needed, send test task to Codex:
 
 ```
-Bash(CCB_CALLER=claude ask codex "Run tests for this change:
+Bash(CURDX_CALLER=claude ask codex "Run tests for this change:
 
 Step: [step title]
 Changed files: [list]
@@ -211,8 +211,8 @@ If Step 3 applied a split (`needsSplit=true`):
 
 If PASS (execution path), ask Codex to:
 1) mark current step/substep `status: "done"` and advance `current`
-2) regenerate `.ccb/todo.md` from `.ccb/state.json`
-3) append completion entry to `.ccb/plan_log.md`
+2) regenerate `.curdx/todo.md` from `.curdx/state.json`
+3) append completion entry to `.curdx/plan_log.md`
 
 Send `FileOpsREQ` with `purpose: "finalize_step"` via `/file-op`. Codex returns `FileOpsRES` JSON only.
 
@@ -256,7 +256,7 @@ Based on review results:
 - **Minor issues** (typo, minor fix) → Have Codex fix directly, optionally re-test, then go to 10.3
 - **Medium issues** (need 1-2 extra steps) → Append steps to current task:
   1. Claude designs 1-2 fix steps
-  2. Call `/file-op` to append steps to `.ccb/state.json`:
+  2. Call `/file-op` to append steps to `.curdx/state.json`:
      - Template: `../templates/append-steps.json`
   3. Continue executing `/tr` to complete appended steps
   4. After completion, re-enter Step 10

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // ContextTransfer orchestrates context transfer between providers.
@@ -468,7 +468,7 @@ func (ct *ContextTransfer) SendToProvider(context *TransferContext, provider str
 	return true, string(result)
 }
 
-// SaveTransfer saves transfer to .ccb/history/ with timestamp.
+// SaveTransfer saves transfer to .curdx/history/ with timestamp.
 func (ct *ContextTransfer) SaveTransfer(
 	context *TransferContext,
 	format string,

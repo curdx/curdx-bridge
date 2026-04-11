@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/comm"
-	"github.com/anthropics/curdx-bridge/internal/completionhook"
-	"github.com/anthropics/curdx-bridge/internal/protocol"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/comm"
+	"github.com/curdx/curdx-bridge/internal/completionhook"
+	"github.com/curdx/curdx-bridge/internal/protocol"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 // CodexAdapter implements BaseProviderAdapter for the Codex provider.
@@ -132,7 +132,7 @@ func (a *CodexAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 	fallbackScan := false
 
 	// Idle timeout detection for degraded completion
-	idleTimeout := envFloatDefault("CCB_CASKD_IDLE_TIMEOUT", 8.0)
+	idleTimeout := envFloatDefault("CURDX_CASKD_IDLE_TIMEOUT", 8.0)
 	lastReplySnapshot := ""
 	lastReplyChangedAt := time.Now()
 
@@ -149,10 +149,10 @@ func (a *CodexAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 	if terminal.IsWindows() {
 		defaultInterval = 5.0
 	}
-	paneCheckInterval := envFloatDefault("CCB_CASKD_PANE_CHECK_INTERVAL", defaultInterval)
-	staleGraceS := envFloatDefault("CCB_CASKD_STALE_LOG_GRACE_SECONDS", 2.5)
-	staleCheckInterval := envFloatDefault("CCB_CASKD_STALE_LOG_CHECK_INTERVAL", 1.0)
-	staleThresholdS := envFloatDefault("CCB_CODEX_STALE_LOG_SECONDS", 10.0)
+	paneCheckInterval := envFloatDefault("CURDX_CASKD_PANE_CHECK_INTERVAL", defaultInterval)
+	staleGraceS := envFloatDefault("CURDX_CASKD_STALE_LOG_GRACE_SECONDS", 2.5)
+	staleCheckInterval := envFloatDefault("CURDX_CASKD_STALE_LOG_CHECK_INTERVAL", 1.0)
+	staleThresholdS := envFloatDefault("CURDX_CODEX_STALE_LOG_SECONDS", 10.0)
 	lastStaleCheck := time.Now()
 
 	for {
@@ -268,13 +268,13 @@ func (a *CodexAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 			break
 		}
 
-		// Idle-timeout: detect when Codex finished but forgot CCB_DONE
+		// Idle-timeout: detect when Codex finished but forgot CURDX_DONE
 		if combined != lastReplySnapshot {
 			lastReplySnapshot = combined
 			lastReplyChangedAt = time.Now()
 		} else if combined != "" && time.Since(lastReplyChangedAt).Seconds() >= idleTimeout {
 			codexWriteLog(fmt.Sprintf(
-				"[WARN] Codex reply idle for %.0fs without CCB_DONE, accepting as complete req_id=%s",
+				"[WARN] Codex reply idle for %.0fs without CURDX_DONE, accepting as complete req_id=%s",
 				idleTimeout, task.ReqID,
 			))
 			doneSeen = true

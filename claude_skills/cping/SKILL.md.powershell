@@ -21,7 +21,7 @@ The first argument must be the provider name:
 ## Execution (MANDATORY)
 
 ```powershell
-ccb-ping $ARGUMENTS
+curdx-ping $ARGUMENTS
 ```
 
 ## Examples

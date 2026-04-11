@@ -2,10 +2,10 @@
   "proto": "autoflow.fileops.v1",
   "id": "TR-PREFLIGHT",
   "purpose": "read_state",
-  "summary": "Load .ccb/state.json, validate current step, bump attempts if allowed",
+  "summary": "Load .curdx/state.json, validate current step, bump attempts if allowed",
   "done": ["Returns current step context or a terminal status"],
   "ops": [
-    { "op": "autoflow_state_preflight", "path": ".ccb/state.json", "maxAttempts": 2 }
+    { "op": "autoflow_state_preflight", "path": ".curdx/state.json", "maxAttempts": 2 }
   ],
   "report": { "changedFiles": true, "diffSummary": true, "commandOutputs": "never" },
   "_meta": {

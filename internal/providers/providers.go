@@ -35,7 +35,7 @@ var CaskdSpec = ProviderDaemonSpec{
 	ProtocolPrefix: "cask",
 	StateFileName:  "caskd.json",
 	LogFileName:    "caskd.log",
-	IdleTimeoutEnv: "CCB_CASKD_IDLE_TIMEOUT_S",
+	IdleTimeoutEnv: "CURDX_CASKD_IDLE_TIMEOUT_S",
 	LockName:       "caskd",
 }
 
@@ -44,7 +44,7 @@ var GaskdSpec = ProviderDaemonSpec{
 	ProtocolPrefix: "gask",
 	StateFileName:  "gaskd.json",
 	LogFileName:    "gaskd.log",
-	IdleTimeoutEnv: "CCB_GASKD_IDLE_TIMEOUT_S",
+	IdleTimeoutEnv: "CURDX_GASKD_IDLE_TIMEOUT_S",
 	LockName:       "gaskd",
 }
 
@@ -53,7 +53,7 @@ var OaskdSpec = ProviderDaemonSpec{
 	ProtocolPrefix: "oask",
 	StateFileName:  "oaskd.json",
 	LogFileName:    "oaskd.log",
-	IdleTimeoutEnv: "CCB_OASKD_IDLE_TIMEOUT_S",
+	IdleTimeoutEnv: "CURDX_OASKD_IDLE_TIMEOUT_S",
 	LockName:       "oaskd",
 }
 
@@ -62,7 +62,7 @@ var LaskdSpec = ProviderDaemonSpec{
 	ProtocolPrefix: "lask",
 	StateFileName:  "laskd.json",
 	LogFileName:    "laskd.log",
-	IdleTimeoutEnv: "CCB_LASKD_IDLE_TIMEOUT_S",
+	IdleTimeoutEnv: "CURDX_LASKD_IDLE_TIMEOUT_S",
 	LockName:       "laskd",
 }
 
@@ -70,10 +70,10 @@ var LaskdSpec = ProviderDaemonSpec{
 
 var CaskClientSpec = ProviderClientSpec{
 	ProtocolPrefix:      "cask",
-	EnabledEnv:          "CCB_CASKD",
-	AutostartEnvPrimary: "CCB_CASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_CASKD",
-	StateFileEnv:        "CCB_CASKD_STATE_FILE",
+	EnabledEnv:          "CURDX_CASKD",
+	AutostartEnvPrimary: "CURDX_CASKD_AUTOSTART",
+	AutostartEnvLegacy:  "CURDX_AUTO_CASKD",
+	StateFileEnv:        "CURDX_CASKD_STATE_FILE",
 	SessionFilename:     ".codex-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",
@@ -81,10 +81,10 @@ var CaskClientSpec = ProviderClientSpec{
 
 var GaskClientSpec = ProviderClientSpec{
 	ProtocolPrefix:      "gask",
-	EnabledEnv:          "CCB_GASKD",
-	AutostartEnvPrimary: "CCB_GASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_GASKD",
-	StateFileEnv:        "CCB_GASKD_STATE_FILE",
+	EnabledEnv:          "CURDX_GASKD",
+	AutostartEnvPrimary: "CURDX_GASKD_AUTOSTART",
+	AutostartEnvLegacy:  "CURDX_AUTO_GASKD",
+	StateFileEnv:        "CURDX_GASKD_STATE_FILE",
 	SessionFilename:     ".gemini-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",
@@ -92,10 +92,10 @@ var GaskClientSpec = ProviderClientSpec{
 
 var OaskClientSpec = ProviderClientSpec{
 	ProtocolPrefix:      "oask",
-	EnabledEnv:          "CCB_OASKD",
-	AutostartEnvPrimary: "CCB_OASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_OASKD",
-	StateFileEnv:        "CCB_OASKD_STATE_FILE",
+	EnabledEnv:          "CURDX_OASKD",
+	AutostartEnvPrimary: "CURDX_OASKD_AUTOSTART",
+	AutostartEnvLegacy:  "CURDX_AUTO_OASKD",
+	StateFileEnv:        "CURDX_OASKD_STATE_FILE",
 	SessionFilename:     ".opencode-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",
@@ -103,10 +103,10 @@ var OaskClientSpec = ProviderClientSpec{
 
 var LaskClientSpec = ProviderClientSpec{
 	ProtocolPrefix:      "lask",
-	EnabledEnv:          "CCB_LASKD",
-	AutostartEnvPrimary: "CCB_LASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CCB_AUTO_LASKD",
-	StateFileEnv:        "CCB_LASKD_STATE_FILE",
+	EnabledEnv:          "CURDX_LASKD",
+	AutostartEnvPrimary: "CURDX_LASKD_AUTOSTART",
+	AutostartEnvLegacy:  "CURDX_AUTO_LASKD",
+	StateFileEnv:        "CURDX_LASKD_STATE_FILE",
 	SessionFilename:     ".claude-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",

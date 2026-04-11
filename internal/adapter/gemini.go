@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/comm"
-	"github.com/anthropics/curdx-bridge/internal/completionhook"
-	"github.com/anthropics/curdx-bridge/internal/protocol"
-	"github.com/anthropics/curdx-bridge/internal/provprotocol"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/comm"
+	"github.com/curdx/curdx-bridge/internal/completionhook"
+	"github.com/curdx/curdx-bridge/internal/protocol"
+	"github.com/curdx/curdx-bridge/internal/provprotocol"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 // GeminiAdapter implements BaseProviderAdapter for the Gemini provider.
@@ -96,7 +96,7 @@ func readSessionMessages(sessionPath string) []map[string]interface{} {
 
 // cancelAppliesToReq checks if a cancel event at cancelIndex applies to our request.
 func cancelAppliesToReq(messages []map[string]interface{}, cancelIndex int, reqID string) bool {
-	needle := fmt.Sprintf("CCB_REQ_ID: %s", reqID)
+	needle := fmt.Sprintf("CURDX_REQ_ID: %s", reqID)
 	for j := cancelIndex - 1; j >= 0; j-- {
 		msg := messages[j]
 		msgType, _ := msg["type"].(string)
@@ -219,11 +219,11 @@ func (a *GeminiAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 	latestReply := ""
 	requestCancelled := false
 
-	paneCheckInterval := envFloatDefault("CCB_GASKD_PANE_CHECK_INTERVAL", 2.0)
+	paneCheckInterval := envFloatDefault("CURDX_GASKD_PANE_CHECK_INTERVAL", 2.0)
 	lastPaneCheck := time.Now()
 
 	// Idle-timeout
-	idleTimeout := envFloatDefault("CCB_GEMINI_IDLE_TIMEOUT", 15.0)
+	idleTimeout := envFloatDefault("CURDX_GEMINI_IDLE_TIMEOUT", 15.0)
 	lastReplySnapshot := ""
 	lastReplyChangedAt := time.Now()
 
@@ -314,7 +314,7 @@ func (a *GeminiAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 			lastReplyChangedAt = time.Now()
 		} else if latestReply != "" && time.Since(lastReplyChangedAt).Seconds() >= idleTimeout {
 			geminiWriteLog(fmt.Sprintf(
-				"[WARN] Gemini reply idle for %.0fs without CCB_DONE, accepting as complete req_id=%s",
+				"[WARN] Gemini reply idle for %.0fs without CURDX_DONE, accepting as complete req_id=%s",
 				idleTimeout, task.ReqID,
 			))
 			doneSeen = true

@@ -15,7 +15,7 @@ import (
 // ProviderLock is a per-provider, per-directory file lock to serialize
 // request-response cycles.
 //
-// Lock files are stored in ~/.ccb/run/{provider}-{cwd_hash}.lock
+// Lock files are stored in ~/.curdx/run/{provider}-{cwd_hash}.lock
 type ProviderLock struct {
 	Provider string
 	Timeout  float64
@@ -32,7 +32,7 @@ func NewProviderLock(provider string, timeout float64, cwd string) *ProviderLock
 	}
 
 	home, _ := os.UserHomeDir()
-	lockDir := filepath.Join(home, ".ccb", "run")
+	lockDir := filepath.Join(home, ".curdx", "run")
 
 	h := md5.Sum([]byte(cwd))
 	cwdHash := fmt.Sprintf("%x", h)[:8]

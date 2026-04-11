@@ -1,5 +1,5 @@
-// Package protocol implements the CCB request/response framing protocol.
-// Source: claude_code_bridge/lib/ccb_protocol.py
+// Package protocol implements the CURDX request/response framing protocol.
+// Source: claude_code_bridge/lib/curdx_protocol.py
 package protocol
 
 import (
@@ -12,29 +12,29 @@ import (
 )
 
 const (
-	REQIDPrefix  = "CCB_REQ_ID:"
-	BeginPrefix  = "CCB_BEGIN:"
-	DonePrefix   = "CCB_DONE:"
+	REQIDPrefix  = "CURDX_REQ_ID:"
+	BeginPrefix  = "CURDX_BEGIN:"
+	DonePrefix   = "CURDX_DONE:"
 )
 
-const doneLineRETemplate = `^\s*CCB_DONE:\s*%s\s*$`
+const doneLineRETemplate = `^\s*CURDX_DONE:\s*%s\s*$`
 
 // trailingDoneTagRE matches lines like "HARNESS_DONE" or "FOO_DONE: 20260125-..."
-// but NOT "CCB_DONE: ...". Go's RE2 lacks negative lookahead (?!), so we use
-// a two-step check: match the general pattern, then exclude CCB_DONE.
+// but NOT "CURDX_DONE: ...". Go's RE2 lacks negative lookahead (?!), so we use
+// a two-step check: match the general pattern, then exclude CURDX_DONE.
 var trailingDoneTagRE = regexp.MustCompile(
 	`^\s*[A-Z][A-Z0-9_]*_DONE(?:\s*:\s*\d{8}-\d{6}-\d{3}-\d+-\d+)?\s*$`,
 )
-var ccbDonePrefixRE = regexp.MustCompile(`^\s*CCB_DONE\s*:`)
+var curdxDonePrefixRE = regexp.MustCompile(`^\s*CURDX_DONE\s*:`)
 
-var anyCCBDoneLineRE = regexp.MustCompile(
-	`^\s*CCB_DONE:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`,
+var anyCURDXDoneLineRE = regexp.MustCompile(
+	`^\s*CURDX_DONE:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`,
 )
 
 // isTrailingDoneTag replicates the Python _TRAILING_DONE_TAG_RE which uses
-// a negative lookahead to exclude CCB_DONE lines.
+// a negative lookahead to exclude CURDX_DONE lines.
 func isTrailingDoneTag(line string) bool {
-	return trailingDoneTagRE.MatchString(line) && !ccbDonePrefixRE.MatchString(line)
+	return trailingDoneTagRE.MatchString(line) && !curdxDonePrefixRE.MatchString(line)
 }
 
 // isTrailingNoiseLine returns true for blank lines and generic harness
@@ -47,13 +47,13 @@ func isTrailingNoiseLine(line string) bool {
 }
 
 // StripTrailingMarkers removes trailing protocol/harness marker lines
-// (blank lines, CCB_DONE: <id>, and other *_DONE tags).
+// (blank lines, CURDX_DONE: <id>, and other *_DONE tags).
 // This is meant for "recall"/display commands (e.g. cpend) where we want a clean view.
 func StripTrailingMarkers(text string) string {
 	lines := splitAndRstrip(text)
 	for len(lines) > 0 {
 		last := lines[len(lines)-1]
-		if isTrailingNoiseLine(last) || anyCCBDoneLineRE.MatchString(last) {
+		if isTrailingNoiseLine(last) || anyCURDXDoneLineRE.MatchString(last) {
 			lines = lines[:len(lines)-1]
 			continue
 		}
@@ -79,7 +79,7 @@ func MakeReqID() string {
 	)
 }
 
-// WrapCodexPrompt wraps a user message with CCB protocol framing for Codex.
+// WrapCodexPrompt wraps a user message with CURDX protocol framing for Codex.
 func WrapCodexPrompt(message, reqID string) string {
 	message = strings.TrimRight(message, " \t\r\n")
 	return fmt.Sprintf("%s %s\n\n%s\n\nIMPORTANT:\n- Reply normally.\n- Reply normally, in English.\n- End your reply with this exact final line (verbatim, on its own line):\n%s %s\n",
@@ -94,7 +94,7 @@ func DoneLineRE(reqID string) *regexp.Regexp {
 	return regexp.MustCompile(fmt.Sprintf(doneLineRETemplate, regexp.QuoteMeta(reqID)))
 }
 
-// IsDoneText checks whether the given text contains the CCB_DONE line for reqID
+// IsDoneText checks whether the given text contains the CURDX_DONE line for reqID
 // as the last meaningful (non-noise) line.
 func IsDoneText(text, reqID string) bool {
 	lines := splitAndRstrip(text)
@@ -108,7 +108,7 @@ func IsDoneText(text, reqID string) bool {
 	return false
 }
 
-// StripDoneText strips the CCB_DONE line (and surrounding noise) from text.
+// StripDoneText strips the CURDX_DONE line (and surrounding noise) from text.
 func StripDoneText(text, reqID string) string {
 	lines := splitAndRstrip(text)
 	if len(lines) == 0 {
@@ -135,7 +135,7 @@ func StripDoneText(text, reqID string) string {
 }
 
 // ExtractReplyForReq extracts the reply segment for reqID from a message.
-// When multiple replies are present (each ending with CCB_DONE: <req_id>),
+// When multiple replies are present (each ending with CURDX_DONE: <req_id>),
 // extract only the segment between the previous done line and the done line
 // for our req_id.
 func ExtractReplyForReq(text, reqID string) string {
@@ -144,12 +144,12 @@ func ExtractReplyForReq(text, reqID string) string {
 		return ""
 	}
 
-	targetRE := regexp.MustCompile(`(?i)^\s*CCB_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
+	targetRE := regexp.MustCompile(`(?i)^\s*CURDX_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
 
 	var doneIdxs []int
 	var targetIdxs []int
 	for i, ln := range lines {
-		if anyCCBDoneLineRE.MatchString(ln) {
+		if anyCURDXDoneLineRE.MatchString(ln) {
 			doneIdxs = append(doneIdxs, i)
 			if targetRE.MatchString(ln) {
 				targetIdxs = append(targetIdxs, i)
@@ -158,11 +158,11 @@ func ExtractReplyForReq(text, reqID string) string {
 	}
 
 	if len(targetIdxs) == 0 {
-		// No CCB_DONE for our req_id found
+		// No CURDX_DONE for our req_id found
 		if len(doneIdxs) > 0 {
 			return "" // Prevent returning old content
 		}
-		// No CCB_DONE markers at all - fallback to strip behavior
+		// No CURDX_DONE markers at all - fallback to strip behavior
 		return StripDoneText(text, reqID)
 	}
 

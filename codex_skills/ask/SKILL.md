@@ -20,7 +20,7 @@ The first argument must be the provider name. The message MUST be provided via s
 ## Execution (MANDATORY)
 
 ```bash
-CCB_CALLER=codex ask $PROVIDER <<'EOF'
+CURDX_CALLER=codex ask $PROVIDER <<'EOF'
 $MESSAGE
 EOF
 ```
@@ -34,11 +34,11 @@ EOF
 ## Examples
 
 - `/ask gemini What is 12+12?` (send via heredoc)
-- `CCB_CALLER=codex ask gemini <<'EOF'`
+- `CURDX_CALLER=codex ask gemini <<'EOF'`
   `What is 12+12?`
   `EOF`
 
 ## Notes
 
-- If it fails, check backend health with the corresponding ping command (`ccb-ping <provider>` (e.g., `ccb-ping gemini`)).
-- Codex-managed sessions default to foreground; use `--background` or `CCB_ASK_BACKGROUND=1` for async.
+- If it fails, check backend health with the corresponding ping command (`curdx-ping <provider>` (e.g., `curdx-ping gemini`)).
+- Codex-managed sessions default to foreground; use `--background` or `CURDX_ASK_BACKGROUND=1` for async.

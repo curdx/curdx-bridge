@@ -11,14 +11,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/anthropics/curdx-bridge/internal/paneregistry"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/paneregistry"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // SessionEnvKeys are environment variables checked for session IDs.
 var SessionEnvKeys = []string{
-	"CCB_SESSION_ID",
+	"CURDX_SESSION_ID",
 	"CODEX_SESSION_ID",
 	"GEMINI_SESSION_ID",
 	"OPENCODE_SESSION_ID",
@@ -106,7 +106,7 @@ func dataFromRegistry(record map[string]any, fallbackWorkDir string) map[string]
 		return data
 	}
 
-	data["ccb_project_id"] = record["ccb_project_id"]
+	data["curdx_project_id"] = record["curdx_project_id"]
 	wd, _ := record["work_dir"].(string)
 	if wd == "" {
 		wd = fallbackWorkDir
@@ -235,7 +235,7 @@ func normalizeSessionBinding(data map[string]any, workDir string) {
 
 func registryRunDir() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".ccb", "run")
+	return filepath.Join(home, ".curdx", "run")
 }
 
 func registryUpdatedAt(data map[string]any, path string) int {
@@ -255,8 +255,8 @@ func registryUpdatedAt(data map[string]any, path string) int {
 	return 0
 }
 
-func loadRegistryByProjectIDUnfiltered(ccbProjectID, workDir string) map[string]any {
-	if ccbProjectID == "" {
+func loadRegistryByProjectIDUnfiltered(curdxProjectID, workDir string) map[string]any {
+	if curdxProjectID == "" {
 		return nil
 	}
 	runDir := registryRunDir()
@@ -270,7 +270,7 @@ func loadRegistryByProjectIDUnfiltered(ccbProjectID, workDir string) map[string]
 
 	var paths []string
 	for _, e := range entries {
-		if strings.HasPrefix(e.Name(), "ccb-session-") && strings.HasSuffix(e.Name(), ".json") {
+		if strings.HasPrefix(e.Name(), "curdx-session-") && strings.HasSuffix(e.Name(), ".json") {
 			paths = append(paths, filepath.Join(runDir, e.Name()))
 		}
 	}
@@ -281,14 +281,14 @@ func loadRegistryByProjectIDUnfiltered(ccbProjectID, workDir string) map[string]
 		if data == nil {
 			continue
 		}
-		pid, _ := data["ccb_project_id"].(string)
+		pid, _ := data["curdx_project_id"].(string)
 		pid = strings.TrimSpace(pid)
 		if pid == "" {
 			if wd, _ := data["work_dir"].(string); strings.TrimSpace(wd) != "" {
-				pid = projectid.ComputeCCBProjectID(wd)
+				pid = projectid.ComputeCURDXProjectID(wd)
 			}
 		}
-		if pid != ccbProjectID {
+		if pid != curdxProjectID {
 			continue
 		}
 		ts := registryUpdatedAt(data, p)
@@ -304,7 +304,7 @@ func loadRegistryByProjectIDUnfiltered(ccbProjectID, workDir string) map[string]
 func ResolveClaudeSession(workDir string) *ClaudeSessionResolution {
 	var bestFallback *ClaudeSessionResolution
 
-	currentPID := projectid.ComputeCCBProjectID(workDir)
+	currentPID := projectid.ComputeCURDXProjectID(workDir)
 
 	cfgDir := sessionutil.ResolveProjectConfigDir(workDir)
 	strictProject := false
@@ -312,7 +312,7 @@ func ResolveClaudeSession(workDir string) *ClaudeSessionResolution {
 		strictProject = true
 	}
 	allowCross := false
-	if v := os.Getenv("CCB_ALLOW_CROSS_PROJECT_SESSION"); v == "1" || v == "true" || v == "yes" {
+	if v := os.Getenv("CURDX_ALLOW_CROSS_PROJECT_SESSION"); v == "1" || v == "true" || v == "yes" {
 		allowCross = true
 	}
 	if !strictProject && !allowCross {
@@ -323,11 +323,11 @@ func ResolveClaudeSession(workDir string) *ClaudeSessionResolution {
 		if record == nil {
 			return ""
 		}
-		if pid, _ := record["ccb_project_id"].(string); strings.TrimSpace(pid) != "" {
+		if pid, _ := record["curdx_project_id"].(string); strings.TrimSpace(pid) != "" {
 			return strings.TrimSpace(pid)
 		}
 		if wd, _ := record["work_dir"].(string); strings.TrimSpace(wd) != "" {
-			return projectid.ComputeCCBProjectID(wd)
+			return projectid.ComputeCURDXProjectID(wd)
 		}
 		return ""
 	}
@@ -376,8 +376,8 @@ func ResolveClaudeSession(workDir string) *ClaudeSessionResolution {
 		break
 	}
 
-	// 2) Registry via ccb_project_id
-	pid := projectid.ComputeCCBProjectID(workDir)
+	// 2) Registry via curdx_project_id
+	pid := projectid.ComputeCURDXProjectID(workDir)
 	if pid != "" {
 		record := paneregistry.LoadRegistryByProjectID(pid, "claude")
 		if record != nil {

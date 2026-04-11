@@ -24,7 +24,7 @@ func checkAccess(path string, mode uint32) bool {
 		// path might be a directory; try creating a temp file inside it.
 		info, statErr := os.Stat(path)
 		if statErr == nil && info.IsDir() {
-			tmp, tmpErr := os.CreateTemp(path, ".ccb-access-check-*")
+			tmp, tmpErr := os.CreateTemp(path, ".curdx-access-check-*")
 			if tmpErr != nil {
 				return false
 			}

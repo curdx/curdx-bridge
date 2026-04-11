@@ -53,7 +53,7 @@ func CreateAutoLayout(
 			// Daemon/outside tmux: create a detached session as a container.
 			sessionName := strings.TrimSpace(tmuxSessionName)
 			if sessionName == "" {
-				sessionName = fmt.Sprintf("ccb-%s-%d-%d", filepath.Base(cwd), int(time.Now().Unix())%100000, os.Getpid())
+				sessionName = fmt.Sprintf("curdx-%s-%d-%d", filepath.Base(cwd), int(time.Now().Unix())%100000, os.Getpid())
 			}
 			if !backend.IsAlive(sessionName) {
 				if _, err := backend.TmuxRun([]string{"new-session", "-d", "-s", sessionName, "-c", cwd}, true, false, nil, 0); err != nil {

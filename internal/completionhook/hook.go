@@ -1,4 +1,4 @@
-// Package completionhook provides async notification when CCB delegation tasks complete.
+// Package completionhook provides async notification when CURDX delegation tasks complete.
 // Source: claude_code_bridge/lib/completion_hook.py
 package completionhook
 
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/envutil"
 )
 
 // Completion status constants.
@@ -31,10 +31,10 @@ var StatusLabels = map[string]string{
 
 // StatusMarkers maps status to a bracketed marker string.
 var StatusMarkers = map[string]string{
-	StatusCompleted:  "[CCB_TASK_COMPLETED]",
-	StatusCancelled:  "[CCB_TASK_CANCELLED]",
-	StatusFailed:     "[CCB_TASK_FAILED]",
-	StatusIncomplete: "[CCB_TASK_INCOMPLETE]",
+	StatusCompleted:  "[CURDX_TASK_COMPLETED]",
+	StatusCancelled:  "[CURDX_TASK_CANCELLED]",
+	StatusFailed:     "[CURDX_TASK_FAILED]",
+	StatusIncomplete: "[CURDX_TASK_INCOMPLETE]",
 }
 
 var validStatuses = map[string]bool{
@@ -116,14 +116,14 @@ func findHookScript() string {
 
 	candidates := []string{}
 	if selfDir != "" {
-		candidates = append(candidates, filepath.Join(selfDir, "ccb-completion-hook"))
+		candidates = append(candidates, filepath.Join(selfDir, "curdx-completion-hook"))
 	}
 
 	home, _ := os.UserHomeDir()
 	if home != "" {
-		candidates = append(candidates, filepath.Join(home, ".local", "bin", "ccb-completion-hook"))
+		candidates = append(candidates, filepath.Join(home, ".local", "bin", "curdx-completion-hook"))
 	}
-	candidates = append(candidates, "/usr/local/bin/ccb-completion-hook")
+	candidates = append(candidates, "/usr/local/bin/curdx-completion-hook")
 
 	for _, p := range candidates {
 		info, err := os.Stat(p)
@@ -143,7 +143,7 @@ func findHookScript() string {
 }
 
 func runHookAsync(p NotifyParams, status string) {
-	if !envutil.EnvBool("CCB_COMPLETION_HOOK_ENABLED", true) {
+	if !envutil.EnvBool("CURDX_COMPLETION_HOOK_ENABLED", true) {
 		return
 	}
 
@@ -169,30 +169,30 @@ func runHookAsync(p NotifyParams, status string) {
 
 	// Build environment.
 	env := os.Environ()
-	env = append(env, "CCB_CALLER="+caller)
+	env = append(env, "CURDX_CALLER="+caller)
 	doneSeen := "0"
 	if p.DoneSeen {
 		doneSeen = "1"
 	}
-	env = append(env, "CCB_DONE_SEEN="+doneSeen)
-	env = append(env, "CCB_COMPLETION_STATUS="+status)
+	env = append(env, "CURDX_DONE_SEEN="+doneSeen)
+	env = append(env, "CURDX_COMPLETION_STATUS="+status)
 	if p.EmailReqID != "" {
-		env = append(env, "CCB_EMAIL_REQ_ID="+p.EmailReqID)
+		env = append(env, "CURDX_EMAIL_REQ_ID="+p.EmailReqID)
 	}
 	if p.EmailMsgID != "" {
-		env = append(env, "CCB_EMAIL_MSG_ID="+p.EmailMsgID)
+		env = append(env, "CURDX_EMAIL_MSG_ID="+p.EmailMsgID)
 	}
 	if p.EmailFrom != "" {
-		env = append(env, "CCB_EMAIL_FROM="+p.EmailFrom)
+		env = append(env, "CURDX_EMAIL_FROM="+p.EmailFrom)
 	}
 	if p.WorkDir != "" {
-		env = append(env, "CCB_WORK_DIR="+p.WorkDir)
+		env = append(env, "CURDX_WORK_DIR="+p.WorkDir)
 	}
 	if p.CallerPaneID != "" {
-		env = append(env, "CCB_CALLER_PANE_ID="+p.CallerPaneID)
+		env = append(env, "CURDX_CALLER_PANE_ID="+p.CallerPaneID)
 	}
 	if p.CallerTerminal != "" {
-		env = append(env, "CCB_CALLER_TERMINAL="+p.CallerTerminal)
+		env = append(env, "CURDX_CALLER_TERMINAL="+p.CallerTerminal)
 	}
 
 	// Spawn as background process using Start() (not Run()).

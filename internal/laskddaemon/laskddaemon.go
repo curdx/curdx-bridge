@@ -17,12 +17,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/envutil"
-	"github.com/anthropics/curdx-bridge/internal/filewatcher"
-	"github.com/anthropics/curdx-bridge/internal/memory"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/filewatcher"
+	"github.com/curdx/curdx-bridge/internal/memory"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // ClaudeProjectsRoot returns the root directory for Claude project logs.
@@ -258,7 +258,7 @@ func pathWithin(child, parent string) bool {
 func inferWorkDirFromSessionFile(sessionFile string) string {
 	parent := filepath.Dir(sessionFile)
 	base := filepath.Base(parent)
-	if base == sessionutil.CCBProjectConfigDirname || base == sessionutil.CCBProjectConfigLegacyDirname {
+	if base == sessionutil.CURDXProjectConfigDirname || base == sessionutil.CURDXProjectConfigLegacyDirname {
 		return filepath.Dir(parent)
 	}
 	return parent
@@ -286,9 +286,9 @@ func ensureClaudeSessionWorkDirFields(payload map[string]interface{}, sessionFil
 		payload["work_dir_norm"] = projectid.NormalizeWorkDir(workDir)
 	}
 
-	pidRaw, _ := payload["ccb_project_id"].(string)
+	pidRaw, _ := payload["curdx_project_id"].(string)
 	if strings.TrimSpace(pidRaw) == "" {
-		payload["ccb_project_id"] = projectid.ComputeCCBProjectID(workDir)
+		payload["curdx_project_id"] = projectid.ComputeCURDXProjectID(workDir)
 	}
 
 	return workDir
@@ -581,7 +581,7 @@ func autoTransferKey(workDir, sessionPath string) string {
 }
 
 func maybeAutoExtractOldSession(oldSessionPath, workDir string) {
-	if !envutil.EnvBool("CCB_CTX_TRANSFER_ON_SESSION_SWITCH", true) {
+	if !envutil.EnvBool("CURDX_CTX_TRANSFER_ON_SESSION_SWITCH", true) {
 		return
 	}
 	if oldSessionPath == "" {
@@ -610,13 +610,13 @@ func maybeAutoExtractOldSession(oldSessionPath, workDir string) {
 
 	go func() {
 		defer func() { recover() }()
-		lastN := envutil.EnvInt("CCB_CTX_TRANSFER_LAST_N", 0)
-		maxTokens := envutil.EnvInt("CCB_CTX_TRANSFER_MAX_TOKENS", 8000)
-		format := strings.TrimSpace(strings.ToLower(os.Getenv("CCB_CTX_TRANSFER_FORMAT")))
+		lastN := envutil.EnvInt("CURDX_CTX_TRANSFER_LAST_N", 0)
+		maxTokens := envutil.EnvInt("CURDX_CTX_TRANSFER_MAX_TOKENS", 8000)
+		format := strings.TrimSpace(strings.ToLower(os.Getenv("CURDX_CTX_TRANSFER_FORMAT")))
 		if format == "" {
 			format = "markdown"
 		}
-		provider := strings.TrimSpace(strings.ToLower(os.Getenv("CCB_CTX_TRANSFER_PROVIDER")))
+		provider := strings.TrimSpace(strings.ToLower(os.Getenv("CURDX_CTX_TRANSFER_PROVIDER")))
 		if provider == "" {
 			provider = "auto"
 		}
@@ -637,14 +637,14 @@ func maybeAutoExtractOldSession(oldSessionPath, workDir string) {
 
 func writeLog(line string) {
 	// Best-effort log to laskd.log; import cycle prevention means we inline the path logic.
-	cacheDir := os.Getenv("CCB_RUN_DIR")
+	cacheDir := os.Getenv("CURDX_RUN_DIR")
 	if cacheDir == "" {
 		cacheDir = os.Getenv("XDG_CACHE_HOME")
 		if cacheDir != "" {
-			cacheDir = filepath.Join(cacheDir, "ccb")
+			cacheDir = filepath.Join(cacheDir, "curdx")
 		} else {
 			home, _ := os.UserHomeDir()
-			cacheDir = filepath.Join(home, ".cache", "ccb")
+			cacheDir = filepath.Join(home, ".cache", "curdx")
 		}
 	}
 	logPath := filepath.Join(cacheDir, "laskd.log")
@@ -889,8 +889,8 @@ func (r *LaskdSessionRegistry) monitorLoop() {
 
 func (r *LaskdSessionRegistry) checkAllSessions() {
 	now := float64(time.Now().Unix())
-	refreshIntervalS := envFloat("CCB_LASKD_BIND_REFRESH_INTERVAL", 60.0)
-	scanLimit := envInt("CCB_LASKD_BIND_SCAN_LIMIT", 400)
+	refreshIntervalS := envFloat("CURDX_LASKD_BIND_REFRESH_INTERVAL", 60.0)
+	scanLimit := envInt("CURDX_LASKD_BIND_SCAN_LIMIT", 400)
 	if scanLimit < 50 {
 		scanLimit = 50
 	}

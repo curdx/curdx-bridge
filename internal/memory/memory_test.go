@@ -27,7 +27,7 @@ func TestDedupeMessagesRemovesConsecutiveDuplicates(t *testing.T) {
 
 func TestStripProtocolMarkers(t *testing.T) {
 	d := &ConversationDeduper{}
-	text := "hello\nCCB_REQ_ID: 20260125-143000-123-12345-1\nworld\nCCB_DONE: 20260125-143000-123-12345-1\n"
+	text := "hello\nCURDX_REQ_ID: 20260125-143000-123-12345-1\nworld\nCURDX_DONE: 20260125-143000-123-12345-1\n"
 	result := d.StripProtocolMarkers(text)
 	if result != "hello\nworld\n" {
 		t.Errorf("expected markers stripped, got %q", result)

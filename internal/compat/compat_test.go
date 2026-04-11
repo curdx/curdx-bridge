@@ -61,8 +61,8 @@ func TestDecodeStdinBytesUTF8BOM(t *testing.T) {
 }
 
 func TestDecodeStdinBytesOverrideEncoding(t *testing.T) {
-	os.Setenv("CCB_STDIN_ENCODING", "utf-8")
-	defer os.Unsetenv("CCB_STDIN_ENCODING")
+	os.Setenv("CURDX_STDIN_ENCODING", "utf-8")
+	defer os.Unsetenv("CURDX_STDIN_ENCODING")
 
 	raw := []byte("hello")
 	result := DecodeStdinBytes(raw)

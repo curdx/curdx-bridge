@@ -1,13 +1,13 @@
 ---
 name: continue
-description: Attach the newest context-transfer Markdown from the current project's ./.ccb/history/ into Claude using @file. Use when the user types /continue or asks to resume with the latest transfer file in this project.
+description: Attach the newest context-transfer Markdown from the current project's ./.curdx/history/ into Claude using @file. Use when the user types /continue or asks to resume with the latest transfer file in this project.
 ---
 
 # Continue (Attach Latest History)
 
 ## Overview
 
-Find the newest Markdown in `./.ccb/history/` (or legacy `./.ccb_config/history/`) and reply with an `@file` reference so Claude loads it.
+Find the newest Markdown in `./.curdx/history/` (or legacy `./.curdx_config/history/`) and reply with an `@file` reference so Claude loads it.
 
 ## Workflow
 
@@ -18,12 +18,12 @@ Find the newest Markdown in `./.ccb/history/` (or legacy `./.ccb_config/history/
 ## Execution (MANDATORY)
 
 ```bash
-latest="$(ls -t "$PWD"/.ccb/history/*.md 2>/dev/null | head -n 1)"
+latest="$(ls -t "$PWD"/.curdx/history/*.md 2>/dev/null | head -n 1)"
 if [[ -z "$latest" ]]; then
-  latest="$(ls -t "$PWD"/.ccb_config/history/*.md 2>/dev/null | head -n 1)"
+  latest="$(ls -t "$PWD"/.curdx_config/history/*.md 2>/dev/null | head -n 1)"
 fi
 if [[ -z "$latest" ]]; then
-  echo "No history file found in ./.ccb/history."
+  echo "No history file found in ./.curdx/history."
   exit 0
 fi
 printf '@%s\n' "$latest"
@@ -36,4 +36,4 @@ printf '@%s\n' "$latest"
 
 ## Examples
 
-- `/continue` -> `@/home/bfly/workspace/hippocampus/.ccb/history/claude-20260208-225221-9f236442.md`
+- `/continue` -> `@/home/bfly/workspace/hippocampus/.curdx/history/claude-20260208-225221-9f236442.md`

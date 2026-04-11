@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/envutil"
 )
 
-// RunDir returns the daemon run directory, respecting CCB_RUN_DIR and XDG_CACHE_HOME.
+// RunDir returns the daemon run directory, respecting CURDX_RUN_DIR and XDG_CACHE_HOME.
 func RunDir() string {
-	override := strings.TrimSpace(os.Getenv("CCB_RUN_DIR"))
+	override := strings.TrimSpace(os.Getenv("CURDX_RUN_DIR"))
 	if override != "" {
 		// Expand ~ prefix
 		if strings.HasPrefix(override, "~/") || override == "~" {
@@ -31,10 +31,10 @@ func RunDir() string {
 
 	xdgCache := strings.TrimSpace(os.Getenv("XDG_CACHE_HOME"))
 	if xdgCache != "" {
-		return filepath.Join(xdgCache, "ccb")
+		return filepath.Join(xdgCache, "curdx")
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".cache", "ccb")
+	return filepath.Join(home, ".cache", "curdx")
 }
 
 // StateFilePath returns the path for a state file (appends .json if needed).
@@ -59,14 +59,14 @@ var (
 )
 
 // maybeShrinkLog keeps daemon logs from growing unbounded.
-// Truncates to last N bytes when file exceeds CCB_LOG_MAX_BYTES.
+// Truncates to last N bytes when file exceeds CURDX_LOG_MAX_BYTES.
 func maybeShrinkLog(path string) {
-	maxBytes := envutil.EnvInt("CCB_LOG_MAX_BYTES", 2*1024*1024) // 2 MiB default
+	maxBytes := envutil.EnvInt("CURDX_LOG_MAX_BYTES", 2*1024*1024) // 2 MiB default
 	if maxBytes <= 0 {
 		return
 	}
 
-	intervalS := envutil.EnvInt("CCB_LOG_SHRINK_CHECK_INTERVAL_S", 10)
+	intervalS := envutil.EnvInt("CURDX_LOG_SHRINK_CHECK_INTERVAL_S", 10)
 	if intervalS < 0 {
 		intervalS = 0
 	}

@@ -8,14 +8,14 @@ dist/
 /autoloop
 /autonew
 /cask
-/ccb
-/ccb-arch
-/ccb-cleanup
-/ccb-completion-hook
-/ccb-installer-helper
-/ccb-mcp-delegation
-/ccb-mounted
-/ccb-ping
+/curdx
+/curdx-arch
+/curdx-cleanup
+/curdx-completion-hook
+/curdx-installer-helper
+/curdx-mcp-delegation
+/curdx-mounted
+/curdx-ping
 /cpend
 /cping
 /ctx-transfer
@@ -28,6 +28,12 @@ dist/
 /lping
 /oask
 /pend
+
+# IDE
+.idea/
+
+# Built binary
+/curdx
 
 # OS
 .DS_Store

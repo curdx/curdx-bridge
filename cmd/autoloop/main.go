@@ -160,8 +160,8 @@ func getPaneID(repo string) string {
 		return pane
 	}
 	candidates := []string{
-		filepath.Join(repo, ".ccb", ".claude-session"),
-		filepath.Join(repo, ".ccb_config", ".claude-session"),
+		filepath.Join(repo, ".curdx", ".claude-session"),
+		filepath.Join(repo, ".curdx_config", ".claude-session"),
 		filepath.Join(repo, ".claude-session"),
 	}
 	for _, path := range candidates {
@@ -190,7 +190,7 @@ func lask(repo, text string) error {
 		askPath = filepath.Join(home, ".local", "bin", "ask")
 	}
 	env := os.Environ()
-	env = append(env, "CCB_CALLER=autoloop")
+	env = append(env, "CURDX_CALLER=autoloop")
 	cmd := exec.Command(askPath, "claude", "--no-wrap", "--foreground", text)
 	cmd.Dir = repo
 	cmd.Env = env
@@ -885,9 +885,9 @@ func run() int {
 	flag.Parse()
 
 	repo := resolveRepoRoot(repoRoot)
-	statePath := filepath.Join(repo, ".ccb", "state.json")
-	stateFile := filepath.Join(repo, ".ccb", "autoloop_state.json")
-	lockPath := filepath.Join(repo, ".ccb", "autoloop.lock")
+	statePath := filepath.Join(repo, ".curdx", "state.json")
+	stateFile := filepath.Join(repo, ".curdx", "autoloop_state.json")
+	lockPath := filepath.Join(repo, ".curdx", "autoloop.lock")
 
 	if once {
 		return runOnce(repo, statePath, stateFile, lockPath, threshold, contextLimit, cooldown, true)

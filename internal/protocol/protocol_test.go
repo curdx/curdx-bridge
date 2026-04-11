@@ -1,5 +1,5 @@
-// Package protocol - tests for CCB protocol functions.
-// Ported from: claude_code_bridge/test/test_ccb_protocol.py
+// Package protocol - tests for CURDX protocol functions.
+// Ported from: claude_code_bridge/test/test_curdx_protocol.py
 package protocol
 
 import (

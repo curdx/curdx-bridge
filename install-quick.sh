@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# CCB Installer — auto-detects pre-built binaries vs source compilation.
+# CURDX Installer — auto-detects pre-built binaries vs source compilation.
 #
 # One-line install (macOS/Linux):
 #   curl -fsSL https://raw.githubusercontent.com/curdx/curdx-bridge/main/install-quick.sh | bash
 #
 # Options:
-#   CCB_VERSION=v5.3.0    Pin a specific version (default: latest)
-#   CCB_INSTALL_DIR=~/.local/bin  Change binary directory
-#   CCB_FROM_SOURCE=1     Force source compilation even if pre-built available
+#   CURDX_VERSION=v5.3.0    Pin a specific version (default: latest)
+#   CURDX_INSTALL_DIR=~/.local/bin  Change binary directory
+#   CURDX_FROM_SOURCE=1     Force source compilation even if pre-built available
 set -euo pipefail
 
 REPO="curdx/curdx-bridge"
-INSTALL_DIR="${CCB_INSTALL_DIR:-$HOME/.local/bin}"
-SHARE_DIR="${CCB_SHARE_DIR:-$HOME/.local/share/ccb}"
+INSTALL_DIR="${CURDX_INSTALL_DIR:-$HOME/.local/bin}"
+SHARE_DIR="${CURDX_SHARE_DIR:-$HOME/.local/share/curdx}"
 
 # ── Colors ──
 RED='\033[0;31m'
@@ -79,14 +79,14 @@ install_prebuilt() {
   local ext="tar.gz"
   [[ "$os" == "windows" ]] && ext="zip"
 
-  local archive="ccb-${os}-${arch}.${ext}"
+  local archive="curdx-${os}-${arch}.${ext}"
   local url="https://github.com/${REPO}/releases/download/${version}/${archive}"
 
   local tmpdir
   tmpdir="$(mktemp -d)"
   trap 'rm -rf "$tmpdir"' EXIT
 
-  info "Downloading CCB ${version} for ${os}/${arch}..."
+  info "Downloading CURDX ${version} for ${os}/${arch}..."
   download "$url" "${tmpdir}/${archive}" || return 1
 
   info "Extracting..."
@@ -97,7 +97,7 @@ install_prebuilt() {
     tar xzf "$archive" || return 1
   fi
 
-  local srcdir="ccb-${os}-${arch}"
+  local srcdir="curdx-${os}-${arch}"
   [[ -d "$srcdir" ]] || return 1
 
   # Install binaries
@@ -263,12 +263,12 @@ install_codex_skills() {
   ok "Installed $count Codex skills to $dst"
 }
 
-# ── Inject CCB config into ~/.claude/CLAUDE.md ──
+# ── Inject CURDX config into ~/.claude/CLAUDE.md ──
 install_claude_md() {
   local claude_md="$HOME/.claude/CLAUDE.md"
-  local template="$SHARE_DIR/config/claude-md-ccb.md"
-  local start_marker="<!-- CCB_CONFIG_START -->"
-  local end_marker="<!-- CCB_CONFIG_END -->"
+  local template="$SHARE_DIR/config/claude-md-curdx.md"
+  local start_marker="<!-- CURDX_CONFIG_START -->"
+  local end_marker="<!-- CURDX_CONFIG_END -->"
 
   [[ -f "$template" ]] || return 0
 
@@ -277,8 +277,8 @@ install_claude_md() {
   if [[ -f "$claude_md" ]]; then
     if grep -q "$start_marker" "$claude_md" 2>/dev/null; then
       # Replace existing block using helper if available, otherwise sed
-      if [[ -x "$INSTALL_DIR/ccb-installer-helper" ]]; then
-        "$INSTALL_DIR/ccb-installer-helper" replace-block "$claude_md" "$template" "$start_marker" "$end_marker"
+      if [[ -x "$INSTALL_DIR/curdx-installer-helper" ]]; then
+        "$INSTALL_DIR/curdx-installer-helper" replace-block "$claude_md" "$template" "$start_marker" "$end_marker"
       else
         # Manual replacement: remove old block and append new
         local tmpfile
@@ -291,15 +291,15 @@ install_claude_md() {
         cat "$template" >> "$tmpfile"
         mv "$tmpfile" "$claude_md"
       fi
-      ok "Updated CCB config in CLAUDE.md"
+      ok "Updated CURDX config in CLAUDE.md"
     else
       echo "" >> "$claude_md"
       cat "$template" >> "$claude_md"
-      ok "Added CCB config to CLAUDE.md"
+      ok "Added CURDX config to CLAUDE.md"
     fi
   else
     cp "$template" "$claude_md"
-    ok "Created CLAUDE.md with CCB config"
+    ok "Created CLAUDE.md with CURDX config"
   fi
 }
 
@@ -324,34 +324,34 @@ post_install() {
 
   # Verify
   echo ""
-  if command -v ccb >/dev/null 2>&1; then
-    ok "Installation complete! $(ccb --print-version 2>/dev/null || echo '')"
+  if command -v curdx >/dev/null 2>&1; then
+    ok "Installation complete! $(curdx --print-version 2>/dev/null || echo '')"
   else
     ok "Installation complete!"
   fi
   echo ""
   echo "  Get started:"
-  echo "    ccb --help          # Show help"
-  echo "    ccb codex claude    # Start with Codex + Claude"
+  echo "    curdx --help          # Show help"
+  echo "    curdx codex claude    # Start with Codex + Claude"
   echo ""
 }
 
 # ── Main ──
 main() {
-  printf "${BOLD}CCB Installer${NC}\n"
+  printf "${BOLD}CURDX Installer${NC}\n"
   echo ""
 
   local platform version
   platform="$(detect_platform)"
 
   # Try pre-built first (unless forced source)
-  if [[ "${CCB_FROM_SOURCE:-}" == "1" ]]; then
+  if [[ "${CURDX_FROM_SOURCE:-}" == "1" ]]; then
     install_from_source
     post_install
     return
   fi
 
-  version="${CCB_VERSION:-$(get_latest_version)}"
+  version="${CURDX_VERSION:-$(get_latest_version)}"
 
   if [[ -n "$version" ]]; then
     if install_prebuilt "$platform" "$version" 2>/dev/null; then

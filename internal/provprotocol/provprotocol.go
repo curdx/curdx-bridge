@@ -17,29 +17,29 @@ import (
 
 // Constants re-exported from protocol package for convenience.
 const (
-	ReqIDPrefix = "CCB_REQ_ID:"
-	BeginPrefix = "CCB_BEGIN:"
-	DonePrefix  = "CCB_DONE:"
+	ReqIDPrefix = "CURDX_REQ_ID:"
+	BeginPrefix = "CURDX_BEGIN:"
+	DonePrefix  = "CURDX_DONE:"
 )
 
 // AnyDoneLineRe matches both old (32-char hex) and new (YYYYMMDD-HHMMSS-mmm-PID-counter) formats.
-var AnyDoneLineRe = regexp.MustCompile(`(?i)^\s*CCB_DONE:\s*(?:[0-9a-f]{32}|\d{8}-\d{6}-\d{3}-\d+-\d+)\s*$`)
+var AnyDoneLineRe = regexp.MustCompile(`(?i)^\s*CURDX_DONE:\s*(?:[0-9a-f]{32}|\d{8}-\d{6}-\d{3}-\d+-\d+)\s*$`)
 
-// protocolMarkerRe matches lines that look like CCB protocol markers (CCB_DONE:, CCB_REQ_ID:, CCB_BEGIN:).
-var protocolMarkerRe = regexp.MustCompile(`(?im)^(\s*)(CCB_(?:DONE|REQ_ID|BEGIN):)`)
+// protocolMarkerRe matches lines that look like CURDX protocol markers (CURDX_DONE:, CURDX_REQ_ID:, CURDX_BEGIN:).
+var protocolMarkerRe = regexp.MustCompile(`(?im)^(\s*)(CURDX_(?:DONE|REQ_ID|BEGIN):)`)
 
 // sanitizeUserMessage prevents user-supplied content from injecting fake protocol markers.
-// It prefixes any line matching a CCB protocol marker with a zero-width space to break parsing.
+// It prefixes any line matching a CURDX protocol marker with a zero-width space to break parsing.
 func sanitizeUserMessage(message string) string {
 	return protocolMarkerRe.ReplaceAllString(message, "${1}\u200B${2}")
 }
 
 // ── Codex (caskd_protocol.py) ──
-// Pure shim — re-exports from ccb_protocol. All functions are in protocol package.
+// Pure shim — re-exports from curdx_protocol. All functions are in protocol package.
 
 // ── Gemini (gaskd_protocol.py) ──
 
-// WrapGeminiPrompt wraps a prompt with CCB markers for Gemini.
+// WrapGeminiPrompt wraps a prompt with CURDX markers for Gemini.
 func WrapGeminiPrompt(message, reqID string) string {
 	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
 	return fmt.Sprintf(
@@ -58,7 +58,7 @@ func WrapGeminiPrompt(message, reqID string) string {
 
 // ── OpenCode (oaskd_protocol.py) ──
 
-// WrapOpenCodePrompt wraps a prompt with CCB markers for OpenCode.
+// WrapOpenCodePrompt wraps a prompt with CURDX markers for OpenCode.
 func WrapOpenCodePrompt(message, reqID string) string {
 	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
 	return fmt.Sprintf(
@@ -86,7 +86,7 @@ func loadClaudeSkills() string {
 		s := ""
 		claudeSkillCache = &s
 
-		if !envBool("CCB_CLAUDE_SKILLS", true) {
+		if !envBool("CURDX_CLAUDE_SKILLS", true) {
 			return
 		}
 
@@ -127,7 +127,7 @@ func wantsMarkdownTable(message string) bool {
 
 func languageHint() string {
 	lang := strings.TrimSpace(strings.ToLower(
-		coalesce(os.Getenv("CCB_REPLY_LANG"), os.Getenv("CCB_LANG")),
+		coalesce(os.Getenv("CURDX_REPLY_LANG"), os.Getenv("CURDX_LANG")),
 	))
 	switch lang {
 	case "zh", "cn", "chinese":
@@ -139,7 +139,7 @@ func languageHint() string {
 	}
 }
 
-// WrapClaudePrompt wraps a prompt with CCB markers for Claude (local).
+// WrapClaudePrompt wraps a prompt with CURDX markers for Claude (local).
 func WrapClaudePrompt(message, reqID string) string {
 	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
 	skills := loadClaudeSkills()
@@ -186,7 +186,7 @@ func ExtractReplyStandard(text, reqID string, stripDone func(string, string) str
 		return ""
 	}
 
-	targetRe := regexp.MustCompile(`(?i)^\s*CCB_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
+	targetRe := regexp.MustCompile(`(?i)^\s*CURDX_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
 	var doneIdxs []int
 	var targetIdxs []int
 	for i, ln := range lines {
@@ -228,7 +228,7 @@ func ExtractReplyForClaude(text, reqID string, stripDone func(string, string) st
 		return ""
 	}
 
-	targetRe := regexp.MustCompile(`(?i)^\s*CCB_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
+	targetRe := regexp.MustCompile(`(?i)^\s*CURDX_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
 	beginRe := regexp.MustCompile(`(?i)^\s*` + regexp.QuoteMeta(BeginPrefix) + `\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
 
 	var doneIdxs []int

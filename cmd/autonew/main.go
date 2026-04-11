@@ -14,9 +14,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/anthropics/curdx-bridge/internal/paneregistry"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/paneregistry"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 // providerCommands maps provider to its reset command.
@@ -66,7 +66,7 @@ func run() int {
 		fmt.Fprintf(os.Stderr, "[ERROR] Failed to compute project ID: %s\n", err)
 		return 1
 	}
-	pid := projectid.ComputeCCBProjectID(workDir)
+	pid := projectid.ComputeCURDXProjectID(workDir)
 
 	// Wire up the pane registry backend so LoadRegistryByProjectID can check pane liveness.
 	paneregistry.GetBackendFunc = func(record map[string]interface{}) paneregistry.TerminalBackend {

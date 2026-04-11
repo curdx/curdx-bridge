@@ -38,4 +38,4 @@ Start-Process -NoNewWindow -FilePath "ask" -ArgumentList "$PROVIDER" -RedirectSt
 
 ## Notes
 
-- If it fails, check backend health with the corresponding ping command (`ccb-ping <provider>` (e.g., `ccb-ping gemini`)).
+- If it fails, check backend health with the corresponding ping command (`curdx-ping <provider>` (e.g., `curdx-ping gemini`)).

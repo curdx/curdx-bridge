@@ -5,8 +5,8 @@ package main
 import (
 	"os"
 
-	"github.com/anthropics/curdx-bridge/internal/askcli"
-	"github.com/anthropics/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/askcli"
+	"github.com/curdx/curdx-bridge/internal/providers"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		ProviderName: "Gemini",
 		ProviderKey:  "gemini",
 		Spec:         providers.GaskClientSpec,
-		AsyncGuardrail: `[CCB_ASYNC_SUBMITTED provider=gemini]
+		AsyncGuardrail: `[CURDX_ASYNC_SUBMITTED provider=gemini]
 IMPORTANT: Task submitted to Gemini. You MUST:
 1. Tell user "Gemini processing..."
 2. END YOUR TURN IMMEDIATELY
@@ -23,10 +23,10 @@ IMPORTANT: Task submitted to Gemini. You MUST:
 `,
 		DefaultTimeout:         3600.0,
 		HasRetryLoop:           true,
-		StartupWaitEnv:         "CCB_GASKD_STARTUP_WAIT_S",
-		RetryWaitEnv:           "CCB_GASKD_RETRY_WAIT_S",
+		StartupWaitEnv:         "CURDX_GASKD_STARTUP_WAIT_S",
+		RetryWaitEnv:           "CURDX_GASKD_RETRY_WAIT_S",
 		DaemonHint:             "gaskd",
-		DaemonAutostartEnvHint: "CCB_GASKD_AUTOSTART=1",
-		SetupHint:              "`ccb gemini`",
+		DaemonAutostartEnvHint: "CURDX_GASKD_AUTOSTART=1",
+		SetupHint:              "`curdx gemini`",
 	}))
 }

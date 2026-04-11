@@ -19,9 +19,9 @@ The first argument must be the provider name:
 
 ## Execution (MANDATORY)
 
-Use `ccb-ping` wrapper to avoid conflict with system `ping`:
+Use `curdx-ping` wrapper to avoid conflict with system `ping`:
 ```
-Bash(ccb-ping $PROVIDER)
+Bash(curdx-ping $PROVIDER)
 ```
 
 ## Examples

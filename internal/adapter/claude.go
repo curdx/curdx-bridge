@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/comm"
-	"github.com/anthropics/curdx-bridge/internal/completionhook"
-	"github.com/anthropics/curdx-bridge/internal/protocol"
-	"github.com/anthropics/curdx-bridge/internal/provprotocol"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/comm"
+	"github.com/curdx/curdx-bridge/internal/completionhook"
+	"github.com/curdx/curdx-bridge/internal/protocol"
+	"github.com/curdx/curdx-bridge/internal/provprotocol"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 // ClaudeAdapter implements BaseProviderAdapter for the Claude provider.
@@ -217,8 +217,8 @@ func (a *ClaudeAdapter) waitForResponse(
 	}
 
 	rebounded := false
-	tailBytes := int64(envIntDefault("CCB_LASKD_REBIND_TAIL_BYTES", 2*1024*1024))
-	paneCheckInterval := envFloatDefault("CCB_LASKD_PANE_CHECK_INTERVAL", 2.0)
+	tailBytes := int64(envIntDefault("CURDX_LASKD_REBIND_TAIL_BYTES", 2*1024*1024))
+	paneCheckInterval := envFloatDefault("CURDX_LASKD_PANE_CHECK_INTERVAL", 2.0)
 	lastPaneCheck := time.Now()
 
 	for {

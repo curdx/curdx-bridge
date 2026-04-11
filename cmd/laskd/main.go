@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/anthropics/curdx-bridge/internal/rpc"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 func parseListen(value string) (string, int) {
@@ -59,8 +59,8 @@ func main() {
 		return terminal.NewTmuxBackend("")
 	}
 
-	listen := envOrDefault("CCB_LASKD_LISTEN", "127.0.0.1:0")
-	stateFile := envOrDefault("CCB_LASKD_STATE_FILE", "")
+	listen := envOrDefault("CURDX_LASKD_LISTEN", "127.0.0.1:0")
+	stateFile := envOrDefault("CURDX_LASKD_STATE_FILE", "")
 	shutdown := false
 
 	args := os.Args[1:]

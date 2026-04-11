@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/adapter"
-	"github.com/anthropics/curdx-bridge/internal/protocol"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/registry"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/server"
-	"github.com/anthropics/curdx-bridge/internal/workerpool"
+	"github.com/curdx/curdx-bridge/internal/adapter"
+	"github.com/curdx/curdx-bridge/internal/protocol"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/registry"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/server"
+	"github.com/curdx/curdx-bridge/internal/workerpool"
 )
 
 // AskdSpec is the daemon spec for the unified ask daemon.
@@ -22,7 +22,7 @@ var AskdSpec = providers.ProviderDaemonSpec{
 	ProtocolPrefix: "ask",
 	StateFileName:  "askd.json",
 	LogFileName:    "askd.log",
-	IdleTimeoutEnv: "CCB_ASKD_IDLE_TIMEOUT_S",
+	IdleTimeoutEnv: "CURDX_ASKD_IDLE_TIMEOUT_S",
 	LockName:       "askd",
 }
 

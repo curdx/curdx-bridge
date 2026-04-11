@@ -206,7 +206,7 @@ func (r *CodexLogReader) latestLog() string {
 			if r.sessionIDFilter != "" {
 				latestAny := r.scanLatestAny()
 				if latestAny != "" && latestAny != preferred {
-					threshold := envFloat("CCB_CODEX_STALE_LOG_SECONDS", 10.0)
+					threshold := envFloat("CURDX_CODEX_STALE_LOG_SECONDS", 10.0)
 					if threshold > 0 {
 						pi, _ := os.Stat(preferred)
 						li, _ := os.Stat(latestAny)

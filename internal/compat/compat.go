@@ -21,7 +21,7 @@ func SetupWindowsEncoding() {
 //
 // Strategy (matches Python exactly):
 //  1. Honor BOMs (UTF-8/UTF-16).
-//  2. CCB_STDIN_ENCODING override.
+//  2. CURDX_STDIN_ENCODING override.
 //  3. Try UTF-8 strictly.
 //  4. Fallback to locale preferred encoding (best effort).
 //  5. Windows fallback: treat as Latin-1 (approximate mbcs).
@@ -49,8 +49,8 @@ func DecodeStdinBytes(data []byte) string {
 		}
 	}
 
-	// CCB_STDIN_ENCODING override
-	forced := strings.TrimSpace(os.Getenv("CCB_STDIN_ENCODING"))
+	// CURDX_STDIN_ENCODING override
+	forced := strings.TrimSpace(os.Getenv("CURDX_STDIN_ENCODING"))
 	if forced != "" {
 		lower := strings.ToLower(forced)
 		if lower == "utf-8" || lower == "utf8" {

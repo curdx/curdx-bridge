@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // RequestHandler processes a JSON request and returns a JSON response.

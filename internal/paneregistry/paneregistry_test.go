@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/projectid"
 )
 
 // --- test helpers ---
@@ -27,7 +27,7 @@ func (b *fakeBackend) FindPaneByTitleMarker(marker string, cwdHint ...string) st
 
 func writeRegistryFile(t *testing.T, home, sessionID string, payload map[string]interface{}) string {
 	t.Helper()
-	dir := filepath.Join(home, ".ccb", "run")
+	dir := filepath.Join(home, ".curdx", "run")
 	os.MkdirAll(dir, 0o755)
 	path := filepath.Join(dir, RegistryPrefix+sessionID+RegistrySuffix)
 	data, err := json.MarshalIndent(payload, "", "  ")
@@ -60,17 +60,17 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 
 	workDir := filepath.Join(home, "proj")
 	os.MkdirAll(workDir, 0o755)
-	pid := projectid.ComputeCCBProjectID(workDir)
+	pid := projectid.ComputeCURDXProjectID(workDir)
 
 	ok1 := UpsertRegistry(map[string]interface{}{
-		"ccb_session_id": "s1",
-		"ccb_project_id": pid,
+		"curdx_session_id": "s1",
+		"curdx_project_id": pid,
 		"work_dir":       workDir,
 		"terminal":       "tmux",
 		"providers": map[string]interface{}{
 			"codex": map[string]interface{}{
 				"pane_id":      "%1",
-				"session_file": filepath.Join(workDir, ".ccb", ".codex-session"),
+				"session_file": filepath.Join(workDir, ".curdx", ".codex-session"),
 			},
 		},
 	})
@@ -79,14 +79,14 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 	}
 
 	ok2 := UpsertRegistry(map[string]interface{}{
-		"ccb_session_id": "s1",
-		"ccb_project_id": pid,
+		"curdx_session_id": "s1",
+		"curdx_project_id": pid,
 		"work_dir":       workDir,
 		"terminal":       "tmux",
 		"providers": map[string]interface{}{
 			"gemini": map[string]interface{}{
 				"pane_id":      "%1",
-				"session_file": filepath.Join(workDir, ".ccb", ".gemini-session"),
+				"session_file": filepath.Join(workDir, ".curdx", ".gemini-session"),
 			},
 		},
 	})
@@ -104,8 +104,8 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if data["ccb_project_id"] != pid {
-		t.Errorf("ccb_project_id = %v, want %v", data["ccb_project_id"], pid)
+	if data["curdx_project_id"] != pid {
+		t.Errorf("curdx_project_id = %v, want %v", data["curdx_project_id"], pid)
 	}
 	provs, ok := data["providers"].(map[string]interface{})
 	if !ok {
@@ -124,14 +124,14 @@ func TestLoadRegistryByProjectIDFiltersDeadPanes(t *testing.T) {
 
 	workDir := filepath.Join(home, "proj")
 	os.MkdirAll(workDir, 0o755)
-	pid := projectid.ComputeCCBProjectID(workDir)
+	pid := projectid.ComputeCURDXProjectID(workDir)
 
 	now := time.Now().Unix()
 
 	// Newer but dead.
 	writeRegistryFile(t, home, "new", map[string]interface{}{
-		"ccb_session_id": "new",
-		"ccb_project_id": pid,
+		"curdx_session_id": "new",
+		"curdx_project_id": pid,
 		"work_dir":       workDir,
 		"terminal":       "tmux",
 		"updated_at":     float64(now),
@@ -142,8 +142,8 @@ func TestLoadRegistryByProjectIDFiltersDeadPanes(t *testing.T) {
 
 	// Older but alive.
 	writeRegistryFile(t, home, "old", map[string]interface{}{
-		"ccb_session_id": "old",
-		"ccb_project_id": pid,
+		"curdx_session_id": "old",
+		"curdx_project_id": pid,
 		"work_dir":       workDir,
 		"terminal":       "tmux",
 		"updated_at":     float64(now - 10),
@@ -161,9 +161,9 @@ func TestLoadRegistryByProjectIDFiltersDeadPanes(t *testing.T) {
 	if rec == nil {
 		t.Fatal("expected non-nil record")
 	}
-	sid, _ := rec["ccb_session_id"].(string)
+	sid, _ := rec["curdx_session_id"].(string)
 	if sid != "old" {
-		t.Errorf("ccb_session_id = %v, want old", rec["ccb_session_id"])
+		t.Errorf("curdx_session_id = %v, want old", rec["curdx_session_id"])
 	}
 }
 
@@ -172,13 +172,13 @@ func TestLoadRegistryByProjectIDInfersMissingProjectID(t *testing.T) {
 
 	workDir := filepath.Join(home, "proj")
 	os.MkdirAll(workDir, 0o755)
-	pid := projectid.ComputeCCBProjectID(workDir)
+	pid := projectid.ComputeCURDXProjectID(workDir)
 
 	now := time.Now().Unix()
 
-	// Legacy record missing ccb_project_id.
+	// Legacy record missing curdx_project_id.
 	writeRegistryFile(t, home, "legacy", map[string]interface{}{
-		"ccb_session_id": "legacy",
+		"curdx_session_id": "legacy",
 		"work_dir":       workDir,
 		"terminal":       "tmux",
 		"updated_at":     float64(now),
@@ -196,8 +196,8 @@ func TestLoadRegistryByProjectIDInfersMissingProjectID(t *testing.T) {
 	if rec == nil {
 		t.Fatal("expected non-nil record")
 	}
-	sid, _ := rec["ccb_session_id"].(string)
+	sid, _ := rec["curdx_session_id"].(string)
 	if sid != "legacy" {
-		t.Errorf("ccb_session_id = %v, want legacy", rec["ccb_session_id"])
+		t.Errorf("curdx_session_id = %v, want legacy", rec["curdx_session_id"])
 	}
 }

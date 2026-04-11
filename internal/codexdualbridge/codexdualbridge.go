@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 func envFloat(name string, defaultVal float64) float64 {
@@ -119,9 +119,9 @@ func (b *DualBridge) Run() int {
 		b.logConsole(fmt.Sprintf("Received signal %v, exiting...", sig))
 	}()
 
-	idleSleep := envFloat("CCB_BRIDGE_IDLE_SLEEP", 0.05)
-	errorBackoffMin := envFloat("CCB_BRIDGE_ERROR_BACKOFF_MIN", 0.05)
-	errorBackoffMax := envFloat("CCB_BRIDGE_ERROR_BACKOFF_MAX", 0.2)
+	idleSleep := envFloat("CURDX_BRIDGE_IDLE_SLEEP", 0.05)
+	errorBackoffMin := envFloat("CURDX_BRIDGE_ERROR_BACKOFF_MIN", 0.05)
+	errorBackoffMax := envFloat("CURDX_BRIDGE_ERROR_BACKOFF_MAX", 0.2)
 	errorBackoff := errorBackoffMin
 	if errorBackoff > errorBackoffMax {
 		errorBackoff = errorBackoffMax

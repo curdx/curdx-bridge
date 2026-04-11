@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/comm"
-	"github.com/anthropics/curdx-bridge/internal/envutil"
-	"github.com/anthropics/curdx-bridge/internal/memory"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/comm"
+	"github.com/curdx/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/memory"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 var (
@@ -49,7 +49,7 @@ func autoTransferKey(provider, workDir, sessionPath, sessionID, projectID string
 // MaybeAutoTransfer triggers an automatic context transfer if conditions are met.
 // It runs the actual transfer in a background goroutine.
 func MaybeAutoTransfer(provider, workDir, sessionPath, sessionID, projectID string) {
-	if !envutil.EnvBool("CCB_CTX_TRANSFER_ON_SESSION_SWITCH", true) {
+	if !envutil.EnvBool("CURDX_CTX_TRANSFER_ON_SESSION_SWITCH", true) {
 		return
 	}
 	if sessionPath == "" && sessionID == "" {
@@ -93,9 +93,9 @@ func MaybeAutoTransfer(provider, workDir, sessionPath, sessionID, projectID stri
 
 func runAutoTransfer(provider, workDir, sessionPath, sessionID, projectID string) {
 	// Read environment configuration (mirrors Python _run() inner function)
-	lastN := envutil.EnvInt("CCB_CTX_TRANSFER_LAST_N", 0)
-	maxTokens := envutil.EnvInt("CCB_CTX_TRANSFER_MAX_TOKENS", 8000)
-	fmtStr := strings.ToLower(strings.TrimSpace(os.Getenv("CCB_CTX_TRANSFER_FORMAT")))
+	lastN := envutil.EnvInt("CURDX_CTX_TRANSFER_LAST_N", 0)
+	maxTokens := envutil.EnvInt("CURDX_CTX_TRANSFER_MAX_TOKENS", 8000)
+	fmtStr := strings.ToLower(strings.TrimSpace(os.Getenv("CURDX_CTX_TRANSFER_FORMAT")))
 	if fmtStr == "" {
 		fmtStr = "markdown"
 	}

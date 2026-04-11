@@ -11,13 +11,13 @@ import (
 	"strconv"
 	"strings"
 
-	adapterPkg "github.com/anthropics/curdx-bridge/internal/adapter"
-	"github.com/anthropics/curdx-bridge/internal/daemon"
-	"github.com/anthropics/curdx-bridge/internal/registry"
-	"github.com/anthropics/curdx-bridge/internal/rpc"
-	"github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/session"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	adapterPkg "github.com/curdx/curdx-bridge/internal/adapter"
+	"github.com/curdx/curdx-bridge/internal/daemon"
+	"github.com/curdx/curdx-bridge/internal/registry"
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	"github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/session"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 var allProviders = []string{"codex", "gemini", "opencode", "claude"}
@@ -67,11 +67,11 @@ func main() {
 		return terminal.NewTmuxBackend("")
 	}
 
-	listen := envOrDefault("CCB_ASKD_LISTEN", "127.0.0.1:0")
-	stateFile := envOrDefault("CCB_ASKD_STATE_FILE", "")
+	listen := envOrDefault("CURDX_ASKD_LISTEN", "127.0.0.1:0")
+	stateFile := envOrDefault("CURDX_ASKD_STATE_FILE", "")
 	shutdown := false
-	providersList := envOrDefault("CCB_ASKD_PROVIDERS", "")
-	workDir := envOrDefault("CCB_WORK_DIR", "")
+	providersList := envOrDefault("CURDX_ASKD_PROVIDERS", "")
+	workDir := envOrDefault("CURDX_WORK_DIR", "")
 
 	args := os.Args[1:]
 	for i := 0; i < len(args); i++ {

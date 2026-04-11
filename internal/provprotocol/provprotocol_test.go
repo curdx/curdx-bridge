@@ -17,7 +17,7 @@ func makeTestReqID(n int) string {
 func stubStripDone(text, reqID string) string {
 	lines := strings.Split(text, "\n")
 	var result []string
-	doneRe := fmt.Sprintf("CCB_DONE: %s", reqID)
+	doneRe := fmt.Sprintf("CURDX_DONE: %s", reqID)
 	for _, ln := range lines {
 		if strings.TrimSpace(ln) == doneRe {
 			continue
@@ -59,7 +59,7 @@ func TestWrapClaudePromptStructure(t *testing.T) {
 
 func TestExtractReplyStandardBasic(t *testing.T) {
 	reqID := makeTestReqID(10)
-	text := fmt.Sprintf("some preamble\nCCB_DONE: %s\n", reqID)
+	text := fmt.Sprintf("some preamble\nCURDX_DONE: %s\n", reqID)
 	reply := ExtractReplyStandard(text, reqID, stubStripDone)
 	if !strings.Contains(reply, "some preamble") {
 		t.Errorf("expected 'some preamble' in reply, got %q", reply)
@@ -69,7 +69,7 @@ func TestExtractReplyStandardBasic(t *testing.T) {
 func TestExtractReplyStandardEmptyOnWrongID(t *testing.T) {
 	reqID := makeTestReqID(11)
 	otherID := makeTestReqID(12)
-	text := fmt.Sprintf("content\nCCB_DONE: %s\n", otherID)
+	text := fmt.Sprintf("content\nCURDX_DONE: %s\n", otherID)
 	reply := ExtractReplyStandard(text, reqID, stubStripDone)
 	if reply != "" {
 		t.Errorf("expected empty reply for wrong ID, got %q", reply)
@@ -79,7 +79,7 @@ func TestExtractReplyStandardEmptyOnWrongID(t *testing.T) {
 func TestExtractReplyStandardMultipleDoneMarkers(t *testing.T) {
 	req1 := makeTestReqID(13)
 	req2 := makeTestReqID(14)
-	text := fmt.Sprintf("reply1\nCCB_DONE: %s\nreply2\nCCB_DONE: %s\n", req1, req2)
+	text := fmt.Sprintf("reply1\nCURDX_DONE: %s\nreply2\nCURDX_DONE: %s\n", req1, req2)
 	reply := ExtractReplyStandard(text, req2, stubStripDone)
 	if !strings.Contains(reply, "reply2") {
 		t.Errorf("expected 'reply2' in reply, got %q", reply)

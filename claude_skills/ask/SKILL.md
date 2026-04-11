@@ -19,13 +19,13 @@ The first argument must be the provider name, followed by the message:
 ## Execution (MANDATORY)
 
 ```
-Bash(CCB_CALLER=claude ask $PROVIDER "$MESSAGE")
+Bash(CURDX_CALLER=claude ask $PROVIDER "$MESSAGE")
 ```
 
 ## Rules
 
 - Follow the **Async Guardrail** rule in CLAUDE.md (mandatory).
-- Local fallback: if output contains `CCB_ASYNC_SUBMITTED`, end your turn immediately.
+- Local fallback: if output contains `CURDX_ASYNC_SUBMITTED`, end your turn immediately.
 - If submit fails (non-zero exit):
   - Reply with exactly one line: `[Provider] submit failed: <short error>`
   - End your turn immediately.

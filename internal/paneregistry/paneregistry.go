@@ -1,4 +1,4 @@
-// Package paneregistry manages JSON-based session registry files in ~/.ccb/run/.
+// Package paneregistry manages JSON-based session registry files in ~/.curdx/run/.
 // Source: claude_code_bridge/lib/pane_registry.py
 package paneregistry
 
@@ -12,19 +12,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/cliutil"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/cliutil"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/providers"
 )
 
 const (
-	RegistryPrefix     = "ccb-session-"
+	RegistryPrefix     = "curdx-session-"
 	RegistrySuffix     = ".json"
 	RegistryTTLSeconds = 7 * 24 * 60 * 60 // 7 days
 )
 
 func debugEnabled() bool {
-	v := strings.TrimSpace(os.Getenv("CCB_DEBUG"))
+	v := strings.TrimSpace(os.Getenv("CURDX_DEBUG"))
 	return v == "1" || v == "true" || v == "yes"
 }
 
@@ -37,7 +37,7 @@ func debug(msg string) {
 
 func registryDir() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".ccb", "run")
+	return filepath.Join(home, ".curdx", "run")
 }
 
 // RegistryPathForSession returns the path for a registry file given a session ID.
@@ -303,8 +303,8 @@ func LoadRegistryByClaudePane(paneID string) map[string]interface{} {
 }
 
 // LoadRegistryByProjectID loads the newest alive registry record matching project+provider.
-func LoadRegistryByProjectID(ccbProjectID, provider string) map[string]interface{} {
-	proj := strings.TrimSpace(ccbProjectID)
+func LoadRegistryByProjectID(curdxProjectID, provider string) map[string]interface{} {
+	proj := strings.TrimSpace(curdxProjectID)
 	prov := strings.TrimSpace(strings.ToLower(provider))
 	if proj == "" || prov == "" {
 		return nil
@@ -327,7 +327,7 @@ func LoadRegistryByProjectID(ccbProjectID, provider string) map[string]interface
 		}
 
 		existing := ""
-		if v, ok := data["ccb_project_id"]; ok {
+		if v, ok := data["curdx_project_id"]; ok {
 			existing = strings.TrimSpace(fmt.Sprintf("%v", v))
 		}
 		inferred := ""
@@ -335,7 +335,7 @@ func LoadRegistryByProjectID(ccbProjectID, provider string) map[string]interface
 			if wd, ok := data["work_dir"]; ok {
 				wdStr := strings.TrimSpace(fmt.Sprintf("%v", wd))
 				if wdStr != "" {
-					inferred = projectid.ComputeCCBProjectID(wdStr)
+					inferred = projectid.ComputeCURDXProjectID(wdStr)
 				}
 			}
 		}
@@ -360,16 +360,16 @@ func LoadRegistryByProjectID(ccbProjectID, provider string) map[string]interface
 	}
 
 	if best != nil && bestNeedsMigration {
-		// Best-effort persistence: add ccb_project_id to the winning record.
+		// Best-effort persistence: add curdx_project_id to the winning record.
 		existingPID := ""
-		if v, ok := best["ccb_project_id"]; ok {
+		if v, ok := best["curdx_project_id"]; ok {
 			existingPID = strings.TrimSpace(fmt.Sprintf("%v", v))
 		}
 		if existingPID == "" {
 			if wd, ok := best["work_dir"]; ok {
 				wdStr := strings.TrimSpace(fmt.Sprintf("%v", wd))
 				if wdStr != "" {
-					best["ccb_project_id"] = projectid.ComputeCCBProjectID(wdStr)
+					best["curdx_project_id"] = projectid.ComputeCURDXProjectID(wdStr)
 					_ = UpsertRegistry(best)
 				}
 			}
@@ -381,14 +381,14 @@ func LoadRegistryByProjectID(ccbProjectID, provider string) map[string]interface
 
 // UpsertRegistry writes (or merges) a registry record.
 func UpsertRegistry(record map[string]interface{}) bool {
-	sessionIDRaw, ok := record["ccb_session_id"]
+	sessionIDRaw, ok := record["curdx_session_id"]
 	if !ok {
-		debug("Registry update skipped: missing ccb_session_id")
+		debug("Registry update skipped: missing curdx_session_id")
 		return false
 	}
 	sessionID := fmt.Sprintf("%v", sessionIDRaw)
 	if strings.TrimSpace(sessionID) == "" {
-		debug("Registry update skipped: empty ccb_session_id")
+		debug("Registry update skipped: empty curdx_session_id")
 		return false
 	}
 
@@ -485,16 +485,16 @@ func UpsertRegistry(record map[string]interface{}) bool {
 	}
 	data["providers"] = provsIface
 
-	// Ensure ccb_project_id exists.
+	// Ensure curdx_project_id exists.
 	pid := ""
-	if v, ok := data["ccb_project_id"]; ok {
+	if v, ok := data["curdx_project_id"]; ok {
 		pid = strings.TrimSpace(fmt.Sprintf("%v", v))
 	}
 	if pid == "" {
 		if wd, ok := data["work_dir"]; ok {
 			wdStr := strings.TrimSpace(fmt.Sprintf("%v", wd))
 			if wdStr != "" {
-				data["ccb_project_id"] = projectid.ComputeCCBProjectID(wdStr)
+				data["curdx_project_id"] = projectid.ComputeCURDXProjectID(wdStr)
 			}
 		}
 	}

@@ -31,7 +31,7 @@ Example:
 | `inspiration` | Creative consultant (unreliable, user decides) |
 | `reviewer` | Quality gate (Rubric A, per-dimension scoring) |
 
-Roles resolve to providers via CLAUDE.md `CCB_ROLES` table.
+Roles resolve to providers via CLAUDE.md `CURDX_ROLES` table.
 
 ## Key Features
 

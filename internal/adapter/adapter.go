@@ -5,7 +5,7 @@ package adapter
 import (
 	"sync"
 
-	"github.com/anthropics/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/providers"
 )
 
 // ProviderRequest is the unified request structure for all providers.

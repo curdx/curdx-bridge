@@ -4,7 +4,7 @@ Planning skill using abstract roles defined in CLAUDE.md Role Assignment table.
 
 **Usage**: For complex features or architectural decisions requiring thorough planning.
 
-**Roles used by this skill** (resolve to providers via CLAUDE.md `CCB_ROLES`):
+**Roles used by this skill** (resolve to providers via CLAUDE.md `CURDX_ROLES`):
 - `designer` — Primary planner, owns the plan from start to finish
 - `inspiration` — Creative brainstorming consultant (unreliable, use with judgment)
 - `reviewer` — Scored quality gate, evaluates the plan using Rubric A (must pass >= 7.0)

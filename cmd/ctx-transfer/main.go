@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/anthropics/curdx-bridge/internal/memory"
+	"github.com/curdx/curdx-bridge/internal/memory"
 )
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `Usage: ctx-transfer [OPTIONS]
 
-Transfer conversation context between CCB providers.
+Transfer conversation context between CURDX providers.
 
 Options:
   -n, --last N         Number of conversation pairs (default: 3)
@@ -27,7 +27,7 @@ Options:
   --max-tokens N       Maximum tokens to transfer (default: 8000)
   -f, --format FMT     Output format: markdown|plain|json (default: markdown)
   -q, --quiet          Suppress informational output
-  -s, --save           Save transfer to ./.ccb/history/
+  -s, --save           Save transfer to ./.curdx/history/
   --no-save            Disable auto-save when sending
   --detailed           Output detailed tool executions
   -h, --help           Show this help message`)
@@ -182,7 +182,7 @@ func run(argv []string) int {
 		if _, ok := err.(*memory.SessionNotFoundError); ok {
 			fmt.Fprintf(os.Stderr, "Session not found: %v\n", err)
 			fmt.Fprintln(os.Stderr, "Hints:")
-			fmt.Fprintln(os.Stderr, "  - Ensure a CCB-supported CLI is running in this directory")
+			fmt.Fprintln(os.Stderr, "  - Ensure a CURDX-supported CLI is running in this directory")
 			fmt.Fprintln(os.Stderr, "  - Use --from to select a specific provider")
 			fmt.Fprintln(os.Stderr, "  - Use --session-path to specify a Claude session file")
 			return 1
@@ -323,7 +323,7 @@ func flattenConversations(convs [][2]string) string {
 }
 
 func saveTransfer(workDir, content, format, targetProvider string) string {
-	historyDir := filepath.Join(workDir, ".ccb", "history")
+	historyDir := filepath.Join(workDir, ".curdx", "history")
 	_ = os.MkdirAll(historyDir, 0o755)
 
 	ext := ".md"

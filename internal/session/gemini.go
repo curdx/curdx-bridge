@@ -3,7 +3,7 @@ package session
 import (
 	"path/filepath"
 
-	"github.com/anthropics/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/projectid"
 )
 
 // GeminiProjectSession represents a Gemini provider session.
@@ -50,13 +50,13 @@ func (s *GeminiProjectSession) UpdateGeminiBinding(sessionPath, sessionID string
 		updated = true
 	}
 
-	// Ensure ccb_project_id exists.
-	pid := getString(s.Data, "ccb_project_id")
+	// Ensure curdx_project_id exists.
+	pid := getString(s.Data, "curdx_project_id")
 	if pid == "" {
 		workDir := s.WorkDir()
-		computed := projectid.ComputeCCBProjectID(workDir)
+		computed := projectid.ComputeCURDXProjectID(workDir)
 		if computed != "" {
-			s.Data["ccb_project_id"] = computed
+			s.Data["curdx_project_id"] = computed
 			updated = true
 		}
 	}

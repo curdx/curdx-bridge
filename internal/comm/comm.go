@@ -39,15 +39,15 @@ func StripANSI(text string) string {
 }
 
 // ---------------------------------------------------------------------------
-// CCB marker patterns (shared by pane-log readers)
+// CURDX marker patterns (shared by pane-log readers)
 // ---------------------------------------------------------------------------
 
-// ccbReqIDRE matches CCB_REQ_ID: <id> lines.
-var ccbReqIDRE = regexp.MustCompile(`(?m)^\s*CCB_REQ_ID:\s*(\S+)\s*$`)
+// curdxReqIDRE matches CURDX_REQ_ID: <id> lines.
+var curdxReqIDRE = regexp.MustCompile(`(?m)^\s*CURDX_REQ_ID:\s*(\S+)\s*$`)
 
-// ccbDoneRE matches CCB_DONE: <id> lines (both old hex and new timestamp formats).
-var ccbDoneRE = regexp.MustCompile(
-	`(?mi)^\s*CCB_DONE:\s*(?:[0-9a-f]{32}|\d{8}-\d{6}-\d{3}-\d+-\d+)\s*$`,
+// curdxDoneRE matches CURDX_DONE: <id> lines (both old hex and new timestamp formats).
+var curdxDoneRE = regexp.MustCompile(
+	`(?mi)^\s*CURDX_DONE:\s*(?:[0-9a-f]{32}|\d{8}-\d{6}-\d{3}-\d+-\d+)\s*$`,
 )
 
 // ---------------------------------------------------------------------------
@@ -81,19 +81,19 @@ type ConvPair struct {
 // ---------------------------------------------------------------------------
 
 // extractAssistantBlocks extracts assistant reply blocks from cleaned terminal text.
-// A reply block is text between a CCB_REQ_ID marker and the corresponding CCB_DONE marker.
+// A reply block is text between a CURDX_REQ_ID marker and the corresponding CURDX_DONE marker.
 func extractAssistantBlocks(text string) []string {
 	type reqPos struct {
 		end int
 		id  string
 	}
-	reqMatches := ccbReqIDRE.FindAllStringSubmatchIndex(text, -1)
+	reqMatches := curdxReqIDRE.FindAllStringSubmatchIndex(text, -1)
 	var reqPositions []reqPos
 	for _, m := range reqMatches {
 		reqPositions = append(reqPositions, reqPos{end: m[1], id: text[m[2]:m[3]]})
 	}
 
-	doneMatches := ccbDoneRE.FindAllStringIndex(text, -1)
+	doneMatches := curdxDoneRE.FindAllStringIndex(text, -1)
 	var doneStarts []int
 	for _, m := range doneMatches {
 		doneStarts = append(doneStarts, m[0])
@@ -133,8 +133,8 @@ func extractAssistantBlocks(text string) []string {
 
 // extractConversationPairs extracts (user_prompt, assistant_reply) pairs from terminal text.
 func extractConversationPairs(text string) []ConvPair {
-	reqMatches := ccbReqIDRE.FindAllStringIndex(text, -1)
-	doneMatches := ccbDoneRE.FindAllStringIndex(text, -1)
+	reqMatches := curdxReqIDRE.FindAllStringIndex(text, -1)
+	doneMatches := curdxDoneRE.FindAllStringIndex(text, -1)
 	var doneStarts []int
 	for _, m := range doneMatches {
 		doneStarts = append(doneStarts, m[0])

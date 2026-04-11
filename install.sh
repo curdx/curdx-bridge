@@ -5,11 +5,11 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_PREFIX="${CODEX_INSTALL_PREFIX:-$HOME/.local/share/codex-dual}"
 BIN_DIR="${CODEX_BIN_DIR:-$HOME/.local/bin}"
 readonly REPO_ROOT INSTALL_PREFIX BIN_DIR
-HELPER="$BIN_DIR/ccb-installer-helper"
+HELPER="$BIN_DIR/curdx-installer-helper"
 
 # i18n support
 detect_lang() {
-  local lang="${CCB_LANG:-auto}"
+  local lang="${CURDX_LANG:-auto}"
   case "$lang" in
     zh|cn|chinese) echo "zh" ;;
     en|english) echo "en" ;;
@@ -24,7 +24,7 @@ detect_lang() {
   esac
 }
 
-CCB_LANG_DETECTED="$(detect_lang)"
+CURDX_LANG_DETECTED="$(detect_lang)"
 
 # Message function
 msg() {
@@ -60,8 +60,8 @@ msg() {
       en_msg="Detected WSL environment"
       zh_msg="检测到 WSL 环境" ;;
     same_env_required)
-      en_msg="ccb/ask/ping/pend must run in the same environment as codex/gemini."
-      zh_msg="ccb/ask/ping/pend 必须与 codex/gemini 在同一环境运行。" ;;
+      en_msg="curdx/ask/ping/pend must run in the same environment as codex/gemini."
+      zh_msg="curdx/ask/ping/pend 必须与 codex/gemini 在同一环境运行。" ;;
     confirm_wsl_native)
       en_msg="Please confirm: you will install and run codex/gemini in WSL (not Windows native)."
       zh_msg="请确认：你将在 WSL 中安装并运行 codex/gemini（不是 Windows 原生）。" ;;
@@ -87,7 +87,7 @@ msg() {
       en_msg="$key"
       zh_msg="$key" ;;
   esac
-  if [[ "$CCB_LANG_DETECTED" == "zh" ]]; then
+  if [[ "$CURDX_LANG_DETECTED" == "zh" ]]; then
     echo "$zh_msg"
   else
     echo "$en_msg"
@@ -114,17 +114,17 @@ SCRIPTS_TO_LINK=(
   bin/lpend
   bin/lping
   bin/ask
-  bin/ccb-ping
+  bin/curdx-ping
   bin/pend
   bin/autonew
-  bin/ccb-completion-hook
+  bin/curdx-completion-hook
   bin/maild
   bin/ctx-transfer
-  ccb
+  curdx
 )
 
 CLAUDE_MARKDOWN=(
-  # Old CCB commands removed - replaced by unified ask/ping/pend skills
+  # Old CURDX commands removed - replaced by unified ask/ping/pend skills
 )
 
 LEGACY_SCRIPTS=(
@@ -154,9 +154,9 @@ Optional environment variables:
   CODEX_INSTALL_PREFIX     Install directory (default: ~/.local/share/codex-dual)
   CODEX_BIN_DIR            Executable directory (default: ~/.local/bin)
   CODEX_CLAUDE_COMMAND_DIR Custom Claude commands directory (default: auto-detect)
-  CCB_CLAUDE_MD_MODE       CLAUDE.md injection mode: "inline" (default) or "route"
+  CURDX_CLAUDE_MD_MODE       CLAUDE.md injection mode: "inline" (default) or "route"
                            inline = full config in CLAUDE.md (~57 lines)
-                           route  = minimal pointer in CLAUDE.md, full config in ~/.claude/rules/ccb-config.md
+                           route  = minimal pointer in CLAUDE.md, full config in ~/.claude/rules/curdx-config.md
 USAGE
 }
 
@@ -194,7 +194,7 @@ require_command() {
   fi
 }
 
-PYTHON_BIN="${CCB_PYTHON_BIN:-}"
+PYTHON_BIN="${CURDX_PYTHON_BIN:-}"
 
 _python_check_310() {
   local cmd="$1"
@@ -229,7 +229,7 @@ pick_any_python_bin() {
 }
 
 require_python_version() {
-  # ccb requires Python 3.10+ (PEP 604 type unions: `str | None`, etc.)
+  # curdx requires Python 3.10+ (PEP 604 type unions: `str | None`, etc.)
   if ! pick_python_bin; then
     echo "ERROR: Missing dependency: python (3.10+ required)"
     echo "   Please install Python 3.10+ and ensure it is on PATH, then re-run install.sh"
@@ -347,14 +347,14 @@ confirm_backend_env_wsl() {
     return
   fi
 
-  if [[ "${CCB_INSTALL_ASSUME_YES:-}" == "1" ]]; then
+  if [[ "${CURDX_INSTALL_ASSUME_YES:-}" == "1" ]]; then
     return
   fi
 
   if [[ ! -t 0 ]]; then
     echo "ERROR: Installing in WSL but detected non-interactive terminal; aborted to avoid env mismatch."
     echo "   If you confirm codex/gemini will be installed and run in WSL:"
-    echo "   Re-run: CCB_INSTALL_ASSUME_YES=1 ./install.sh install"
+    echo "   Re-run: CURDX_INSTALL_ASSUME_YES=1 ./install.sh install"
     exit 1
   fi
 
@@ -362,7 +362,7 @@ confirm_backend_env_wsl() {
   echo "================================================================"
   echo "WARN: Detected WSL environment"
   echo "================================================================"
-  echo "ccb/ask/ping/pend must run in the same environment as codex/gemini."
+  echo "curdx/ask/ping/pend must run in the same environment as codex/gemini."
   echo
   echo "Please confirm: you will install and run codex/gemini in WSL (not Windows native)."
   echo "If you plan to run codex/gemini in Windows native, exit and run on Windows side:"
@@ -526,8 +526,8 @@ save_wezterm_config() {
   wezterm_path="$(detect_wezterm_path)"
   if [[ -n "$wezterm_path" ]]; then
     local cfg_root="${XDG_CONFIG_HOME:-$HOME/.config}"
-    mkdir -p "$cfg_root/ccb"
-    echo "CODEX_WEZTERM_BIN=${wezterm_path}" > "$cfg_root/ccb/env"
+    mkdir -p "$cfg_root/curdx"
+    echo "CODEX_WEZTERM_BIN=${wezterm_path}" > "$cfg_root/curdx/env"
     echo "OK: WezTerm path cached: $wezterm_path"
   fi
 }
@@ -566,7 +566,7 @@ copy_project() {
       --exclude '.mypy_cache/' \
       --exclude '.venv/' \
       --exclude 'lib/web/' \
-      --exclude 'bin/ccb-web' \
+      --exclude 'bin/curdx-web' \
       "$REPO_ROOT"/ "$staging"/
   else
     tar -C "$REPO_ROOT" \
@@ -576,7 +576,7 @@ copy_project() {
       --exclude '.mypy_cache' \
       --exclude '.venv' \
       --exclude 'lib/web' \
-      --exclude 'bin/ccb-web' \
+      --exclude 'bin/curdx-web' \
       -cf - . | tar -C "$staging" -xf -
   fi
 
@@ -585,7 +585,7 @@ copy_project() {
   mv "$staging" "$INSTALL_PREFIX"
   trap - EXIT
 
-  # Update GIT_COMMIT and GIT_DATE in ccb file
+  # Update GIT_COMMIT and GIT_DATE in curdx file
   local git_commit="" git_date=""
 
   # Method 1: From git repo
@@ -594,10 +594,10 @@ copy_project() {
     git_date=$(git -C "$REPO_ROOT" log -1 --format='%cs' 2>/dev/null || echo "")
   fi
 
-  # Method 2: From environment variables (set by ccb update)
-  if [[ -z "$git_commit" && -n "${CCB_GIT_COMMIT:-}" ]]; then
-    git_commit="$CCB_GIT_COMMIT"
-    git_date="${CCB_GIT_DATE:-}"
+  # Method 2: From environment variables (set by curdx update)
+  if [[ -z "$git_commit" && -n "${CURDX_GIT_COMMIT:-}" ]]; then
+    git_commit="$CURDX_GIT_COMMIT"
+    git_date="${CURDX_GIT_DATE:-}"
   fi
 
   # Method 3: From GitHub API (fallback)
@@ -610,7 +610,7 @@ copy_project() {
     fi
   fi
 
-  if [[ -n "$git_commit" && -f "$INSTALL_PREFIX/ccb" ]]; then
+  if [[ -n "$git_commit" && -f "$INSTALL_PREFIX/curdx" ]]; then
     # Validate git_commit and git_date to prevent sed injection
     if [[ ! "$git_commit" =~ ^[0-9a-fA-F]+$ ]]; then
       echo "WARN: invalid git_commit format, skipping version stamp"
@@ -620,9 +620,9 @@ copy_project() {
       echo "WARN: invalid git_date format, skipping version stamp"
       return
     fi
-    sed -i.bak "s/^GIT_COMMIT = .*/GIT_COMMIT = \"$git_commit\"/" "$INSTALL_PREFIX/ccb"
-    sed -i.bak "s/^GIT_DATE = .*/GIT_DATE = \"$git_date\"/" "$INSTALL_PREFIX/ccb"
-    rm -f "$INSTALL_PREFIX/ccb.bak"
+    sed -i.bak "s/^GIT_COMMIT = .*/GIT_COMMIT = \"$git_commit\"/" "$INSTALL_PREFIX/curdx"
+    sed -i.bak "s/^GIT_DATE = .*/GIT_DATE = \"$git_date\"/" "$INSTALL_PREFIX/curdx"
+    rm -f "$INSTALL_PREFIX/curdx.bak"
   fi
 }
 
@@ -685,7 +685,7 @@ ensure_path_configured() {
 
   # Add to shell rc
   echo "" >> "$shell_rc"
-  echo "# Added by ccb installer" >> "$shell_rc"
+  echo "# Added by curdx installer" >> "$shell_rc"
   echo "$path_line" >> "$shell_rc"
   echo "OK: Added $BIN_DIR to PATH in $shell_rc"
   echo "   Run: source $shell_rc  (or restart terminal)"
@@ -696,7 +696,7 @@ install_claude_commands() {
   claude_dir="$(detect_claude_dir)"
   mkdir -p "$claude_dir"
 
-  # Clean up obsolete CCB commands (replaced by unified ask/ping/pend)
+  # Clean up obsolete CURDX commands (replaced by unified ask/ping/pend)
   local obsolete_cmds="cask.md gask.md oask.md lask.md cpend.md gpend.md opend.md lpend.md cping.md gping.md oping.md lping.md"
   for obs_cmd in $obsolete_cmds; do
     if [[ -f "$claude_dir/$obs_cmd" ]]; then
@@ -723,7 +723,7 @@ install_claude_skills() {
 
   mkdir -p "$skills_dst"
 
-  # Clean up obsolete CCB skills (replaced by unified ask/cping/pend)
+  # Clean up obsolete CURDX skills (replaced by unified ask/cping/pend)
   local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
@@ -789,7 +789,7 @@ install_codex_skills() {
 
   mkdir -p "$skills_dst"
 
-  # Clean up obsolete CCB skills (replaced by unified ask/ping/pend)
+  # Clean up obsolete CURDX skills (replaced by unified ask/ping/pend)
   local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
@@ -832,8 +832,8 @@ install_codex_skills() {
   echo "Updated Codex skills directory: $skills_dst"
 }
 
-CCB_START_MARKER="<!-- CCB_CONFIG_START -->"
-CCB_END_MARKER="<!-- CCB_CONFIG_END -->"
+CURDX_START_MARKER="<!-- CURDX_CONFIG_START -->"
+CURDX_END_MARKER="<!-- CURDX_CONFIG_END -->"
 LEGACY_RULE_MARKER="## Codex 协作规则"
 
 remove_codex_mcp() {
@@ -855,10 +855,10 @@ remove_codex_mcp() {
 
 install_claude_md_config() {
   local claude_md="$HOME/.claude/CLAUDE.md"
-  local md_mode="${CCB_CLAUDE_MD_MODE:-inline}"
-  local full_template="$INSTALL_PREFIX/config/claude-md-ccb.md"
-  local route_template="$INSTALL_PREFIX/config/claude-md-ccb-route.md"
-  local external_config="$HOME/.claude/rules/ccb-config.md"
+  local md_mode="${CURDX_CLAUDE_MD_MODE:-inline}"
+  local full_template="$INSTALL_PREFIX/config/claude-md-curdx.md"
+  local route_template="$INSTALL_PREFIX/config/claude-md-curdx-route.md"
+  local external_config="$HOME/.claude/rules/curdx-config.md"
 
   # Select template based on mode
   local template
@@ -879,15 +879,15 @@ install_claude_md_config() {
   if [[ "$md_mode" == "route" ]]; then
     mkdir -p "$HOME/.claude/rules"
     cp "$full_template" "$external_config"
-    echo "Wrote full CCB config to $external_config"
+    echo "Wrote full CURDX config to $external_config"
   fi
 
   if [[ -f "$claude_md" ]]; then
-    if grep -q "$CCB_START_MARKER" "$claude_md" 2>/dev/null; then
-      echo "Updating existing CCB config block (mode: $md_mode)..."
-      "$HELPER" replace-block "$claude_md" "$template" "<!-- CCB_CONFIG_START -->" "<!-- CCB_CONFIG_END -->"
+    if grep -q "$CURDX_START_MARKER" "$claude_md" 2>/dev/null; then
+      echo "Updating existing CURDX config block (mode: $md_mode)..."
+      "$HELPER" replace-block "$claude_md" "$template" "<!-- CURDX_CONFIG_START -->" "<!-- CURDX_CONFIG_END -->"
     elif grep -qE "$LEGACY_RULE_MARKER|## Codex Collaboration Rules|## Gemini|## OpenCode" "$claude_md" 2>/dev/null; then
-      echo "Removing legacy rules and adding new CCB config block..."
+      echo "Removing legacy rules and adding new CURDX config block..."
       "$HELPER" remove-legacy-md-rules "$claude_md"
       cat "$template" >> "$claude_md"
     else
@@ -901,14 +901,14 @@ install_claude_md_config() {
   echo "Updated AI collaboration rules in $claude_md (mode: $md_mode)"
 }
 
-CCB_ROLES_START_MARKER="<!-- CCB_ROLES_START -->"
-CCB_ROLES_END_MARKER="<!-- CCB_ROLES_END -->"
-CCB_RUBRICS_START_MARKER="<!-- REVIEW_RUBRICS_START -->"
-CCB_RUBRICS_END_MARKER="<!-- REVIEW_RUBRICS_END -->"
+CURDX_ROLES_START_MARKER="<!-- CURDX_ROLES_START -->"
+CURDX_ROLES_END_MARKER="<!-- CURDX_ROLES_END -->"
+CURDX_RUBRICS_START_MARKER="<!-- REVIEW_RUBRICS_START -->"
+CURDX_RUBRICS_END_MARKER="<!-- REVIEW_RUBRICS_END -->"
 
 install_agents_md_config() {
   local agents_md="$INSTALL_PREFIX/AGENTS.md"
-  local template="$INSTALL_PREFIX/config/agents-md-ccb.md"
+  local template="$INSTALL_PREFIX/config/agents-md-curdx.md"
 
   if [[ ! -f "$template" ]]; then
     echo "WARN: Template not found: $template; skipping AGENTS.md injection"
@@ -916,12 +916,12 @@ install_agents_md_config() {
   fi
 
   if [[ -f "$agents_md" ]]; then
-    # Replace existing CCB blocks if present
+    # Replace existing CURDX blocks if present
     local updated=false
-    if grep -q "$CCB_ROLES_START_MARKER" "$agents_md" 2>/dev/null || \
-       grep -q "$CCB_RUBRICS_START_MARKER" "$agents_md" 2>/dev/null; then
-      echo "Updating existing CCB blocks in AGENTS.md..."
-      "$HELPER" replace-block "$agents_md" "$template" "<!-- CCB_ROLES_START -->" "<!-- CCB_ROLES_END -->"
+    if grep -q "$CURDX_ROLES_START_MARKER" "$agents_md" 2>/dev/null || \
+       grep -q "$CURDX_RUBRICS_START_MARKER" "$agents_md" 2>/dev/null; then
+      echo "Updating existing CURDX blocks in AGENTS.md..."
+      "$HELPER" replace-block "$agents_md" "$template" "<!-- CURDX_ROLES_START -->" "<!-- CURDX_ROLES_END -->"
       "$HELPER" replace-block "$agents_md" "$template" "<!-- REVIEW_RUBRICS_START -->" "<!-- REVIEW_RUBRICS_END -->"
       updated=true
     fi
@@ -938,7 +938,7 @@ install_agents_md_config() {
 
 install_clinerules_config() {
   local clinerules="$INSTALL_PREFIX/.clinerules"
-  local template="$INSTALL_PREFIX/config/clinerules-ccb.md"
+  local template="$INSTALL_PREFIX/config/clinerules-curdx.md"
 
   if [[ ! -f "$template" ]]; then
     echo "WARN: Template not found: $template; skipping .clinerules injection"
@@ -946,9 +946,9 @@ install_clinerules_config() {
   fi
 
   if [[ -f "$clinerules" ]]; then
-    if grep -q "$CCB_ROLES_START_MARKER" "$clinerules" 2>/dev/null; then
-      echo "Updating existing CCB roles block in .clinerules..."
-      "$HELPER" replace-block "$clinerules" "$template" "<!-- CCB_ROLES_START -->" "<!-- CCB_ROLES_END -->"
+    if grep -q "$CURDX_ROLES_START_MARKER" "$clinerules" 2>/dev/null; then
+      echo "Updating existing CURDX roles block in .clinerules..."
+      "$HELPER" replace-block "$clinerules" "$template" "<!-- CURDX_ROLES_START -->" "<!-- CURDX_ROLES_END -->"
     else
       echo "" >> "$clinerules"
       cat "$template" >> "$clinerules"
@@ -966,7 +966,7 @@ install_settings_permissions() {
 
   local perms_to_add=(
     'Bash(ask *)'
-    'Bash(ccb-ping *)'
+    'Bash(curdx-ping *)'
     'Bash(pend *)'
   )
 
@@ -976,7 +976,7 @@ install_settings_permissions() {
 	  "permissions": {
 	    "allow": [
 	      "Bash(ask *)",
-	      "Bash(ccb-ping *)",
+	      "Bash(curdx-ping *)",
 	      "Bash(pend *)"
 	    ],
     "deny": []
@@ -1013,18 +1013,18 @@ SETTINGS
   fi
 }
 
-CCB_TMUX_MARKER="# CCB (Claude Code Bridge) tmux configuration"
-CCB_TMUX_MARKER_LEGACY="# CCB tmux configuration"
+CURDX_TMUX_MARKER="# CURDX (Claude Code Bridge) tmux configuration"
+CURDX_TMUX_MARKER_LEGACY="# CURDX tmux configuration"
 
-remove_ccb_tmux_block_from_file() {
+remove_curdx_tmux_block_from_file() {
   local target_conf="$1"
 
   if [[ ! -f "$target_conf" ]]; then
     return 0
   fi
 
-  if ! grep -q "$CCB_TMUX_MARKER" "$target_conf" 2>/dev/null && \
-     ! grep -q "$CCB_TMUX_MARKER_LEGACY" "$target_conf" 2>/dev/null; then
+  if ! grep -q "$CURDX_TMUX_MARKER" "$target_conf" 2>/dev/null && \
+     ! grep -q "$CURDX_TMUX_MARKER_LEGACY" "$target_conf" 2>/dev/null; then
     return 0
   fi
 
@@ -1036,53 +1036,53 @@ install_tmux_config() {
   local tmux_conf_local="$HOME/.tmux.conf.local"
   local tmux_conf="$tmux_conf_main"
   local reload_conf="$tmux_conf_main"
-  local ccb_tmux_conf="$REPO_ROOT/config/tmux-ccb.conf"
-  local ccb_status_script="$REPO_ROOT/config/ccb-status.sh"
-  local status_install_path="$BIN_DIR/ccb-status.sh"
+  local curdx_tmux_conf="$REPO_ROOT/config/tmux-curdx.conf"
+  local curdx_status_script="$REPO_ROOT/config/curdx-status.sh"
+  local status_install_path="$BIN_DIR/curdx-status.sh"
 
-  if [[ ! -f "$ccb_tmux_conf" ]]; then
+  if [[ ! -f "$curdx_tmux_conf" ]]; then
     return
   fi
 
   mkdir -p "$BIN_DIR"
 
-  # Install ccb-status.sh script
-  if [[ -f "$ccb_status_script" ]]; then
-    cp "$ccb_status_script" "$status_install_path"
+  # Install curdx-status.sh script
+  if [[ -f "$curdx_status_script" ]]; then
+    cp "$curdx_status_script" "$status_install_path"
     chmod +x "$status_install_path"
     echo "Installed: $status_install_path"
   fi
 
-  # Install ccb-border.sh script (dynamic pane border colors)
-  local ccb_border_script="$REPO_ROOT/config/ccb-border.sh"
-  local border_install_path="$BIN_DIR/ccb-border.sh"
-  if [[ -f "$ccb_border_script" ]]; then
-    cp "$ccb_border_script" "$border_install_path"
+  # Install curdx-border.sh script (dynamic pane border colors)
+  local curdx_border_script="$REPO_ROOT/config/curdx-border.sh"
+  local border_install_path="$BIN_DIR/curdx-border.sh"
+  if [[ -f "$curdx_border_script" ]]; then
+    cp "$curdx_border_script" "$border_install_path"
     chmod +x "$border_install_path"
     echo "Installed: $border_install_path"
   fi
 
-  # Install ccb-git.sh script (cached git status for tmux status line)
-  local ccb_git_script="$REPO_ROOT/config/ccb-git.sh"
-  local git_install_path="$BIN_DIR/ccb-git.sh"
-  if [[ -f "$ccb_git_script" ]]; then
-    cp "$ccb_git_script" "$git_install_path"
+  # Install curdx-git.sh script (cached git status for tmux status line)
+  local curdx_git_script="$REPO_ROOT/config/curdx-git.sh"
+  local git_install_path="$BIN_DIR/curdx-git.sh"
+  if [[ -f "$curdx_git_script" ]]; then
+    cp "$curdx_git_script" "$git_install_path"
     chmod +x "$git_install_path"
     echo "Installed: $git_install_path"
   fi
 
-  # Install tmux UI toggle scripts (enable/disable CCB theming per-session)
-  local ccb_tmux_on_script="$REPO_ROOT/config/ccb-tmux-on.sh"
-  local ccb_tmux_off_script="$REPO_ROOT/config/ccb-tmux-off.sh"
-  if [[ -f "$ccb_tmux_on_script" ]]; then
-    cp "$ccb_tmux_on_script" "$BIN_DIR/ccb-tmux-on.sh"
-    chmod +x "$BIN_DIR/ccb-tmux-on.sh"
-    echo "Installed: $BIN_DIR/ccb-tmux-on.sh"
+  # Install tmux UI toggle scripts (enable/disable CURDX theming per-session)
+  local curdx_tmux_on_script="$REPO_ROOT/config/curdx-tmux-on.sh"
+  local curdx_tmux_off_script="$REPO_ROOT/config/curdx-tmux-off.sh"
+  if [[ -f "$curdx_tmux_on_script" ]]; then
+    cp "$curdx_tmux_on_script" "$BIN_DIR/curdx-tmux-on.sh"
+    chmod +x "$BIN_DIR/curdx-tmux-on.sh"
+    echo "Installed: $BIN_DIR/curdx-tmux-on.sh"
   fi
-  if [[ -f "$ccb_tmux_off_script" ]]; then
-    cp "$ccb_tmux_off_script" "$BIN_DIR/ccb-tmux-off.sh"
-    chmod +x "$BIN_DIR/ccb-tmux-off.sh"
-    echo "Installed: $BIN_DIR/ccb-tmux-off.sh"
+  if [[ -f "$curdx_tmux_off_script" ]]; then
+    cp "$curdx_tmux_off_script" "$BIN_DIR/curdx-tmux-off.sh"
+    chmod +x "$BIN_DIR/curdx-tmux-off.sh"
+    echo "Installed: $BIN_DIR/curdx-tmux-off.sh"
   fi
 
   # Oh-My-Tmux keeps user customizations in ~/.tmux.conf.local.
@@ -1101,18 +1101,18 @@ install_tmux_config() {
   local already_configured=false
   for conf in "$tmux_conf_main" "$tmux_conf_local"; do
     if [[ -f "$conf" ]] && \
-      (grep -q "$CCB_TMUX_MARKER" "$conf" 2>/dev/null || \
-       grep -q "$CCB_TMUX_MARKER_LEGACY" "$conf" 2>/dev/null); then
+      (grep -q "$CURDX_TMUX_MARKER" "$conf" 2>/dev/null || \
+       grep -q "$CURDX_TMUX_MARKER_LEGACY" "$conf" 2>/dev/null); then
       already_configured=true
       break
     fi
   done
 
   if $already_configured; then
-    # Update existing config: remove old CCB block(s) and re-add at target location.
-    echo "Updating CCB tmux configuration..."
-    remove_ccb_tmux_block_from_file "$tmux_conf_main" || true
-    remove_ccb_tmux_block_from_file "$tmux_conf_local" || true
+    # Update existing config: remove old CURDX block(s) and re-add at target location.
+    echo "Updating CURDX tmux configuration..."
+    remove_curdx_tmux_block_from_file "$tmux_conf_main" || true
+    remove_curdx_tmux_block_from_file "$tmux_conf_local" || true
   else
     # Backup existing config if present
     if [[ -f "$tmux_conf" ]]; then
@@ -1120,15 +1120,15 @@ install_tmux_config() {
     fi
   fi
 
-  # Append CCB tmux config (fill in BIN_DIR placeholders)
+  # Append CURDX tmux config (fill in BIN_DIR placeholders)
   {
     echo ""
-    "$HELPER" file-replace "$ccb_tmux_conf" "@CCB_BIN_DIR@" "$BIN_DIR" 2>/dev/null || cat "$ccb_tmux_conf"
+    "$HELPER" file-replace "$curdx_tmux_conf" "@CURDX_BIN_DIR@" "$BIN_DIR" 2>/dev/null || cat "$curdx_tmux_conf"
   } >> "$tmux_conf"
 
   echo "Updated tmux configuration: $tmux_conf"
-  echo "   - CCB tmux integration (copy mode, mouse, pane management)"
-  echo "   - CCB theme is enabled only while CCB is running (auto restore on exit)"
+  echo "   - CURDX tmux integration (copy mode, mouse, pane management)"
+  echo "   - CURDX theme is enabled only while CURDX is running (auto restore on exit)"
   echo "   - Vi-style pane management with h/j/k/l"
   echo "   - Mouse support and better copy mode"
   echo "   - Run 'tmux source $reload_conf' to apply (or restart tmux)"
@@ -1149,18 +1149,18 @@ install_tmux_config() {
 uninstall_tmux_config() {
   local tmux_conf_main="$HOME/.tmux.conf"
   local tmux_conf_local="$HOME/.tmux.conf.local"
-  local status_script="$BIN_DIR/ccb-status.sh"
-  local border_script="$BIN_DIR/ccb-border.sh"
-  local tmux_on_script="$BIN_DIR/ccb-tmux-on.sh"
-  local tmux_off_script="$BIN_DIR/ccb-tmux-off.sh"
+  local status_script="$BIN_DIR/curdx-status.sh"
+  local border_script="$BIN_DIR/curdx-border.sh"
+  local tmux_on_script="$BIN_DIR/curdx-tmux-on.sh"
+  local tmux_off_script="$BIN_DIR/curdx-tmux-off.sh"
 
-  # Remove ccb-status.sh script
+  # Remove curdx-status.sh script
   if [[ -f "$status_script" ]]; then
     rm -f "$status_script"
     echo "Removed: $status_script"
   fi
 
-  # Remove ccb-border.sh script
+  # Remove curdx-border.sh script
   if [[ -f "$border_script" ]]; then
     rm -f "$border_script"
     echo "Removed: $border_script"
@@ -1179,11 +1179,11 @@ uninstall_tmux_config() {
   local removed_any=false
   for conf in "$tmux_conf_main" "$tmux_conf_local"; do
     if [[ -f "$conf" ]] && \
-      (grep -q "$CCB_TMUX_MARKER" "$conf" 2>/dev/null || \
-       grep -q "$CCB_TMUX_MARKER_LEGACY" "$conf" 2>/dev/null); then
-      echo "Removing CCB tmux configuration from $conf..."
-      if remove_ccb_tmux_block_from_file "$conf"; then
-        echo "Removed CCB tmux configuration from $conf"
+      (grep -q "$CURDX_TMUX_MARKER" "$conf" 2>/dev/null || \
+       grep -q "$CURDX_TMUX_MARKER_LEGACY" "$conf" 2>/dev/null); then
+      echo "Removing CURDX tmux configuration from $conf..."
+      if remove_curdx_tmux_block_from_file "$conf"; then
+        echo "Removed CURDX tmux configuration from $conf"
         removed_any=true
       fi
     fi
@@ -1230,8 +1230,8 @@ cleanup_legacy_files() {
     fi
   done
 
-  # Legacy daemon state files in ~/.cache/ccb/
-  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/ccb"
+  # Legacy daemon state files in ~/.cache/curdx/
+  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/curdx"
   local legacy_states="caskd.json gaskd.json oaskd.json laskd.json"
   for state in $legacy_states; do
     if [[ -f "$cache_dir/$state" ]]; then
@@ -1279,11 +1279,11 @@ install_all() {
   echo "   Project dir    : $INSTALL_PREFIX"
   echo "   Executable dir : $BIN_DIR"
   echo "   Claude commands updated"
-  local md_mode="${CCB_CLAUDE_MD_MODE:-inline}"
+  local md_mode="${CURDX_CLAUDE_MD_MODE:-inline}"
   if [[ "$md_mode" == "route" ]]; then
-    echo "   Global CLAUDE.md configured with CCB route pointer (full config in ~/.claude/rules/ccb-config.md)"
+    echo "   Global CLAUDE.md configured with CURDX route pointer (full config in ~/.claude/rules/curdx-config.md)"
   else
-    echo "   Global CLAUDE.md configured with CCB collaboration rules (inline)"
+    echo "   Global CLAUDE.md configured with CURDX collaboration rules (inline)"
   fi
   echo "   AGENTS.md configured with review rubrics"
   echo "   .clinerules configured with role assignments"
@@ -1297,10 +1297,10 @@ uninstall_claude_md_config() {
     return
   fi
 
-  if grep -q "$CCB_START_MARKER" "$claude_md" 2>/dev/null; then
-    echo "Removing CCB config block from CLAUDE.md..."
-    "$HELPER" replace-block "$claude_md" "/dev/null" "<!-- CCB_CONFIG_START -->" "<!-- CCB_CONFIG_END -->"
-    echo "Removed CCB config from CLAUDE.md"
+  if grep -q "$CURDX_START_MARKER" "$claude_md" 2>/dev/null; then
+    echo "Removing CURDX config block from CLAUDE.md..."
+    "$HELPER" replace-block "$claude_md" "/dev/null" "<!-- CURDX_CONFIG_START -->" "<!-- CURDX_CONFIG_END -->"
+    echo "Removed CURDX config from CLAUDE.md"
   elif grep -qE "$LEGACY_RULE_MARKER|## Codex Collaboration Rules|## Gemini|## OpenCode" "$claude_md" 2>/dev/null; then
     echo "Removing legacy collaboration rules from CLAUDE.md..."
     "$HELPER" remove-legacy-md-rules "$claude_md"
@@ -1308,10 +1308,10 @@ uninstall_claude_md_config() {
   fi
 
   # Clean up external config file if it exists (route mode)
-  local external_config="$HOME/.claude/rules/ccb-config.md"
+  local external_config="$HOME/.claude/rules/curdx-config.md"
   if [[ -f "$external_config" ]]; then
     rm -f "$external_config"
-    echo "Removed external CCB config: $external_config"
+    echo "Removed external CURDX config: $external_config"
   fi
 }
 
@@ -1325,7 +1325,7 @@ uninstall_settings_permissions() {
   local perms_to_remove=(
     'Bash(ask *)'
     'Bash(ping *)'
-    'Bash(ccb-ping *)'
+    'Bash(curdx-ping *)'
     'Bash(pend *)'
     'Bash(cask:*)'
     'Bash(cpend)'
@@ -1357,14 +1357,14 @@ uninstall_settings_permissions() {
 
 uninstall_claude_skills() {
   local skills_dst="$HOME/.claude/skills"
-  local ccb_skills="ask cping ping pend autonew mounted all-plan docs tp tr file-op review"
+  local curdx_skills="ask cping ping pend autonew mounted all-plan docs tp tr file-op review"
 
   if [[ ! -d "$skills_dst" ]]; then
     return
   fi
 
-  echo "Removing CCB Claude skills..."
-  for skill in $ccb_skills; do
+  echo "Removing CURDX Claude skills..."
+  for skill in $curdx_skills; do
     if [[ -d "$skills_dst/$skill" ]]; then
       rm -rf "$skills_dst/$skill"
       echo "  Removed skill: $skill"
@@ -1374,14 +1374,14 @@ uninstall_claude_skills() {
 
 uninstall_codex_skills() {
   local skills_dst="${CODEX_HOME:-$HOME/.codex}/skills"
-  local ccb_skills="ask ping pend autonew mounted all-plan file-op"
+  local curdx_skills="ask ping pend autonew mounted all-plan file-op"
 
   if [[ ! -d "$skills_dst" ]]; then
     return
   fi
 
-  echo "Removing CCB Codex skills..."
-  for skill in $ccb_skills; do
+  echo "Removing CURDX Codex skills..."
+  for skill in $curdx_skills; do
     if [[ -d "$skills_dst/$skill" ]]; then
       rm -rf "$skills_dst/$skill"
       echo "  Removed skill: $skill"
@@ -1390,7 +1390,7 @@ uninstall_codex_skills() {
 }
 
 uninstall_all() {
-  echo "INFO: Starting ccb uninstall..."
+  echo "INFO: Starting curdx uninstall..."
 
   # 1. Remove project directory
   if [[ -d "$INSTALL_PREFIX" ]]; then

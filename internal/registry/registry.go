@@ -5,7 +5,7 @@ package registry
 import (
 	"sync"
 
-	"github.com/anthropics/curdx-bridge/internal/adapter"
+	"github.com/curdx/curdx-bridge/internal/adapter"
 )
 
 // ProviderRegistry manages registration and lookup of provider adapters.

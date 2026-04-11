@@ -84,11 +84,11 @@ func (e *SessionParseError) Error() string { return e.Msg }
 // ── Deduper (deduper.py) ──
 
 var protocolPatterns = []*regexp.Regexp{
-	regexp.MustCompile(`^\s*CCB_REQ_ID:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`),
-	regexp.MustCompile(`^\s*CCB_BEGIN:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`),
-	regexp.MustCompile(`^\s*CCB_DONE:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`),
-	regexp.MustCompile(`^\s*\[CCB_ASYNC_SUBMITTED[^\]]*\].*$`),
-	regexp.MustCompile(`^\s*CCB_CALLER=\w+\s*$`),
+	regexp.MustCompile(`^\s*CURDX_REQ_ID:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`),
+	regexp.MustCompile(`^\s*CURDX_BEGIN:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`),
+	regexp.MustCompile(`^\s*CURDX_DONE:\s*\d{8}-\d{6}-\d{3}-\d+-\d+\s*$`),
+	regexp.MustCompile(`^\s*\[CURDX_ASYNC_SUBMITTED[^\]]*\].*$`),
+	regexp.MustCompile(`^\s*CURDX_CALLER=\w+\s*$`),
 	regexp.MustCompile(`^\s*\[Request interrupted by user for tool use\]\s*$`),
 	regexp.MustCompile(`^\s*The user doesn't want to proceed with this tool use\..*$`),
 	regexp.MustCompile(`^\s*User rejected tool use\s*$`),
@@ -98,9 +98,9 @@ var noisePatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?s)<system-reminder>.*?</system-reminder>`),
 	regexp.MustCompile(`(?s)<env>.*?</env>`),
 	regexp.MustCompile(`(?s)<rules>.*?</rules>`),
-	regexp.MustCompile(`(?s)<!-- CCB_CONFIG_START -->.*?<!-- CCB_CONFIG_END -->`),
+	regexp.MustCompile(`(?s)<!-- CURDX_CONFIG_START -->.*?<!-- CURDX_CONFIG_END -->`),
 	regexp.MustCompile(`(?s)<local-command-caveat>.*?</local-command-caveat>`),
-	regexp.MustCompile(`(?s)\[CCB_ASYNC_SUBMITTED[^\]]*\][\s\S]*?(?:\n\n|\z)`),
+	regexp.MustCompile(`(?s)\[CURDX_ASYNC_SUBMITTED[^\]]*\][\s\S]*?(?:\n\n|\z)`),
 }
 
 var multiNewlineRe = regexp.MustCompile(`\n{3,}`)
@@ -109,7 +109,7 @@ var whitespaceRe = regexp.MustCompile(`\s+`)
 // ConversationDeduper cleans and deduplicates conversation content.
 type ConversationDeduper struct{}
 
-// StripProtocolMarkers removes CCB protocol markers from text.
+// StripProtocolMarkers removes CURDX protocol markers from text.
 func (d *ConversationDeduper) StripProtocolMarkers(text string) string {
 	lines := strings.Split(text, "\n")
 	var cleaned []string

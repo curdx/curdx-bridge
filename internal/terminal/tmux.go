@@ -17,7 +17,7 @@ import (
 //
 // Compatibility note:
 //   - New API prefers tmux pane IDs like `%12`.
-//   - Legacy CCB code may still pass a tmux session name as pane_id.
+//   - Legacy CURDX code may still pass a tmux session name as pane_id.
 //     Methods accept both: if target starts with % or contains : or . it is
 //     treated as a tmux target; otherwise as a session name.
 type TmuxBackend struct {
@@ -31,7 +31,7 @@ type TmuxBackend struct {
 func NewTmuxBackend(socketName string) *TmuxBackend {
 	sn := strings.TrimSpace(socketName)
 	if sn == "" {
-		sn = strings.TrimSpace(os.Getenv("CCB_TMUX_SOCKET"))
+		sn = strings.TrimSpace(os.Getenv("CURDX_TMUX_SOCKET"))
 	}
 	if sn == "" {
 		return &TmuxBackend{paneLogInfo: map[string]float64{}}
@@ -356,7 +356,7 @@ func (t *TmuxBackend) SendText(paneID string, text string) error {
 			}
 			return nil
 		}
-		bufferName := fmt.Sprintf("ccb-tb-%d-%d-%d", os.Getpid(), time.Now().UnixMilli(), rand.Intn(9000)+1000)
+		bufferName := fmt.Sprintf("curdx-tb-%d-%d-%d", os.Getpid(), time.Now().UnixMilli(), rand.Intn(9000)+1000)
 		if _, err := t.tmuxRun([]string{"load-buffer", "-b", bufferName, "-"}, true, false, []byte(sanitized), 0); err != nil {
 			return err
 		}
@@ -364,7 +364,7 @@ func (t *TmuxBackend) SendText(paneID string, text string) error {
 		if _, err := t.tmuxRun([]string{"paste-buffer", "-t", session, "-b", bufferName, "-p"}, true, false, nil, 0); err != nil {
 			return err
 		}
-		enterDelay := EnvFloat("CCB_TMUX_ENTER_DELAY", 0.5)
+		enterDelay := EnvFloat("CURDX_TMUX_ENTER_DELAY", 0.5)
 		if enterDelay > 0 {
 			time.Sleep(time.Duration(enterDelay * float64(time.Second)))
 		}
@@ -376,7 +376,7 @@ func (t *TmuxBackend) SendText(paneID string, text string) error {
 
 	// Pane-oriented: bracketed paste + unique tmux buffer + cleanup.
 	t.ensureNotInCopyMode(paneID)
-	bufferName := fmt.Sprintf("ccb-tb-%d-%d-%d", os.Getpid(), time.Now().UnixMilli(), rand.Intn(9000)+1000)
+	bufferName := fmt.Sprintf("curdx-tb-%d-%d-%d", os.Getpid(), time.Now().UnixMilli(), rand.Intn(9000)+1000)
 	if _, err := t.tmuxRun([]string{"load-buffer", "-b", bufferName, "-"}, true, false, []byte(sanitized), 0); err != nil {
 		return err
 	}
@@ -384,7 +384,7 @@ func (t *TmuxBackend) SendText(paneID string, text string) error {
 	if _, err := t.tmuxRun([]string{"paste-buffer", "-p", "-t", paneID, "-b", bufferName}, true, false, nil, 0); err != nil {
 		return err
 	}
-	enterDelay := EnvFloat("CCB_TMUX_ENTER_DELAY", 0.5)
+	enterDelay := EnvFloat("CURDX_TMUX_ENTER_DELAY", 0.5)
 	if enterDelay > 0 {
 		time.Sleep(time.Duration(enterDelay * float64(time.Second)))
 	}
@@ -479,7 +479,7 @@ func (t *TmuxBackend) RespawnPane(paneID string, cmd string, cwd string, stderrL
 		cmdBody = fmt.Sprintf("%s 2>> %s", cmdBody, shellQuote(logPath))
 	}
 
-	shell := strings.TrimSpace(os.Getenv("CCB_TMUX_SHELL"))
+	shell := strings.TrimSpace(os.Getenv("CURDX_TMUX_SHELL"))
 	if shell == "" {
 		result, err := t.tmuxRun([]string{"show-option", "-gqv", "default-shell"}, false, true, nil, 1.0)
 		if err == nil && result != nil {
@@ -493,7 +493,7 @@ func (t *TmuxBackend) RespawnPane(paneID string, cmd string, cwd string, stderrL
 		shell, _ = DefaultShell()
 	}
 
-	flagsRaw := strings.TrimSpace(os.Getenv("CCB_TMUX_SHELL_FLAGS"))
+	flagsRaw := strings.TrimSpace(os.Getenv("CURDX_TMUX_SHELL_FLAGS"))
 	var flags []string
 	if flagsRaw != "" {
 		flags = splitShellArgs(flagsRaw)
@@ -570,7 +570,7 @@ func (t *TmuxBackend) CreatePane(cmd string, cwd string, direction string, perce
 	}
 
 	// Outside tmux: create a new detached tmux session as root container.
-	sessionName := fmt.Sprintf("ccb-%s-%d-%d", filepath.Base(cwd), int(time.Now().Unix())%100000, os.Getpid())
+	sessionName := fmt.Sprintf("curdx-%s-%d-%d", filepath.Base(cwd), int(time.Now().Unix())%100000, os.Getpid())
 	if _, err := t.tmuxRun([]string{"new-session", "-d", "-s", sessionName, "-c", cwd}, true, false, nil, 0); err != nil {
 		return "", err
 	}

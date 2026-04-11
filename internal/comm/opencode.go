@@ -922,11 +922,11 @@ func (r *OpenCodeLogReader) readSince(state OpenCodeLogState, timeout time.Durat
 
 			// If no completed timestamp, check for completion markers as fallback.
 			if !completed && text != "" {
-				completionMarker := os.Getenv("CCB_EXECUTION_COMPLETE_MARKER")
+				completionMarker := os.Getenv("CURDX_EXECUTION_COMPLETE_MARKER")
 				if completionMarker == "" {
 					completionMarker = "[EXECUTION_COMPLETE]"
 				}
-				if strings.Contains(text, completionMarker) || strings.Contains(text, "CCB_DONE:") {
+				if strings.Contains(text, completionMarker) || strings.Contains(text, "CURDX_DONE:") {
 					completed = true
 				}
 			}

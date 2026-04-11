@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/providers"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // TerminalBackend abstracts terminal multiplexer operations for session management.
@@ -239,10 +239,10 @@ func findProjectSessionFile(workDir, baseFilename, instance string) string {
 
 // computeSessionKey computes the routing key for a provider session.
 func computeSessionKey(prefix string, data map[string]interface{}, sessionFile, instance string) string {
-	pid := getString(data, "ccb_project_id")
+	pid := getString(data, "curdx_project_id")
 	if pid == "" {
 		workDir := getWorkDir(data, sessionFile)
-		pid = projectid.ComputeCCBProjectID(workDir)
+		pid = projectid.ComputeCURDXProjectID(workDir)
 	}
 	if instance != "" {
 		prefix = prefix + ":" + instance

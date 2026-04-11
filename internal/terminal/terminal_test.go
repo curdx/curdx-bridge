@@ -209,7 +209,7 @@ func TestTmuxFindPaneByTitleMarkerParsesListPanes(t *testing.T) {
 	handler := func(args []string) *TmuxRunResult {
 		if len(args) >= 4 && args[0] == "list-panes" && args[1] == "-a" {
 			return &TmuxRunResult{
-				Stdout:     "%1\tCCB-opencode-abc\n%2\tOTHER\n",
+				Stdout:     "%1\tCURDX-opencode-abc\n%2\tOTHER\n",
 				ReturnCode: 0,
 			}
 		}
@@ -245,7 +245,7 @@ func TestTmuxFindPaneByTitleMarkerParsesListPanes(t *testing.T) {
 		return ""
 	}
 
-	if got := findPane("CCB-opencode"); got != "%1" {
+	if got := findPane("CURDX-opencode"); got != "%1" {
 		t.Errorf("expected %%1, got %s", got)
 	}
 	if got := findPane("NOPE"); got != "" {
@@ -304,7 +304,7 @@ func TestTmuxSendTextAlwaysDeletesBuffer(t *testing.T) {
 	// ensureNotInCopyMode
 	tb.tmuxRun([]string{"display-message", "-p", "-t", paneID, "#{pane_in_mode}"}, false, true, nil, 1.0)
 
-	bufferName := "ccb-tb-test-buffer"
+	bufferName := "curdx-tb-test-buffer"
 	_, err := tb.tmuxRun([]string{"load-buffer", "-b", bufferName, "-"}, true, false, []byte(sanitized), 0)
 	if err != nil {
 		t.Fatal("load-buffer failed unexpectedly")
@@ -572,9 +572,9 @@ func TestExtractCWDPath(t *testing.T) {
 
 func TestGetShellType(t *testing.T) {
 	// On Unix-like systems, default should be "bash".
-	origEnv := os.Getenv("CCB_BACKEND_ENV")
-	os.Unsetenv("CCB_BACKEND_ENV")
-	defer restoreEnv("CCB_BACKEND_ENV", origEnv)
+	origEnv := os.Getenv("CURDX_BACKEND_ENV")
+	os.Unsetenv("CURDX_BACKEND_ENV")
+	defer restoreEnv("CURDX_BACKEND_ENV", origEnv)
 
 	st := GetShellType()
 	if st != "bash" && st != "powershell" {
@@ -670,13 +670,13 @@ func TestCleanupPaneLogs(t *testing.T) {
 	ResetPaneLogCleanTimer()
 
 	// Set max files to 3.
-	os.Setenv("CCB_PANE_LOG_MAX_FILES", "3")
-	os.Setenv("CCB_PANE_LOG_TTL_DAYS", "0")
-	os.Setenv("CCB_PANE_LOG_CLEAN_INTERVAL_S", "0")
+	os.Setenv("CURDX_PANE_LOG_MAX_FILES", "3")
+	os.Setenv("CURDX_PANE_LOG_TTL_DAYS", "0")
+	os.Setenv("CURDX_PANE_LOG_CLEAN_INTERVAL_S", "0")
 	defer func() {
-		os.Unsetenv("CCB_PANE_LOG_MAX_FILES")
-		os.Unsetenv("CCB_PANE_LOG_TTL_DAYS")
-		os.Unsetenv("CCB_PANE_LOG_CLEAN_INTERVAL_S")
+		os.Unsetenv("CURDX_PANE_LOG_MAX_FILES")
+		os.Unsetenv("CURDX_PANE_LOG_TTL_DAYS")
+		os.Unsetenv("CURDX_PANE_LOG_CLEAN_INTERVAL_S")
 	}()
 
 	CleanupPaneLogs(tmpDir)
@@ -696,8 +696,8 @@ func TestMaybeTrimLog(t *testing.T) {
 	os.WriteFile(logPath, []byte(data), 0o644)
 
 	// Set max to 50.
-	os.Setenv("CCB_PANE_LOG_MAX_BYTES", "50")
-	defer os.Unsetenv("CCB_PANE_LOG_MAX_BYTES")
+	os.Setenv("CURDX_PANE_LOG_MAX_BYTES", "50")
+	defer os.Unsetenv("CURDX_PANE_LOG_MAX_BYTES")
 
 	MaybeTrimLog(logPath)
 

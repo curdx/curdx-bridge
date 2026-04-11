@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
 
 // ClaudeProjectSession represents a Claude provider session.
@@ -155,13 +155,13 @@ func (s *ClaudeProjectSession) writeBackLocked() {
 func inferWorkDirFromSessionFile(sessionFile string) string {
 	parent := filepath.Dir(sessionFile)
 	base := filepath.Base(parent)
-	if base == ".ccb" || base == ".ccb_config" {
+	if base == ".curdx" || base == ".curdx_config" {
 		return filepath.Dir(parent)
 	}
 	return parent
 }
 
-// ensureWorkDirFields populates work_dir, work_dir_norm, and ccb_project_id if missing.
+// ensureWorkDirFields populates work_dir, work_dir_norm, and curdx_project_id if missing.
 func ensureWorkDirFields(data map[string]interface{}, sessionFile, fallbackWorkDir string) {
 	if data == nil {
 		return
@@ -182,11 +182,11 @@ func ensureWorkDirFields(data map[string]interface{}, sessionFile, fallbackWorkD
 		data["work_dir_norm"] = projectid.NormalizeWorkDir(workDir)
 	}
 
-	pid := getString(data, "ccb_project_id")
+	pid := getString(data, "curdx_project_id")
 	if pid == "" {
-		computed := projectid.ComputeCCBProjectID(workDir)
+		computed := projectid.ComputeCURDXProjectID(workDir)
 		if computed != "" {
-			data["ccb_project_id"] = computed
+			data["curdx_project_id"] = computed
 		}
 	}
 }
@@ -216,13 +216,13 @@ func LoadClaudeSession(workDir, instance string) *ClaudeProjectSession {
 		if getString(data, "work_dir") == "" {
 			data["work_dir"] = workDir
 		}
-		pid := getString(data, "ccb_project_id")
+		pid := getString(data, "curdx_project_id")
 		if pid == "" {
 			wd := getString(data, "work_dir")
 			if wd == "" {
 				wd = workDir
 			}
-			data["ccb_project_id"] = projectid.ComputeCCBProjectID(wd)
+			data["curdx_project_id"] = projectid.ComputeCURDXProjectID(wd)
 		}
 		ensureWorkDirFields(data, sessionFile, workDir)
 		return &ClaudeProjectSession{SessionFile: sessionFile, Data: data}
@@ -237,13 +237,13 @@ func LoadClaudeSession(workDir, instance string) *ClaudeProjectSession {
 		if getString(data, "work_dir") == "" {
 			data["work_dir"] = workDir
 		}
-		pid := getString(data, "ccb_project_id")
+		pid := getString(data, "curdx_project_id")
 		if pid == "" {
 			wd := getString(data, "work_dir")
 			if wd == "" {
 				wd = workDir
 			}
-			data["ccb_project_id"] = projectid.ComputeCCBProjectID(wd)
+			data["curdx_project_id"] = projectid.ComputeCURDXProjectID(wd)
 		}
 		if sessionFile == "" {
 			configDir := sessionutil.ResolveProjectConfigDir(workDir)
@@ -265,13 +265,13 @@ func LoadClaudeSession(workDir, instance string) *ClaudeProjectSession {
 	if getString(data, "work_dir") == "" {
 		data["work_dir"] = workDir
 	}
-	pid := getString(data, "ccb_project_id")
+	pid := getString(data, "curdx_project_id")
 	if pid == "" {
 		wd := strings.TrimSpace(getString(data, "work_dir"))
 		if wd == "" {
 			wd = workDir
 		}
-		data["ccb_project_id"] = projectid.ComputeCCBProjectID(wd)
+		data["curdx_project_id"] = projectid.ComputeCURDXProjectID(wd)
 	}
 	ensureWorkDirFields(data, sessionFile, workDir)
 	return &ClaudeProjectSession{SessionFile: sessionFile, Data: data}

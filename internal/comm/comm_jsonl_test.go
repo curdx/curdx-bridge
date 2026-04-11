@@ -188,7 +188,7 @@ func TestGemini_WaitForMessageReadsReply(t *testing.T) {
 	sessionPath := filepath.Join(root, "claude-code-bridge-1", "chats", "session-b.json")
 
 	messages := []map[string]interface{}{
-		{"type": "user", "content": fmt.Sprintf("CCB_REQ_ID: %s\nquestion", reqID)},
+		{"type": "user", "content": fmt.Sprintf("CURDX_REQ_ID: %s\nquestion", reqID)},
 	}
 	writeGeminiSession(t, sessionPath, messages, "sid-2")
 
@@ -199,7 +199,7 @@ func TestGemini_WaitForMessageReadsReply(t *testing.T) {
 	messages = append(messages, map[string]interface{}{
 		"type":    "gemini",
 		"id":      "g2",
-		"content": fmt.Sprintf("ok\nCCB_DONE: %s", reqID),
+		"content": fmt.Sprintf("ok\nCURDX_DONE: %s", reqID),
 	})
 	writeGeminiSession(t, sessionPath, messages, "sid-2")
 
@@ -208,8 +208,8 @@ func TestGemini_WaitForMessageReadsReply(t *testing.T) {
 	if reply == "" {
 		t.Fatal("expected non-empty reply")
 	}
-	if !strings.Contains(reply, "CCB_DONE: "+reqID) {
-		t.Errorf("expected CCB_DONE marker in reply, got %q", reply)
+	if !strings.Contains(reply, "CURDX_DONE: "+reqID) {
+		t.Errorf("expected CURDX_DONE marker in reply, got %q", reply)
 	}
 	if newState.SessionPath != sessionPath {
 		t.Errorf("expected session_path=%q, got %q", sessionPath, newState.SessionPath)

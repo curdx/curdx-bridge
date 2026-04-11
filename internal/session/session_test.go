@@ -79,7 +79,7 @@ func TestEnsurePaneAlive(t *testing.T) {
 func TestEnsurePaneMarkerFallback(t *testing.T) {
 	backend := &mockBackend{
 		alive:      map[string]bool{"%2": true},
-		markerMap:  map[string]string{"CCB_CODEX_123": "%2"},
+		markerMap:  map[string]string{"CURDX_CODEX_123": "%2"},
 		belongsCwd: true,
 	}
 	oldFn := GetBackendFunc
@@ -89,7 +89,7 @@ func TestEnsurePaneMarkerFallback(t *testing.T) {
 	dir := t.TempDir()
 	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
 		"pane_id":            "%dead",
-		"pane_title_marker":  "CCB_CODEX_123",
+		"pane_title_marker":  "CURDX_CODEX_123",
 		"terminal":           "tmux",
 		"work_dir":           dir,
 	})
@@ -180,7 +180,7 @@ func TestClaudeNoRespawn(t *testing.T) {
 func TestComputeSessionKey(t *testing.T) {
 	dir := t.TempDir()
 	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
-		"ccb_project_id": "abc123",
+		"curdx_project_id": "abc123",
 		"work_dir":       dir,
 	})
 

@@ -55,7 +55,7 @@ func DefaultShell() (string, string) {
 
 // GetShellType returns "bash" or "powershell" for the current environment.
 func GetShellType() string {
-	if IsWindows() && strings.EqualFold(os.Getenv("CCB_BACKEND_ENV"), "wsl") {
+	if IsWindows() && strings.EqualFold(os.Getenv("CURDX_BACKEND_ENV"), "wsl") {
 		return "bash"
 	}
 	shell, _ := DefaultShell()
@@ -248,7 +248,7 @@ func runCapture(name string, args ...string) (string, error) {
 
 // chooseWeztermCLICWD picks a safe cwd for launching Windows wezterm.exe from WSL.
 func chooseWeztermCLICWD() string {
-	override := strings.TrimSpace(os.Getenv("CCB_WEZTERM_CLI_CWD"))
+	override := strings.TrimSpace(os.Getenv("CURDX_WEZTERM_CLI_CWD"))
 	candidates := []string{}
 	if override != "" {
 		candidates = append(candidates, override)
@@ -296,23 +296,23 @@ func loadCachedWeztermBin() string {
 
 	xdg := strings.TrimSpace(os.Getenv("XDG_CONFIG_HOME"))
 	if xdg != "" {
-		candidates = append(candidates, filepath.Join(xdg, "ccb", "env"))
+		candidates = append(candidates, filepath.Join(xdg, "curdx", "env"))
 	}
 
 	if IsWindows() {
 		localAppData := strings.TrimSpace(os.Getenv("LOCALAPPDATA"))
 		if localAppData != "" {
-			candidates = append(candidates, filepath.Join(localAppData, "ccb", "env"))
+			candidates = append(candidates, filepath.Join(localAppData, "curdx", "env"))
 		}
 		appData := strings.TrimSpace(os.Getenv("APPDATA"))
 		if appData != "" {
-			candidates = append(candidates, filepath.Join(appData, "ccb", "env"))
+			candidates = append(candidates, filepath.Join(appData, "curdx", "env"))
 		}
 	}
 
 	home, _ := os.UserHomeDir()
 	if home != "" {
-		candidates = append(candidates, filepath.Join(home, ".config", "ccb", "env"))
+		candidates = append(candidates, filepath.Join(home, ".config", "curdx", "env"))
 	}
 
 	for _, configPath := range candidates {

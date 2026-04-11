@@ -20,15 +20,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anthropics/curdx-bridge/internal/envutil"
-	"github.com/anthropics/curdx-bridge/internal/paneregistry"
-	"github.com/anthropics/curdx-bridge/internal/processlock"
-	"github.com/anthropics/curdx-bridge/internal/projectid"
-	"github.com/anthropics/curdx-bridge/internal/rpc"
-	rtpkg "github.com/anthropics/curdx-bridge/internal/runtime"
-	"github.com/anthropics/curdx-bridge/internal/sessionutil"
-	"github.com/anthropics/curdx-bridge/internal/startconfig"
-	"github.com/anthropics/curdx-bridge/internal/terminal"
+	"github.com/curdx/curdx-bridge/internal/envutil"
+	"github.com/curdx/curdx-bridge/internal/paneregistry"
+	"github.com/curdx/curdx-bridge/internal/processlock"
+	"github.com/curdx/curdx-bridge/internal/projectid"
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	rtpkg "github.com/curdx/curdx-bridge/internal/runtime"
+	"github.com/curdx/curdx-bridge/internal/sessionutil"
+	"github.com/curdx/curdx-bridge/internal/startconfig"
+	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
 const (
@@ -1187,7 +1187,7 @@ func codexSessionRoot() string {
 
 // codexSessionScanLimit returns the maximum number of session logs to inspect.
 func codexSessionScanLimit() int {
-	raw := strings.TrimSpace(os.Getenv("CCB_CODEX_SCAN_LIMIT"))
+	raw := strings.TrimSpace(os.Getenv("CURDX_CODEX_SCAN_LIMIT"))
 	if raw == "" {
 		return 400
 	}

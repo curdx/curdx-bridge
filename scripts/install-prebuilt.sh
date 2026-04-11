@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# CCB Quick Installer - downloads pre-built binaries from GitHub Release.
+# CURDX Quick Installer - downloads pre-built binaries from GitHub Release.
 # Usage: curl -fsSL https://raw.githubusercontent.com/curdx/curdx-bridge/main/scripts/install-prebuilt.sh | bash
 set -euo pipefail
 
 REPO="curdx/curdx-bridge"
-INSTALL_DIR="${CCB_INSTALL_DIR:-$HOME/.local/bin}"
+INSTALL_DIR="${CURDX_INSTALL_DIR:-$HOME/.local/bin}"
 
 # Detect OS and arch
 detect_platform() {
@@ -47,21 +47,21 @@ main() {
   os="${platform%/*}"
   arch="${platform#*/}"
 
-  version="${CCB_VERSION:-$(get_latest_version)}"
+  version="${CURDX_VERSION:-$(get_latest_version)}"
   if [[ -z "$version" ]]; then
     echo "ERROR: Could not determine latest version." >&2
-    echo "Set CCB_VERSION=v1.0.0 to specify manually." >&2
+    echo "Set CURDX_VERSION=v1.0.0 to specify manually." >&2
     exit 1
   fi
 
-  echo "Installing CCB ${version} for ${os}/${arch}..."
+  echo "Installing CURDX ${version} for ${os}/${arch}..."
 
   ext="tar.gz"
   if [[ "$os" == "windows" ]]; then
     ext="zip"
   fi
 
-  archive_name="ccb-${os}-${arch}.${ext}"
+  archive_name="curdx-${os}-${arch}.${ext}"
   url="https://github.com/${REPO}/releases/download/${version}/${archive_name}"
 
   local tmpdir
@@ -79,7 +79,7 @@ main() {
     tar xzf "$archive_name"
   fi
 
-  local srcdir="ccb-${os}-${arch}"
+  local srcdir="curdx-${os}-${arch}"
   if [[ ! -d "$srcdir" ]]; then
     echo "ERROR: Expected directory $srcdir not found in archive." >&2
     exit 1
@@ -103,7 +103,7 @@ main() {
   done
 
   # Install skills and config
-  local share_dir="${CCB_SHARE_DIR:-$HOME/.local/share/ccb}"
+  local share_dir="${CURDX_SHARE_DIR:-$HOME/.local/share/curdx}"
   mkdir -p "$share_dir"
   for dir in claude_skills codex_skills config; do
     if [[ -d "$srcdir/$dir" ]]; then
@@ -111,7 +111,7 @@ main() {
     fi
   done
 
-  # Copy install.sh for ccb update/reinstall
+  # Copy install.sh for curdx update/reinstall
   if [[ -f "$srcdir/install.sh" ]]; then
     cp "$srcdir/install.sh" "$share_dir/"
   fi
@@ -129,7 +129,7 @@ main() {
   fi
 
   echo ""
-  echo "Done! Run 'ccb --help' to get started."
+  echo "Done! Run 'curdx --help' to get started."
 }
 
 main "$@"
