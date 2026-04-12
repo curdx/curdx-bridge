@@ -25,44 +25,32 @@ import (
 
 // ProviderDaemons maps provider names to their daemon command names.
 var ProviderDaemons = map[string]string{
-	"codex":     "cask",
-	"opencode":  "oask",
-	"claude":    "lask",
-}
-
-// ProviderDisplayNames maps provider names to their display names.
-var ProviderDisplayNames = map[string]string{
-	"opencode": "OpenCode",
+	"codex":  "cask",
+	"claude": "lask",
 }
 
 // CallerSessionFiles maps caller names to their session file names.
 var CallerSessionFiles = map[string]string{
-	"claude":    ".claude-session",
-	"codex":     ".codex-session",
-	"opencode":  ".opencode-session",
+	"claude": ".claude-session",
+	"codex":  ".codex-session",
 }
 
 // CallerPaneEnvHints maps callers to env vars that may carry their pane info.
 var CallerPaneEnvHints = map[string][2]string{
-	"codex":     {"CODEX_TMUX_SESSION", "CODEX_WEZTERM_PANE"},
-	"opencode":  {"OPENCODE_TMUX_SESSION", "OPENCODE_WEZTERM_PANE"},
+	"codex": {"CODEX_TMUX_SESSION", "CODEX_WEZTERM_PANE"},
 }
 
 // CallerEnvHints maps callers to env vars that indicate the caller is active.
 var CallerEnvHints = map[string][2]string{
-	"codex":     {"CODEX_SESSION_ID", "CODEX_RUNTIME_DIR"},
-	"opencode":  {"OPENCODE_SESSION_ID", "OPENCODE_RUNTIME_DIR"},
+	"codex": {"CODEX_SESSION_ID", "CODEX_RUNTIME_DIR"},
 }
 
 var validCallers = map[string]bool{
-	"claude": true, "codex": true, "opencode": true,
+	"claude": true, "codex": true,
 	"email": true, "manual": true,
 }
 
 func displayName(provider string) string {
-	if name, ok := ProviderDisplayNames[provider]; ok {
-		return name
-	}
 	if len(provider) > 0 {
 		return strings.ToUpper(provider[:1]) + provider[1:]
 	}
@@ -525,7 +513,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: ask <provider> [options] <message>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  codex, opencode, claude")
+	fmt.Fprintln(os.Stderr, "  codex, claude")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Options:")
 	fmt.Fprintln(os.Stderr, "  -h, --help              Show this help message")

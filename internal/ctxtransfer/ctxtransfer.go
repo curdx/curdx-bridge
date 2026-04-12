@@ -159,17 +159,6 @@ func extractConversationsForProvider(provider, workDir, sessionPath, sessionID, 
 			reader.SetPreferredSession(sessionPath)
 		}
 		pairs = reader.LatestConversations(fetchN)
-	case "opencode":
-		pid := projectID
-		if pid == "" {
-			pid = "global"
-		}
-		var opts []comm.OpenCodeOption
-		if sessionID != "" {
-			opts = append(opts, comm.WithSessionIDFilter(sessionID))
-		}
-		reader := comm.NewOpenCodeLogReader("", workDir, pid, opts...)
-		pairs = reader.LatestConversations(fetchN)
 	default:
 		return nil
 	}

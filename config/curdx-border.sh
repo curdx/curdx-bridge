@@ -34,9 +34,6 @@ case "$key" in
     Claude)
         set_border "fg=#bb9af7,bold" # Purple
         ;;
-    OpenCode)
-        set_border "fg=#9ece6a,bold" # Green
-        ;;
     Cmd)
         set_border "fg=#7dcfff,bold" # Teal
         ;;
@@ -47,9 +44,6 @@ case "$key" in
                 ;;
             Claude*)
                 set_border "fg=#bb9af7,bold"
-                ;;
-            CURDX-OpenCode*)
-                set_border "fg=#9ece6a,bold"
                 ;;
             CURDX-Cmd*)
                 set_border "fg=#7dcfff,bold"

@@ -209,7 +209,7 @@ func TestTmuxFindPaneByTitleMarkerParsesListPanes(t *testing.T) {
 	handler := func(args []string) *TmuxRunResult {
 		if len(args) >= 4 && args[0] == "list-panes" && args[1] == "-a" {
 			return &TmuxRunResult{
-				Stdout:     "%1\tCURDX-opencode-abc\n%2\tOTHER\n",
+				Stdout:     "%1\tCURDX-claude-abc\n%2\tOTHER\n",
 				ReturnCode: 0,
 			}
 		}
@@ -245,7 +245,7 @@ func TestTmuxFindPaneByTitleMarkerParsesListPanes(t *testing.T) {
 		return ""
 	}
 
-	if got := findPane("CURDX-opencode"); got != "%1" {
+	if got := findPane("CURDX-claude"); got != "%1" {
 		t.Errorf("expected %%1, got %s", got)
 	}
 	if got := findPane("NOPE"); got != "" {
@@ -808,7 +808,7 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 
 	// Simulate 2-provider layout.
 	root := "%root"
-	providers := []string{"codex", "opencode"}
+	providers := []string{"codex", "claude"}
 	panes := map[string]string{}
 	panes[providers[0]] = root
 	mockTitle(root, "M-"+providers[0])
@@ -817,7 +817,7 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 	panes[providers[1]] = right
 	mockTitle(right, "M-"+providers[1])
 
-	if panes["codex"] != "%root" || panes["opencode"] != "%r1" {
+	if panes["codex"] != "%root" || panes["claude"] != "%r1" {
 		t.Errorf("2-provider panes: %v", panes)
 	}
 	if len(splitCalls) != 1 || splitCalls[0].parent != "%root" || splitCalls[0].direction != "right" {
@@ -832,12 +832,12 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 	mockTitle(root, "M-codex")
 	rightTop := mockSplit(root, "right")
 	rightBottom := mockSplit(rightTop, "bottom")
-	panes["opencode"] = rightTop
-	panes["claude"] = rightBottom
-	mockTitle(rightTop, "M-opencode")
-	mockTitle(rightBottom, "M-claude")
+	panes["claude"] = rightTop
+	panes["extra"] = rightBottom
+	mockTitle(rightTop, "M-claude")
+	mockTitle(rightBottom, "M-extra")
 
-	if panes["codex"] != "%root" || panes["opencode"] != "%r2" || panes["claude"] != "%r3" {
+	if panes["codex"] != "%root" || panes["claude"] != "%r2" || panes["extra"] != "%r3" {
 		t.Errorf("3-provider panes: %v", panes)
 	}
 	if len(splitCalls) != 2 {
@@ -859,14 +859,14 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 	rt := mockSplit(root, "right")
 	lb := mockSplit(root, "bottom")
 	rb := mockSplit(rt, "bottom")
-	panes["opencode"] = rt
-	panes["claude"] = lb
+	panes["claude"] = rt
+	panes["extra"] = lb
 	panes["x"] = rb
-	mockTitle(rt, "M-opencode")
-	mockTitle(lb, "M-claude")
+	mockTitle(rt, "M-claude")
+	mockTitle(lb, "M-extra")
 	mockTitle(rb, "M-x")
 
-	if panes["codex"] != "%root" || panes["opencode"] != "%r4" || panes["claude"] != "%r5" || panes["x"] != "%r6" {
+	if panes["codex"] != "%root" || panes["claude"] != "%r4" || panes["extra"] != "%r5" || panes["x"] != "%r6" {
 		t.Errorf("4-provider panes: %v", panes)
 	}
 	if len(splitCalls) != 3 {

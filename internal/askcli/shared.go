@@ -40,9 +40,9 @@ import (
 type ProviderCLIConfig struct {
 	// CmdName is the CLI command name (e.g. "cask", "oask").
 	CmdName string
-	// ProviderName is the human-readable provider name (e.g. "Codex", "OpenCode").
+	// ProviderName is the human-readable provider name (e.g. "Codex").
 	ProviderName string
-	// ProviderKey is the lowercase provider key (e.g. "codex", "opencode").
+	// ProviderKey is the lowercase provider key (e.g. "codex").
 	ProviderKey string
 	// Spec is the provider client spec.
 	Spec providers.ProviderClientSpec
@@ -64,7 +64,7 @@ type ProviderCLIConfig struct {
 	DaemonAutostartEnvHint string
 	// SetupHint is the setup command hint (e.g. "`curdx codex`").
 	SetupHint string
-	// HasSupervisorMode enables the codex+opencode supervisor prompt (cask only).
+	// HasSupervisorMode enables the supervisor prompt (cask only).
 	HasSupervisorMode bool
 	// HasAsyncMode enables --async flag (oask, lask).
 	HasAsyncMode bool
@@ -113,14 +113,6 @@ func run(cfg ProviderCLIConfig, argv []string) int {
 
 	if args.asyncMode {
 		args.syncMode = false
-	}
-
-	// Supervisor mode (cask only)
-	if cfg.HasSupervisorMode {
-		executor := getExecutorFromRoles()
-		if executor == "codex+opencode" {
-			args.message = supervisorPrompt + args.message
-		}
 	}
 
 	workDir, _ := resolveWorkDirWithRegistry(
@@ -755,45 +747,6 @@ func daemonRequestWithRetries(
 	}
 
 	return nil
-}
-
-// -- Supervisor mode (cask only) --
-
-const supervisorPrompt = `## Executor Mode: codex+opencode
-You are the SUPERVISOR, NOT the executor.
-- Do NOT directly edit repo files yourself.
-- Break down tasks into clear instructions for OpenCode.
-- Use oask to delegate execution to OpenCode.
-- Review OpenCode results and iterate if needed.
-
-`
-
-func getExecutorFromRoles() string {
-	home, _ := os.UserHomeDir()
-
-	candidates := []string{
-		".autoflow/roles.session.json",
-		".autoflow/roles.json",
-		filepath.Join(home, ".config", "curdx", "roles.json"),
-	}
-	if xdg := strings.TrimSpace(os.Getenv("XDG_CONFIG_HOME")); xdg != "" {
-		candidates = append(candidates, filepath.Join(xdg, "curdx", "roles.json"))
-	}
-
-	for _, cfgPath := range candidates {
-		data, err := os.ReadFile(cfgPath)
-		if err != nil {
-			continue
-		}
-		var obj map[string]interface{}
-		if err := json.Unmarshal(data, &obj); err != nil {
-			continue
-		}
-		if executor, ok := obj["executor"].(string); ok && executor != "" {
-			return executor
-		}
-	}
-	return ""
 }
 
 // -- Helpers --

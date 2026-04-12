@@ -37,24 +37,6 @@ func sanitizeUserMessage(message string) string {
 // ── Codex (caskd_protocol.py) ──
 // Pure shim — re-exports from curdx_protocol. All functions are in protocol package.
 
-// ── OpenCode (oaskd_protocol.py) ──
-
-// WrapOpenCodePrompt wraps a prompt with CURDX markers for OpenCode.
-func WrapOpenCodePrompt(message, reqID string) string {
-	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
-	return fmt.Sprintf(
-		"%s %s\n\n"+
-			"%s\n\n"+
-			"IMPORTANT:\n"+
-			"- Reply normally, in English.\n"+
-			"- End your reply with this exact final line (verbatim, on its own line):\n"+
-			"%s %s\n",
-		ReqIDPrefix, reqID,
-		message,
-		DonePrefix, reqID,
-	)
-}
-
 // ── Claude (laskd_protocol.py) ──
 
 var (
@@ -159,7 +141,7 @@ func WrapClaudePrompt(message, reqID string) string {
 // ── Common reply extraction ──
 
 // ExtractReplyStandard extracts the reply segment for reqID using the standard
-// algorithm shared by opencode.
+// algorithm.
 // This is the common pattern from *askd_protocol.py.
 func ExtractReplyStandard(text, reqID string, stripDone func(string, string) string) string {
 	lines := splitLines(text)

@@ -4,7 +4,7 @@
 //
 //	autonew <provider>
 //
-// Providers: codex, opencode, claude
+// Providers: codex, claude
 //
 // Source: claude_code_bridge/bin/autonew
 package main
@@ -21,16 +21,15 @@ import (
 
 // providerCommands maps provider to its reset command.
 var providerCommands = map[string]string{
-	"codex":    "/new",
-	"opencode": "/new",
-	"claude":   "/new",
+	"codex":  "/new",
+	"claude": "/new",
 }
 
 func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: autonew <provider>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  codex, opencode, claude")
+	fmt.Fprintln(os.Stderr, "  codex, claude")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Sends /new to the provider's pane to start a new session.")
 }

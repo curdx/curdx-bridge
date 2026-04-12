@@ -405,8 +405,7 @@ func run(argv []string) int {
 
 	// Terminal caller - construct notification message
 	providerNames := map[string]string{
-		"codex":    "Codex",
-		"opencode": "OpenCode",
+		"codex": "Codex",
 	}
 	providerDisplay := providerNames[provider]
 	if providerDisplay == "" {
@@ -440,9 +439,8 @@ func run(argv []string) int {
 	} else {
 		// Fallback: find caller's pane_id from session file
 		sessionFiles := map[string]string{
-			"claude":   ".claude-session",
-			"codex":    ".codex-session",
-			"opencode": ".opencode-session",
+			"claude": ".claude-session",
+			"codex":  ".codex-session",
 		}
 		sessionFilename := sessionFiles[caller]
 		if sessionFilename == "" {

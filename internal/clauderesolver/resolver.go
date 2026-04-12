@@ -20,7 +20,6 @@ import (
 var SessionEnvKeys = []string{
 	"CURDX_SESSION_ID",
 	"CODEX_SESSION_ID",
-	"OPENCODE_SESSION_ID",
 }
 
 // ClaudeProjectsRoot returns the root directory for Claude projects.

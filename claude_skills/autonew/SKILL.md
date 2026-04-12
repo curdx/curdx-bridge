@@ -15,7 +15,7 @@ Send `/new` command directly to a provider's terminal pane to start a new sessio
 autonew <provider>
 ```
 
-Providers: codex, opencode, claude
+Providers: codex, claude
 
 ## Execution (MANDATORY)
 

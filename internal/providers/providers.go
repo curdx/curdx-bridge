@@ -39,15 +39,6 @@ var CaskdSpec = ProviderDaemonSpec{
 	LockName:       "caskd",
 }
 
-var OaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "oaskd",
-	ProtocolPrefix: "oask",
-	StateFileName:  "oaskd.json",
-	LogFileName:    "oaskd.log",
-	IdleTimeoutEnv: "CURDX_OASKD_IDLE_TIMEOUT_S",
-	LockName:       "oaskd",
-}
-
 var LaskdSpec = ProviderDaemonSpec{
 	DaemonKey:      "laskd",
 	ProtocolPrefix: "lask",
@@ -66,17 +57,6 @@ var CaskClientSpec = ProviderClientSpec{
 	AutostartEnvLegacy:  "CURDX_AUTO_CASKD",
 	StateFileEnv:        "CURDX_CASKD_STATE_FILE",
 	SessionFilename:     ".codex-session",
-	DaemonBinName:       "askd",
-	DaemonModule:        "askd.daemon",
-}
-
-var OaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "oask",
-	EnabledEnv:          "CURDX_OASKD",
-	AutostartEnvPrimary: "CURDX_OASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CURDX_AUTO_OASKD",
-	StateFileEnv:        "CURDX_OASKD_STATE_FILE",
-	SessionFilename:     ".opencode-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",
 }

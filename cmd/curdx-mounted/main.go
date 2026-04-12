@@ -23,7 +23,6 @@ type providerDaemon struct {
 
 var providerDaemons = []providerDaemon{
 	{provider: "codex", daemon: "cask"},
-	{provider: "opencode", daemon: "oask"},
 	{provider: "claude", daemon: "lask"},
 }
 
@@ -47,7 +46,7 @@ func getOnlineDaemons() map[string]bool {
 	if err != nil {
 		return online
 	}
-	for _, daemon := range []string{"caskd", "oaskd", "laskd"} {
+	for _, daemon := range []string{"caskd", "laskd"} {
 		if strings.Contains(string(out), daemon) {
 			online[daemon] = true
 		}

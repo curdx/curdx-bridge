@@ -1,6 +1,6 @@
 ---
 name: ping
-description: Test connectivity with AI provider (codex/opencode/claude).
+description: Test connectivity with AI provider (codex/claude).
 metadata:
   short-description: Test AI provider connectivity
 ---
@@ -13,7 +13,6 @@ Test connectivity with specified AI provider.
 
 The first argument must be the provider name:
 - `codex` - Test Codex
-- `opencode` - Test OpenCode
 - `claude` - Test Claude
 
 ## Execution (MANDATORY)

@@ -134,16 +134,8 @@ Send the constructed FileOpsREQ via `/file-op`:
 
 - If `executor == "codex"`:
   - Codex directly executes FileOpsREQ operations and returns FileOpsRES.
-- If `executor == "opencode"`:
-  - Codex uses the internal `oask` skill to call OpenCode.
-  - Codex acts as supervisor:
-    - Translate FileOpsREQ ops into OpenCode-friendly instructions
-    - Guide OpenCode step-by-step to apply changes and run commands
-    - Review OpenCode results and validate against done conditions
-    - If fixes are needed, guide OpenCode to iterate (respect `constraints.max_attempts`)
-  - Codex returns the final FileOpsRES (JSON only) back to Claude.
 
-### 7. Handle FileOpsRES (Codex or OpenCode)
+### 7. Handle FileOpsRES (Codex)
 
 **status = ok** → Go to Review
 

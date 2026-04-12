@@ -36,7 +36,6 @@ check_session() {
     case "$name" in
         claude)  session_file="$PWD/.curdx/.claude-session" ;;
         codex)   session_file="$PWD/.curdx/.codex-session" ;;
-        opencode) session_file="$PWD/.curdx/.opencode-session" ;;
     esac
 
     # Backwards compatibility: legacy config dir or root-level session file.
@@ -114,9 +113,8 @@ main() {
             # Full status with all AIs
             local claude_s=$(format_ai_status "cask" "C" "$C_ORANGE")
             local codex_s=$(format_ai_status "cask" "X" "$C_GREEN")
-            local opencode_s=$(format_ai_status "oask" "O" "$C_PURPLE")
 
-            out=" ${claude_s}${codex_s}${opencode_s} "
+            out=" ${claude_s}${codex_s} "
             ;;
 
         daemons)
@@ -169,13 +167,6 @@ main() {
                 output+="${C_DIM}○${C_RESET} "
             fi
 
-            # O - OpenCode (oask daemon)
-            if [[ $(check_daemon "oask") == "on" ]]; then
-                output+="${C_PURPLE}●${C_RESET}"
-            else
-                output+="${C_DIM}○${C_RESET}"
-            fi
-
             out="${output}"
             ;;
 
@@ -191,7 +182,6 @@ main() {
                 ai_key="$(printf '%s' "$ai_name" | tr '[:upper:]' '[:lower:]')"
                 case "$ai_key" in
                     claude|codex) echo "${C_ORANGE}[$ai_name]${C_RESET}" ;;
-                    opencode)     echo "${C_PURPLE}[$ai_name]${C_RESET}" ;;
                     cmd)          echo "${C_TEAL}[$ai_name]${C_RESET}" ;;
                     *)            echo "[$ai_name]" ;;
                 esac

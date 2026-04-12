@@ -14,7 +14,6 @@ Send the user's request to the specified AI provider via ask.
 The first argument must be the provider name. The message MUST be provided via stdin
 (heredoc or pipe), not as CLI arguments, to avoid shell globbing issues:
 - `claude` - Send to Claude
-- `opencode` - Send to OpenCode
 
 ## Execution (MANDATORY)
 
@@ -32,12 +31,12 @@ EOF
 
 ## Examples
 
-- `/ask opencode What is 12+12?` (send via heredoc)
-- `CURDX_CALLER=codex ask opencode <<'EOF'`
+- `/ask claude What is 12+12?` (send via heredoc)
+- `CURDX_CALLER=codex ask claude <<'EOF'`
   `What is 12+12?`
   `EOF`
 
 ## Notes
 
-- If it fails, check backend health with the corresponding ping command (`curdx-ping <provider>` (e.g., `curdx-ping opencode`)).
+- If it fails, check backend health with the corresponding ping command (`curdx-ping <provider>` (e.g., `curdx-ping claude`)).
 - Codex-managed sessions default to foreground; use `--background` or `CURDX_ASK_BACKGROUND=1` for async.

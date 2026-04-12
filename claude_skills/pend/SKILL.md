@@ -1,6 +1,6 @@
 ---
 name: pend
-description: View latest reply from AI provider (codex/opencode/claude).
+description: View latest reply from AI provider (codex/claude).
 metadata:
   short-description: View latest AI provider reply
 ---
@@ -13,7 +13,6 @@ View the latest reply from specified AI provider.
 
 The first argument must be the provider name:
 - `codex` - View Codex reply
-- `opencode` - View OpenCode reply
 - `claude` - View Claude reply
 
 Optional: Add a number N to show the latest N conversations.

@@ -84,9 +84,9 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 		"work_dir":       workDir,
 		"terminal":       "tmux",
 		"providers": map[string]interface{}{
-			"opencode": map[string]interface{}{
+			"claude": map[string]interface{}{
 				"pane_id":      "%1",
-				"session_file": filepath.Join(workDir, ".curdx", ".opencode-session"),
+				"session_file": filepath.Join(workDir, ".curdx", ".claude-session"),
 			},
 		},
 	})
@@ -114,8 +114,8 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 	if _, ok := provs["codex"]; !ok {
 		t.Error("missing codex in providers")
 	}
-	if _, ok := provs["opencode"]; !ok {
-		t.Error("missing opencode in providers")
+	if _, ok := provs["claude"]; !ok {
+		t.Error("missing claude in providers")
 	}
 }
 

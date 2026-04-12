@@ -1,10 +1,10 @@
 <!-- CURDX_CONFIG_START -->
 ## AI Collaboration
-Use `/ask <provider>` to consult other AI assistants (codex/opencode).
+Use `/ask <provider>` to consult other AI assistants (codex).
 Use `/cping <provider>` to check connectivity.
 Use `/pend <provider>` to view latest replies.
 
-Providers: `codex`, `opencode`, `claude`
+Providers: `codex`, `claude`
 
 ## Async Guardrail (MANDATORY)
 

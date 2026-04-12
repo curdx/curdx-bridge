@@ -266,10 +266,9 @@ func providerLabel(provider string) string {
 		key = "claude"
 	}
 	labels := map[string]string{
-		"claude":   "Claude",
-		"codex":    "Codex",
-		"opencode": "OpenCode",
-		"auto":     "Auto",
+		"claude": "Claude",
+		"codex":  "Codex",
+		"auto":   "Auto",
 	}
 	if label, ok := labels[key]; ok {
 		return label

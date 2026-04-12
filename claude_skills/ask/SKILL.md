@@ -1,6 +1,6 @@
 ---
 name: ask
-description: Async via ask, end turn immediately; use when user explicitly delegates to any AI provider (codex/opencode); NOT for questions about the providers themselves.
+description: Async via ask, end turn immediately; use when user explicitly delegates to any AI provider (codex); NOT for questions about the providers themselves.
 metadata:
   short-description: Ask AI provider asynchronously
 ---
@@ -13,7 +13,6 @@ Send the user's request to specified AI provider asynchronously.
 
 The first argument must be the provider name, followed by the message:
 - `codex` - Send to Codex
-- `opencode` - Send to OpenCode
 
 ## Execution (MANDATORY)
 
@@ -32,5 +31,4 @@ Bash(CURDX_CALLER=claude ask $PROVIDER "$MESSAGE")
 ## Examples
 
 - `/ask codex Refactor this code`
-- `/ask opencode Analyze this bug`
 

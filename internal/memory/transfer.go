@@ -28,21 +28,19 @@ type ContextTransfer struct {
 
 // Supported providers and sources.
 var (
-	SupportedProviders    = []string{"codex", "opencode"}
-	SupportedSources      = []string{"auto", "claude", "codex", "opencode"}
+	SupportedProviders    = []string{"codex"}
+	SupportedSources      = []string{"auto", "claude", "codex"}
 	SourceSessionFiles    = map[string]string{
-		"claude":   ".claude-session",
-		"codex":    ".codex-session",
-		"opencode": ".opencode-session",
+		"claude": ".claude-session",
+		"codex":  ".codex-session",
 	}
-	DefaultSourceOrder    = []string{"claude", "codex", "opencode"}
+	DefaultSourceOrder    = []string{"claude", "codex"}
 	DefaultFallbackPairs  = 50
 )
 
 // Provider command map for send_to_provider.
 var providerCmdMap = map[string]string{
-	"codex":    "cask",
-	"opencode": "oask",
+	"codex": "cask",
 }
 
 // NewContextTransfer creates a new ContextTransfer.
@@ -292,8 +290,6 @@ func (ct *ContextTransfer) extractByProvider(
 		return ct.extractFromClaude(sessionPath, lastN, includeStats)
 	case "codex":
 		return ct.extractFromGeneric("codex", sessionPath, lastN, sourceSessionID)
-	case "opencode":
-		return ct.extractFromGeneric("opencode", sessionPath, lastN, sourceSessionID)
 	default:
 		return nil, &SessionNotFoundError{Msg: fmt.Sprintf("Unsupported source provider: %s", provider)}
 	}
@@ -348,7 +344,7 @@ func (ct *ContextTransfer) extractFromClaude(
 	}, nil
 }
 
-// extractFromGeneric handles codex, opencode providers.
+// extractFromGeneric handles codex provider.
 // In the Go port, the per-provider log readers (CodexLogReader, etc.)
 // are not available. We use the session data to find the log path and parse it
 // with the claude parser as a best-effort extraction, since the JSONL format

@@ -108,7 +108,7 @@ func (t *QueuedTask) SignalDone() {
 
 // BaseProviderAdapter is the interface that all provider adapters must implement.
 type BaseProviderAdapter interface {
-	// Key returns the provider key (e.g., "codex", "opencode").
+	// Key returns the provider key (e.g., "codex").
 	Key() string
 	// Spec returns the provider daemon specification.
 	Spec() providers.ProviderDaemonSpec

@@ -307,7 +307,7 @@ func newLineScanner(r io.Reader) *bufio.Scanner {
 }
 
 // ---------------------------------------------------------------------------
-// JSONL helpers (shared by Claude, Codex, OpenCode log readers)
+// JSONL helpers (shared by Claude, Codex log readers)
 // ---------------------------------------------------------------------------
 
 func strOrEmpty(v interface{}) string {

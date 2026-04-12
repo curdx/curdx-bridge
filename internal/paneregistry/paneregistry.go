@@ -138,9 +138,6 @@ func providerEntryFromLegacy(data map[string]interface{}, provider string) map[s
 		copyIfPresent("pane_title_marker", "pane_title_marker")
 		copyIfPresent("codex_session_id", "codex_session_id")
 		copyIfPresent("codex_session_path", "codex_session_path")
-	case "opencode":
-		copyIfPresent("opencode_pane_id", "pane_id")
-		copyIfPresent("pane_title_marker", "pane_title_marker")
 	case "claude":
 		copyIfPresent("claude_pane_id", "pane_id")
 	}
@@ -168,7 +165,7 @@ func getProvidersMap(data map[string]interface{}) map[string]map[string]interfac
 
 	// Legacy flat format.
 	out := map[string]map[string]interface{}{}
-	for _, p := range []string{"codex", "opencode", "claude"} {
+	for _, p := range []string{"codex", "claude"} {
 		entry := providerEntryFromLegacy(data, p)
 		if len(entry) > 0 {
 			out[p] = entry
@@ -448,7 +445,7 @@ func UpsertRegistry(record map[string]interface{}) bool {
 	}
 
 	// Migrate legacy flat fields.
-	for _, p := range []string{"codex", "opencode", "claude"} {
+	for _, p := range []string{"codex", "claude"} {
 		legacyEntry := providerEntryFromLegacy(record, p)
 		if len(legacyEntry) > 0 {
 			if _, exists := provs[p]; !exists {
