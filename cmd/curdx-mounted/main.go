@@ -14,19 +14,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/curdx/curdx-bridge/internal/rpc"
+	"github.com/curdx/curdx-bridge/internal/runtime"
 )
 
-type providerDaemon struct {
-	provider string
-	daemon   string
-}
-
-var providerDaemons = []providerDaemon{
-	{provider: "codex", daemon: "cask"},
-	{provider: "gemini", daemon: "gask"},
-	{provider: "opencode", daemon: "oask"},
-	{provider: "claude", daemon: "lask"},
-}
+var providerNames = []string{"codex", "gemini", "opencode", "claude"}
 
 func sessionFileExists(cwd, provider string) bool {
 	candidates := []string{
@@ -42,18 +35,10 @@ func sessionFileExists(cwd, provider string) bool {
 	return false
 }
 
-func getOnlineDaemons() map[string]bool {
-	online := make(map[string]bool)
-	out, err := exec.Command("pgrep", "-af", "bin/[cglod]askd$").Output()
-	if err != nil {
-		return online
-	}
-	for _, daemon := range []string{"caskd", "gaskd", "oaskd", "laskd"} {
-		if strings.Contains(string(out), daemon) {
-			online[daemon] = true
-		}
-	}
-	return online
+// isDaemonOnline checks if the unified askd daemon is reachable.
+func isDaemonOnline() bool {
+	stateFile := runtime.StateFilePath("askd.json")
+	return rpc.PingDaemon("ask", 0.5, stateFile)
 }
 
 func main() {
@@ -87,20 +72,20 @@ func main() {
 	self, _ := os.Executable()
 	scriptDir := filepath.Dir(self)
 
-	online := getOnlineDaemons()
+	daemonOnline := isDaemonOnline()
 
 	var mounted []string
-	for _, pd := range providerDaemons {
-		if !sessionFileExists(cwd, pd.provider) {
+	for _, provider := range providerNames {
+		if !sessionFileExists(cwd, provider) {
 			continue
 		}
 
-		isOnline := online[pd.daemon+"d"]
+		isOnline := daemonOnline
 
 		if !isOnline && autostart {
 			// Try autostart via curdx-ping.
 			curdxPing := filepath.Join(scriptDir, "curdx-ping")
-			cmd := exec.Command(curdxPing, pd.provider, "--autostart")
+			cmd := exec.Command(curdxPing, provider, "--autostart")
 			cmd.Dir = cwd
 			cmd.Stdout = nil
 			cmd.Stderr = nil
@@ -110,7 +95,7 @@ func main() {
 		}
 
 		if isOnline {
-			mounted = append(mounted, pd.provider)
+			mounted = append(mounted, provider)
 		}
 	}
 
