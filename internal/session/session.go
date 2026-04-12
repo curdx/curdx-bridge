@@ -231,10 +231,11 @@ func ensurePane(sessionFile string, data map[string]interface{}, hasRespawn bool
 	return EnsurePaneResult{OK: false, Err: "Pane not alive: " + paneID}
 }
 
-// findProjectSessionFile wraps sessionutil.FindProjectSessionFile with instance support.
+// findProjectSessionFile wraps sessionutil.FindActiveProjectSessionFile with instance support.
+// It skips sessions marked active:false, allowing fallback to parent directories.
 func findProjectSessionFile(workDir, baseFilename, instance string) string {
 	filename := providers.SessionFilenameForInstance(baseFilename, instance)
-	return sessionutil.FindProjectSessionFile(workDir, filename)
+	return sessionutil.FindActiveProjectSessionFile(workDir, filename)
 }
 
 // computeSessionKey computes the routing key for a provider session.

@@ -3,6 +3,7 @@
 package sessionutil
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -178,6 +179,15 @@ func PrintSessionError(msg string, toStderr bool) {
 
 // FindProjectSessionFile finds a session file for the given work_dir.
 func FindProjectSessionFile(workDir string, sessionFilename string) string {
+	return findSessionFile(workDir, sessionFilename, false)
+}
+
+// FindActiveProjectSessionFile finds a session file, skipping those marked active:false.
+func FindActiveProjectSessionFile(workDir string, sessionFilename string) string {
+	return findSessionFile(workDir, sessionFilename, true)
+}
+
+func findSessionFile(workDir string, sessionFilename string, skipInactive bool) string {
 	current, err := filepath.Abs(workDir)
 	if err != nil {
 		current = workDir
@@ -187,19 +197,18 @@ func FindProjectSessionFile(workDir string, sessionFilename string) string {
 	}
 
 	for {
-		candidate := filepath.Join(current, CURDXProjectConfigDirname, sessionFilename)
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate
+		candidates := []string{
+			filepath.Join(current, CURDXProjectConfigDirname, sessionFilename),
+			filepath.Join(current, CURDXProjectConfigLegacyDirname, sessionFilename),
+			filepath.Join(current, sessionFilename),
 		}
-
-		legacyCandidate := filepath.Join(current, CURDXProjectConfigLegacyDirname, sessionFilename)
-		if _, err := os.Stat(legacyCandidate); err == nil {
-			return legacyCandidate
-		}
-
-		legacy := filepath.Join(current, sessionFilename)
-		if _, err := os.Stat(legacy); err == nil {
-			return legacy
+		for _, candidate := range candidates {
+			if _, err := os.Stat(candidate); err == nil {
+				if skipInactive && isSessionInactive(candidate) {
+					continue
+				}
+				return candidate
+			}
 		}
 
 		parent := filepath.Dir(current)
@@ -210,4 +219,22 @@ func FindProjectSessionFile(workDir string, sessionFilename string) string {
 	}
 
 	return ""
+}
+
+// isSessionInactive returns true only when the file explicitly has "active": false.
+func isSessionInactive(path string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	var obj map[string]interface{}
+	if json.Unmarshal(data, &obj) != nil {
+		return false
+	}
+	if v, ok := obj["active"]; ok {
+		if b, ok := v.(bool); ok && !b {
+			return true
+		}
+	}
+	return false
 }
