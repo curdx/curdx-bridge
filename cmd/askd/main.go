@@ -2,7 +2,7 @@
 // Source: claude_code_bridge/bin/askd
 //
 // This is the daemon entry point. It starts a unified daemon that handles
-// codex, gemini, opencode, and claude.
+// codex, opencode, and claude.
 package main
 
 import (
@@ -20,7 +20,7 @@ import (
 	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
-var allProviders = []string{"codex", "gemini", "opencode", "claude"}
+var allProviders = []string{"codex", "opencode", "claude"}
 
 func parseListen(value string) (string, int) {
 	value = strings.TrimSpace(value)
@@ -174,8 +174,6 @@ func adapterForProvider(name string) adapterPkg.BaseProviderAdapter {
 	switch name {
 	case "codex":
 		return &adapterPkg.CodexAdapter{}
-	case "gemini":
-		return &adapterPkg.GeminiAdapter{}
 	case "opencode":
 		return &adapterPkg.OpenCodeAdapter{}
 	case "claude":

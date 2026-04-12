@@ -270,7 +270,6 @@ Based on review results:
 
 Claude plans report structure and generates `reportContent`:
 - `documenter = "codex"` (default): Claude generates `reportContent` directly
-- `documenter = "gemini"`: Claude calls `/ask gemini` to generate `reportContent` (markdown), then has Codex write the file
 
 Codex writes `reportContent` to `final/` folder:
 

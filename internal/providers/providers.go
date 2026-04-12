@@ -39,15 +39,6 @@ var CaskdSpec = ProviderDaemonSpec{
 	LockName:       "caskd",
 }
 
-var GaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "gaskd",
-	ProtocolPrefix: "gask",
-	StateFileName:  "gaskd.json",
-	LogFileName:    "gaskd.log",
-	IdleTimeoutEnv: "CURDX_GASKD_IDLE_TIMEOUT_S",
-	LockName:       "gaskd",
-}
-
 var OaskdSpec = ProviderDaemonSpec{
 	DaemonKey:      "oaskd",
 	ProtocolPrefix: "oask",
@@ -75,17 +66,6 @@ var CaskClientSpec = ProviderClientSpec{
 	AutostartEnvLegacy:  "CURDX_AUTO_CASKD",
 	StateFileEnv:        "CURDX_CASKD_STATE_FILE",
 	SessionFilename:     ".codex-session",
-	DaemonBinName:       "askd",
-	DaemonModule:        "askd.daemon",
-}
-
-var GaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "gask",
-	EnabledEnv:          "CURDX_GASKD",
-	AutostartEnvPrimary: "CURDX_GASKD_AUTOSTART",
-	AutostartEnvLegacy:  "CURDX_AUTO_GASKD",
-	StateFileEnv:        "CURDX_GASKD_STATE_FILE",
-	SessionFilename:     ".gemini-session",
 	DaemonBinName:       "askd",
 	DaemonModule:        "askd.daemon",
 }

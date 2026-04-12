@@ -406,7 +406,6 @@ func run(argv []string) int {
 	// Terminal caller - construct notification message
 	providerNames := map[string]string{
 		"codex":    "Codex",
-		"gemini":   "Gemini",
 		"opencode": "OpenCode",
 	}
 	providerDisplay := providerNames[provider]
@@ -443,7 +442,6 @@ func run(argv []string) int {
 		sessionFiles := map[string]string{
 			"claude":   ".claude-session",
 			"codex":    ".codex-session",
-			"gemini":   ".gemini-session",
 			"opencode": ".opencode-session",
 		}
 		sessionFilename := sessionFiles[caller]

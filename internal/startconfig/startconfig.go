@@ -18,7 +18,7 @@ const (
 )
 
 // DefaultProviders is the default set of providers.
-var DefaultProviders = []string{"claude", "codex", "gemini"}
+var DefaultProviders = []string{"claude", "codex"}
 
 // StartConfig holds parsed start configuration data.
 type StartConfig struct {
@@ -28,7 +28,6 @@ type StartConfig struct {
 
 var allowedProviders = map[string]bool{
 	"codex":  true,
-	"gemini": true,
 	"claude": true,
 }
 

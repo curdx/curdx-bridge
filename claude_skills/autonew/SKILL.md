@@ -15,7 +15,7 @@ Send `/new` command directly to a provider's terminal pane to start a new sessio
 autonew <provider>
 ```
 
-Providers: gemini, codex, opencode, claude
+Providers: codex, opencode, claude
 
 ## Execution (MANDATORY)
 
@@ -30,5 +30,4 @@ autonew $PROVIDER
 
 ## Examples
 
-- `/autonew gemini` - Start new Gemini session
 - `/autonew codex` - Start new Codex session

@@ -37,25 +37,6 @@ func sanitizeUserMessage(message string) string {
 // ── Codex (caskd_protocol.py) ──
 // Pure shim — re-exports from curdx_protocol. All functions are in protocol package.
 
-// ── Gemini (gaskd_protocol.py) ──
-
-// WrapGeminiPrompt wraps a prompt with CURDX markers for Gemini.
-func WrapGeminiPrompt(message, reqID string) string {
-	message = sanitizeUserMessage(strings.TrimRight(message, " \t\n\r"))
-	return fmt.Sprintf(
-		"%s %s\n\n"+
-			"%s\n\n"+
-			"IMPORTANT — you MUST follow these rules:\n"+
-			"1. Reply in English with an execution summary. Do not stay silent.\n"+
-			"2. Your FINAL line MUST be exactly (copy verbatim, no extra text):\n"+
-			"   %s %s\n"+
-			"3. Do NOT omit, modify, or paraphrase the line above.\n",
-		ReqIDPrefix, reqID,
-		message,
-		DonePrefix, reqID,
-	)
-}
-
 // ── OpenCode (oaskd_protocol.py) ──
 
 // WrapOpenCodePrompt wraps a prompt with CURDX markers for OpenCode.
@@ -178,7 +159,7 @@ func WrapClaudePrompt(message, reqID string) string {
 // ── Common reply extraction ──
 
 // ExtractReplyStandard extracts the reply segment for reqID using the standard
-// algorithm shared by gemini and opencode.
+// algorithm shared by opencode.
 // This is the common pattern from *askd_protocol.py.
 func ExtractReplyStandard(text, reqID string, stripDone func(string, string) string) string {
 	lines := splitLines(text)

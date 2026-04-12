@@ -60,11 +60,11 @@ msg() {
       en_msg="Detected WSL environment"
       zh_msg="检测到 WSL 环境" ;;
     same_env_required)
-      en_msg="curdx/ask/ping/pend must run in the same environment as codex/gemini."
-      zh_msg="curdx/ask/ping/pend 必须与 codex/gemini 在同一环境运行。" ;;
+      en_msg="curdx/ask/ping/pend must run in the same environment as codex."
+      zh_msg="curdx/ask/ping/pend 必须与 codex 在同一环境运行。" ;;
     confirm_wsl_native)
-      en_msg="Please confirm: you will install and run codex/gemini in WSL (not Windows native)."
-      zh_msg="请确认：你将在 WSL 中安装并运行 codex/gemini（不是 Windows 原生）。" ;;
+      en_msg="Please confirm: you will install and run codex in WSL (not Windows native)."
+      zh_msg="请确认：你将在 WSL 中安装并运行 codex（不是 Windows 原生）。" ;;
     wezterm_recommended)
       en_msg="Recommend installing WezTerm as terminal frontend"
       zh_msg="推荐安装 WezTerm 作为终端前端" ;;
@@ -104,9 +104,6 @@ SCRIPTS_TO_LINK=(
   bin/cask
   bin/cpend
   bin/cping
-  bin/gask
-  bin/gpend
-  bin/gping
   bin/oask
   bin/opend
   bin/oping
@@ -139,7 +136,6 @@ LEGACY_SCRIPTS=(
   claude_ai
   claude_bridge
   caskd
-  gaskd
   oaskd
   laskd
 )
@@ -353,7 +349,7 @@ confirm_backend_env_wsl() {
 
   if [[ ! -t 0 ]]; then
     echo "ERROR: Installing in WSL but detected non-interactive terminal; aborted to avoid env mismatch."
-    echo "   If you confirm codex/gemini will be installed and run in WSL:"
+    echo "   If you confirm codex will be installed and run in WSL:"
     echo "   Re-run: CURDX_INSTALL_ASSUME_YES=1 ./install.sh install"
     exit 1
   fi
@@ -362,10 +358,10 @@ confirm_backend_env_wsl() {
   echo "================================================================"
   echo "WARN: Detected WSL environment"
   echo "================================================================"
-  echo "curdx/ask/ping/pend must run in the same environment as codex/gemini."
+  echo "curdx/ask/ping/pend must run in the same environment as codex."
   echo
-  echo "Please confirm: you will install and run codex/gemini in WSL (not Windows native)."
-  echo "If you plan to run codex/gemini in Windows native, exit and run on Windows side:"
+  echo "Please confirm: you will install and run codex in WSL (not Windows native)."
+  echo "If you plan to run codex in Windows native, exit and run on Windows side:"
   echo "   powershell -ExecutionPolicy Bypass -File .\\install.ps1 install"
   echo "================================================================"
   echo
@@ -697,7 +693,7 @@ install_claude_commands() {
   mkdir -p "$claude_dir"
 
   # Clean up obsolete CURDX commands (replaced by unified ask/ping/pend)
-  local obsolete_cmds="cask.md gask.md oask.md lask.md cpend.md gpend.md opend.md lpend.md cping.md gping.md oping.md lping.md"
+  local obsolete_cmds="cask.md oask.md lask.md cpend.md opend.md lpend.md cping.md oping.md lping.md"
   for obs_cmd in $obsolete_cmds; do
     if [[ -f "$claude_dir/$obs_cmd" ]]; then
       rm -f "$claude_dir/$obs_cmd"
@@ -724,7 +720,7 @@ install_claude_skills() {
   mkdir -p "$skills_dst"
 
   # Clean up obsolete CURDX skills (replaced by unified ask/cping/pend)
-  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto"
+  local obsolete_skills="cask oask lask cpend opend lpend cping oping lping ping auto"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
       rm -rf "$skills_dst/$obs_skill"
@@ -790,7 +786,7 @@ install_codex_skills() {
   mkdir -p "$skills_dst"
 
   # Clean up obsolete CURDX skills (replaced by unified ask/ping/pend)
-  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping"
+  local obsolete_skills="cask oask lask cpend opend lpend cping oping lping"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
       rm -rf "$skills_dst/$obs_skill"
@@ -886,7 +882,7 @@ install_claude_md_config() {
     if grep -q "$CURDX_START_MARKER" "$claude_md" 2>/dev/null; then
       echo "Updating existing CURDX config block (mode: $md_mode)..."
       "$HELPER" replace-block "$claude_md" "$template" "<!-- CURDX_CONFIG_START -->" "<!-- CURDX_CONFIG_END -->"
-    elif grep -qE "$LEGACY_RULE_MARKER|## Codex Collaboration Rules|## Gemini|## OpenCode" "$claude_md" 2>/dev/null; then
+    elif grep -qE "$LEGACY_RULE_MARKER|## Codex Collaboration Rules|## OpenCode" "$claude_md" 2>/dev/null; then
       echo "Removing legacy rules and adding new CURDX config block..."
       "$HELPER" remove-legacy-md-rules "$claude_md"
       cat "$template" >> "$claude_md"
@@ -1215,7 +1211,7 @@ cleanup_legacy_files() {
   local cleaned=0
 
   # Legacy daemon scripts in bin/
-  local legacy_daemons="caskd gaskd oaskd laskd"
+  local legacy_daemons="caskd oaskd laskd"
   for daemon in $legacy_daemons; do
     if [[ -f "$BIN_DIR/$daemon" ]]; then
       rm -f "$BIN_DIR/$daemon"
@@ -1232,7 +1228,7 @@ cleanup_legacy_files() {
 
   # Legacy daemon state files in ~/.cache/curdx/
   local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/curdx"
-  local legacy_states="caskd.json gaskd.json oaskd.json laskd.json"
+  local legacy_states="caskd.json oaskd.json laskd.json"
   for state in $legacy_states; do
     if [[ -f "$cache_dir/$state" ]]; then
       rm -f "$cache_dir/$state"
@@ -1242,7 +1238,7 @@ cleanup_legacy_files() {
   done
 
   # Legacy daemon module files in lib/
-  local legacy_modules="caskd_daemon.py gaskd_daemon.py oaskd_daemon.py laskd_daemon.py"
+  local legacy_modules="caskd_daemon.py oaskd_daemon.py laskd_daemon.py"
   for module in $legacy_modules; do
     if [[ -f "$INSTALL_PREFIX/lib/$module" ]]; then
       rm -f "$INSTALL_PREFIX/lib/$module"
@@ -1301,7 +1297,7 @@ uninstall_claude_md_config() {
     echo "Removing CURDX config block from CLAUDE.md..."
     "$HELPER" replace-block "$claude_md" "/dev/null" "<!-- CURDX_CONFIG_START -->" "<!-- CURDX_CONFIG_END -->"
     echo "Removed CURDX config from CLAUDE.md"
-  elif grep -qE "$LEGACY_RULE_MARKER|## Codex Collaboration Rules|## Gemini|## OpenCode" "$claude_md" 2>/dev/null; then
+  elif grep -qE "$LEGACY_RULE_MARKER|## Codex Collaboration Rules|## OpenCode" "$claude_md" 2>/dev/null; then
     echo "Removing legacy collaboration rules from CLAUDE.md..."
     "$HELPER" remove-legacy-md-rules "$claude_md"
     echo "Removed collaboration rules from CLAUDE.md"
@@ -1330,9 +1326,6 @@ uninstall_settings_permissions() {
     'Bash(cask:*)'
     'Bash(cpend)'
     'Bash(cping)'
-    'Bash(gask:*)'
-    'Bash(gpend)'
-    'Bash(gping)'
     'Bash(oask:*)'
     'Bash(opend)'
     'Bash(oping)'

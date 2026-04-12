@@ -123,7 +123,7 @@ func ApplyBackendEnv() {
 	if runtime.GOOS != "windows" || GetBackendEnv() != "wsl" {
 		return
 	}
-	if os.Getenv("CODEX_SESSION_ROOT") != "" && os.Getenv("GEMINI_ROOT") != "" {
+	if os.Getenv("CODEX_SESSION_ROOT") != "" {
 		return
 	}
 
@@ -138,23 +138,15 @@ func ApplyBackendEnv() {
 	for _, base := range bases {
 		prefix := base + homeWin
 		codexPath := prefix + `\.codex\sessions`
-		geminiPath := prefix + `\.gemini\tmp`
 
 		if info, err := os.Stat(codexPath); err == nil && info != nil {
 			setDefault("CODEX_SESSION_ROOT", codexPath)
-			setDefault("GEMINI_ROOT", geminiPath)
-			return
-		}
-		if info, err := os.Stat(geminiPath); err == nil && info != nil {
-			setDefault("CODEX_SESSION_ROOT", codexPath)
-			setDefault("GEMINI_ROOT", geminiPath)
 			return
 		}
 	}
 
 	prefix := `\\wsl.localhost\` + distro + homeWin
 	setDefault("CODEX_SESSION_ROOT", prefix+`\.codex\sessions`)
-	setDefault("GEMINI_ROOT", prefix+`\.gemini\tmp`)
 }
 
 // setDefault sets an env var only if it is not already set.

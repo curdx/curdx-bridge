@@ -37,13 +37,12 @@ var (
 // providers maps provider name -> {ask, pend, ping} command names.
 var providers = map[string]map[string]string{
 	"codex":    {"ask": "cask", "pend": "cpend", "ping": "cping"},
-	"gemini":   {"ask": "gask", "pend": "gpend", "ping": "gping"},
 	"claude":   {"ask": "lask", "pend": "lpend", "ping": "lping"},
 	"opencode": {"ask": "oask", "pend": "opend", "ping": "oping"},
 }
 
 // providerOrder preserves iteration order matching Python.
-var providerOrder = []string{"codex", "gemini", "claude", "opencode"}
+var providerOrder = []string{"codex", "claude", "opencode"}
 
 type aliasEntry struct {
 	name     string
@@ -53,15 +52,12 @@ type aliasEntry struct {
 
 var aliasTools = []aliasEntry{
 	{"cask", "codex", "ask"},
-	{"gask", "gemini", "ask"},
 	{"lask", "claude", "ask"},
 	{"oask", "opencode", "ask"},
 	{"cpend", "codex", "pend"},
-	{"gpend", "gemini", "pend"},
 	{"lpend", "claude", "pend"},
 	{"opend", "opencode", "pend"},
 	{"cping", "codex", "ping"},
-	{"gping", "gemini", "ping"},
 	{"lping", "claude", "ping"},
 	{"oping", "opencode", "ping"},
 }

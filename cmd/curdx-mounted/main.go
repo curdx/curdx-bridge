@@ -23,7 +23,6 @@ type providerDaemon struct {
 
 var providerDaemons = []providerDaemon{
 	{provider: "codex", daemon: "cask"},
-	{provider: "gemini", daemon: "gask"},
 	{provider: "opencode", daemon: "oask"},
 	{provider: "claude", daemon: "lask"},
 }
@@ -44,11 +43,11 @@ func sessionFileExists(cwd, provider string) bool {
 
 func getOnlineDaemons() map[string]bool {
 	online := make(map[string]bool)
-	out, err := exec.Command("pgrep", "-af", "bin/[cglod]askd$").Output()
+	out, err := exec.Command("pgrep", "-af", "bin/[clod]askd$").Output()
 	if err != nil {
 		return online
 	}
-	for _, daemon := range []string{"caskd", "gaskd", "oaskd", "laskd"} {
+	for _, daemon := range []string{"caskd", "oaskd", "laskd"} {
 		if strings.Contains(string(out), daemon) {
 			online[daemon] = true
 		}

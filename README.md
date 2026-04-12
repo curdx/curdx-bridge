@@ -2,7 +2,7 @@
 
 # CURDX Bridge v5.2.9
 
-**Multi-AI Split-Pane Terminal — Claude · Codex · Gemini**
+**Multi-AI Split-Pane Terminal — Claude · Codex**
 
 One terminal, multiple AI agents, real collaboration.
 
@@ -19,15 +19,15 @@ One terminal, multiple AI agents, real collaboration.
 
 ## What is this?
 
-CURDX Bridge puts multiple AI coding agents into split terminal panes. You talk to Claude as usual — when you need a second opinion, just say "let Codex review this" or "ask Gemini for ideas". Claude handles the coordination automatically.
+CURDX Bridge puts multiple AI coding agents into split terminal panes. You talk to Claude as usual — when you need a second opinion, just say "let Codex review this". Claude handles the coordination automatically.
 
 ```
 ┌─────────────────────┬──────────────────────┐
 │                     │       Codex          │
 │      Claude         │    (Reviewer)        │
-│   You talk here     ├──────────────────────┤
-│                     │       Gemini         │
-│                     │   (Brainstormer)     │
+│   You talk here     │                      │
+│                     │                      │
+│                     │                      │
 └─────────────────────┴──────────────────────┘
 ```
 
@@ -44,10 +44,10 @@ curl -fsSL https://raw.githubusercontent.com/curdx/curdx-bridge/main/install.sh 
 ### 2. Run
 
 ```bash
-curdx                          # Default: Claude + Codex + Gemini
+curdx                          # Default: Claude + Codex
 curdx claude codex             # Just two providers
 curdx -r                       # Resume previous session
-curdx -r claude codex gemini   # Resume with specific providers
+curdx -r claude codex          # Resume with specific providers
 ```
 
 That's it. Panes appear, providers boot up, you start talking to Claude.
@@ -71,15 +71,11 @@ You:    Let Codex review this.
 Claude: [sends diff to Codex, waits for scores]
         Codex scored it 8.5/10. Suggestions: ...
 
-You:    Ask Gemini for alternative naming ideas.
-Claude: [asks Gemini asynchronously]
-        Gemini suggests: ...
-
 You:    Looks good. Apply Codex's suggestions and commit.
 Claude: [makes changes, commits]
 ```
 
-**That's the whole workflow.** Claude is your main interface. Codex and Gemini are collaborators it can call on.
+**That's the whole workflow.** Claude is your main interface. Codex is a collaborator it can call on.
 
 ### Behind the scenes
 
@@ -96,7 +92,6 @@ Each provider runs in its own pane — you can watch them think in real time.
 |------|----------|-------------|
 | **Designer** | Claude | Plans, implements, orchestrates |
 | **Reviewer** | Codex | Scores code/plans (1-10 rubrics) |
-| **Inspiration** | Gemini | Brainstorms alternatives (reference only) |
 
 The review framework has pass/fail gates — code must score ≥ 7 before shipping. Up to 3 review rounds, then escalates to you.
 
@@ -107,14 +102,13 @@ You rarely need these — Claude handles them — but they exist:
 ```bash
 # Direct communication
 cask "message"    # Send to Codex
-gask "message"    # Send to Gemini
 lask "message"    # Send to Claude
 
 # Check latest replies
-cpend / gpend / lpend
+cpend / lpend
 
 # Test connectivity
-cping / gping / lping
+cping / lping
 
 # Session management
 curdx kill              # Kill all sessions
@@ -128,7 +122,6 @@ curdx kill codex -f     # Force kill specific provider
 | **tmux** (or WezTerm) | `brew install tmux` / `apt install tmux` |
 | **Claude Code** | `npm install -g @anthropic-ai/claude-code` |
 | **Codex CLI** (optional) | `npm install -g @openai/codex` |
-| **Gemini CLI** (optional) | See provider docs |
 
 Make sure each provider CLI works standalone first.
 
@@ -143,14 +136,14 @@ macOS (Intel/Apple Silicon) · Linux (x86-64/ARM64) · Windows (x86-64 + WSL)
 Place in `.curdx/curdx.config` (project-level) or `~/.curdx/curdx.config` (global):
 
 ```
-claude codex gemini
+claude codex
 ```
 
 Or JSON for advanced options:
 
 ```json
 {
-  "providers": ["claude", "codex", "gemini"],
+  "providers": ["claude", "codex"],
   "flags": { "resume": true, "auto": true }
 }
 ```

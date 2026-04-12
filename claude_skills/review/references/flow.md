@@ -22,7 +22,7 @@ Dual review by Claude (initial assessment) and a configurable cross-review provi
 
 Resolve the `reviewer` role using a two-layer lookup:
 
-1. **CLAUDE.md Role Assignment table** (primary): Read the Role Assignment table in CLAUDE.md. The `reviewer` role maps to a provider (e.g., `codex`, `gemini`).
+1. **CLAUDE.md Role Assignment table** (primary): Read the Role Assignment table in CLAUDE.md. The `reviewer` role maps to a provider (e.g., `codex`).
 2. **`.autoflow/roles.json`** (override): If this file exists in the repo, and `enabled == true` and `schemaVersion == 1`, use its `reviewer` field to override.
 
 Default: `codex`
@@ -42,7 +42,6 @@ Preliminary verdict: **PASS** / **FIX** / **UNCERTAIN**
 
 If provider is:
 - `codex` → use `/ask codex`
-- `gemini` → use `/ask gemini`
 
 ```
 /ask <provider> "Cross-review:
@@ -77,7 +76,7 @@ Return JSON only."
 {
   "mode": "step|task",
   "target": "<step title or task name>",
-  "crossReviewer": "codex|gemini",
+  "crossReviewer": "codex",
   "verdict": "PASS|FIX|BLOCKED",
   "claudeAssessment": {
     "verdict": "PASS|FIX|UNCERTAIN",

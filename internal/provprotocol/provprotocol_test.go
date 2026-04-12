@@ -27,21 +27,6 @@ func stubStripDone(text, reqID string) string {
 	return strings.TrimRight(strings.Join(result, "\n"), " \t\n\r")
 }
 
-func TestWrapGeminiPromptStructure(t *testing.T) {
-	reqID := makeTestReqID(4)
-	prompt := WrapGeminiPrompt("analyze this", reqID)
-
-	if !strings.Contains(prompt, ReqIDPrefix+" "+reqID) {
-		t.Error("should contain REQ_ID line")
-	}
-	if !strings.Contains(prompt, "IMPORTANT") {
-		t.Error("should contain IMPORTANT")
-	}
-	if !strings.Contains(prompt, DonePrefix+" "+reqID) {
-		t.Error("should contain DONE line")
-	}
-}
-
 func TestWrapClaudePromptStructure(t *testing.T) {
 	reqID := makeTestReqID(5)
 	prompt := WrapClaudePrompt("do something", reqID)

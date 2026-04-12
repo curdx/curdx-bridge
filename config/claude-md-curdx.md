@@ -1,10 +1,10 @@
 <!-- CURDX_CONFIG_START -->
 ## AI Collaboration
-Use `/ask <provider>` to consult other AI assistants (codex/gemini/opencode).
+Use `/ask <provider>` to consult other AI assistants (codex/opencode).
 Use `/cping <provider>` to check connectivity.
 Use `/pend <provider>` to view latest replies.
 
-Providers: `codex`, `gemini`, `opencode`, `claude`
+Providers: `codex`, `opencode`, `claude`
 
 ## Async Guardrail (MANDATORY)
 
@@ -24,7 +24,6 @@ Abstract roles map to concrete AI providers. Skills reference roles, not provide
 | Role | Provider | Description |
 |------|----------|-------------|
 | `designer` | `claude` | Primary planner and architect — owns plans and designs |
-| `inspiration` | `gemini` | Creative brainstorming — provides ideas as reference only (unreliable, never blindly follow) |
 | `reviewer` | `codex` | Scored quality gate — evaluates plans/code using Rubrics |
 | `executor` | `claude` | Code implementation — writes and modifies code |
 
@@ -46,12 +45,5 @@ The `reviewer` scores using Rubrics defined in `AGENTS.md` and returns JSON.
 **On fail**: fix issues from response, re-submit (max 3 rounds). After 3 failures, present results to user.
 **On pass**: display final scores as a summary table.
 <!-- CODEX_REVIEW_END -->
-
-<!-- GEMINI_INSPIRATION_START -->
-## Inspiration Consultation
-
-For creative tasks (UI/UX design, copywriting, naming, brainstorming), the `designer` SHOULD consult `inspiration` (via `/ask`) for reference ideas.
-The `inspiration` provider is often unreliable — never blindly follow. Exercise independent judgment and present suggestions to the user for decision.
-<!-- GEMINI_INSPIRATION_END -->
 
 <!-- CURDX_CONFIG_END -->

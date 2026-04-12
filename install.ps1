@@ -61,7 +61,7 @@ function Install-Skills {
   New-Item -ItemType Directory -Path $DstDir -Force | Out-Null
 
   # Clean obsolete skills
-  foreach ($obs in @("cask","gask","oask","lask","cpend","gpend","opend","lpend","cping","gping","oping","lping","ping","auto")) {
+  foreach ($obs in @("cask","oask","lask","cpend","opend","lpend","cping","oping","lping","ping","auto")) {
     $obsDir = Join-Path $DstDir $obs
     if (Test-Path $obsDir) { Remove-Item $obsDir -Recurse -Force }
   }
@@ -227,7 +227,7 @@ function Uninstall-CURDX {
   Write-Host ""
 
   if (Test-Path $InstallDir) {
-    $exes = Get-ChildItem $InstallDir -Filter "*.exe" | Where-Object { $_.Name -match "^(curdx|ask|cask|gask|oask|lask|cpend|gpend|lpend|cping|gping|lping|askd|laskd|autoloop|autonew|ctx-transfer|curdx-|pend)\b" }
+    $exes = Get-ChildItem $InstallDir -Filter "*.exe" | Where-Object { $_.Name -match "^(curdx|ask|cask|oask|lask|cpend|lpend|cping|lping|askd|laskd|autoloop|autonew|ctx-transfer|curdx-|pend)\b" }
     foreach ($exe in $exes) {
       Remove-Item $exe.FullName -Force -ErrorAction SilentlyContinue
       Write-Info "Removed $($exe.Name)"

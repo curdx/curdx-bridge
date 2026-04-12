@@ -215,10 +215,9 @@ tmux set-window-option -t "$session" pane-active-border-style "$border_active" >
 # Agent-specific pane title colors (consistent across themes)
 pane_format='#{?#{==:#{@curdx_agent},Claude},#[fg='${bg_main}']#[bg='${color_red}']#[bold] #P Claude #[default],'
 pane_format+='#{?#{==:#{@curdx_agent},Codex},#[fg='${bg_main}']#[bg='${color_orange}']#[bold] #P Codex #[default],'
-pane_format+='#{?#{==:#{@curdx_agent},Gemini},#[fg='${bg_main}']#[bg='${color_green}']#[bold] #P Gemini #[default],'
 pane_format+='#{?#{==:#{@curdx_agent},OpenCode},#[fg='${bg_main}']#[bg='${color_purple}']#[bold] #P OpenCode #[default],'
 pane_format+='#{?#{==:#{@curdx_agent},Cmd},#[fg='${bg_main}']#[bg='${color_teal}']#[bold] #P Cmd #[default],'
-pane_format+='#[fg='${pane_default_fg}'] #P #{pane_title} #[default]}}}}}}'
+pane_format+='#[fg='${pane_default_fg}'] #P #{pane_title} #[default]}}}}'
 
 tmux set-window-option -t "$session" pane-border-format "$pane_format" >/dev/null 2>&1 || true
 

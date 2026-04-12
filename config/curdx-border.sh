@@ -31,9 +31,6 @@ case "$key" in
     Codex)
         set_border "fg=#ff9e64,bold" # Orange
         ;;
-    Gemini)
-        set_border "fg=#7dcfff,bold" # Cyan
-        ;;
     Claude)
         set_border "fg=#bb9af7,bold" # Purple
         ;;
@@ -47,9 +44,6 @@ case "$key" in
         case "$title" in
             CURDX-Codex*)
                 set_border "fg=#ff9e64,bold"
-                ;;
-            CURDX-Gemini*)
-                set_border "fg=#7dcfff,bold"
                 ;;
             Claude*)
                 set_border "fg=#bb9af7,bold"

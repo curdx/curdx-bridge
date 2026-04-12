@@ -36,7 +36,6 @@ check_session() {
     case "$name" in
         claude)  session_file="$PWD/.curdx/.claude-session" ;;
         codex)   session_file="$PWD/.curdx/.codex-session" ;;
-        gemini)  session_file="$PWD/.curdx/.gemini-session" ;;
         opencode) session_file="$PWD/.curdx/.opencode-session" ;;
     esac
 
@@ -115,10 +114,9 @@ main() {
             # Full status with all AIs
             local claude_s=$(format_ai_status "cask" "C" "$C_ORANGE")
             local codex_s=$(format_ai_status "cask" "X" "$C_GREEN")
-            local gemini_s=$(format_ai_status "gask" "G" "$C_BLUE")
             local opencode_s=$(format_ai_status "oask" "O" "$C_PURPLE")
 
-            out=" ${claude_s}${codex_s}${gemini_s}${opencode_s} "
+            out=" ${claude_s}${codex_s}${opencode_s} "
             ;;
 
         daemons)
@@ -127,9 +125,6 @@ main() {
 
             if [[ $(check_daemon "cask") == "on" ]]; then
                 output+="${C_GREEN}X${C_RESET}"
-            fi
-            if [[ $(check_daemon "gask") == "on" ]]; then
-                output+="${C_BLUE}G${C_RESET}"
             fi
             if [[ $(check_daemon "oask") == "on" ]]; then
                 output+="${C_PURPLE}O${C_RESET}"
@@ -151,11 +146,6 @@ main() {
             else
                 icons+="${C_DIM}○${C_RESET} "
             fi
-            if [[ $(check_daemon "gask") == "on" ]]; then
-                icons+="${C_TEAL}●${C_RESET} "
-            else
-                icons+="${C_DIM}○${C_RESET} "
-            fi
             if [[ $(check_daemon "oask") == "on" ]]; then
                 icons+="${C_PURPLE}●${C_RESET}"
             else
@@ -166,7 +156,7 @@ main() {
             ;;
 
         modern)
-            # Modern status: C X G O with dots (● = online, ○ = offline)
+            # Modern status: C X O with dots (● = online, ○ = offline)
             local output=""
 
             # C - Claude (no daemon, always dim)
@@ -175,13 +165,6 @@ main() {
             # X - Codex (cask daemon)
             if [[ $(check_daemon "cask") == "on" ]]; then
                 output+="${C_ORANGE}●${C_RESET} "
-            else
-                output+="${C_DIM}○${C_RESET} "
-            fi
-
-            # G - Gemini (gask daemon)
-            if [[ $(check_daemon "gask") == "on" ]]; then
-                output+="${C_TEAL}●${C_RESET} "
             else
                 output+="${C_DIM}○${C_RESET} "
             fi
@@ -208,7 +191,6 @@ main() {
                 ai_key="$(printf '%s' "$ai_name" | tr '[:upper:]' '[:lower:]')"
                 case "$ai_key" in
                     claude|codex) echo "${C_ORANGE}[$ai_name]${C_RESET}" ;;
-                    gemini)       echo "${C_BLUE}[$ai_name]${C_RESET}" ;;
                     opencode)     echo "${C_PURPLE}[$ai_name]${C_RESET}" ;;
                     cmd)          echo "${C_TEAL}[$ai_name]${C_RESET}" ;;
                     *)            echo "[$ai_name]" ;;

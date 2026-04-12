@@ -808,7 +808,7 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 
 	// Simulate 2-provider layout.
 	root := "%root"
-	providers := []string{"codex", "gemini"}
+	providers := []string{"codex", "opencode"}
 	panes := map[string]string{}
 	panes[providers[0]] = root
 	mockTitle(root, "M-"+providers[0])
@@ -817,7 +817,7 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 	panes[providers[1]] = right
 	mockTitle(right, "M-"+providers[1])
 
-	if panes["codex"] != "%root" || panes["gemini"] != "%r1" {
+	if panes["codex"] != "%root" || panes["opencode"] != "%r1" {
 		t.Errorf("2-provider panes: %v", panes)
 	}
 	if len(splitCalls) != 1 || splitCalls[0].parent != "%root" || splitCalls[0].direction != "right" {
@@ -832,12 +832,12 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 	mockTitle(root, "M-codex")
 	rightTop := mockSplit(root, "right")
 	rightBottom := mockSplit(rightTop, "bottom")
-	panes["gemini"] = rightTop
-	panes["opencode"] = rightBottom
-	mockTitle(rightTop, "M-gemini")
-	mockTitle(rightBottom, "M-opencode")
+	panes["opencode"] = rightTop
+	panes["claude"] = rightBottom
+	mockTitle(rightTop, "M-opencode")
+	mockTitle(rightBottom, "M-claude")
 
-	if panes["codex"] != "%root" || panes["gemini"] != "%r2" || panes["opencode"] != "%r3" {
+	if panes["codex"] != "%root" || panes["opencode"] != "%r2" || panes["claude"] != "%r3" {
 		t.Errorf("3-provider panes: %v", panes)
 	}
 	if len(splitCalls) != 2 {
@@ -859,14 +859,14 @@ func TestCreateAutoLayoutTopologies(t *testing.T) {
 	rt := mockSplit(root, "right")
 	lb := mockSplit(root, "bottom")
 	rb := mockSplit(rt, "bottom")
-	panes["gemini"] = rt
-	panes["opencode"] = lb
+	panes["opencode"] = rt
+	panes["claude"] = lb
 	panes["x"] = rb
-	mockTitle(rt, "M-gemini")
-	mockTitle(lb, "M-opencode")
+	mockTitle(rt, "M-opencode")
+	mockTitle(lb, "M-claude")
 	mockTitle(rb, "M-x")
 
-	if panes["codex"] != "%root" || panes["gemini"] != "%r4" || panes["opencode"] != "%r5" || panes["x"] != "%r6" {
+	if panes["codex"] != "%root" || panes["opencode"] != "%r4" || panes["claude"] != "%r5" || panes["x"] != "%r6" {
 		t.Errorf("4-provider panes: %v", panes)
 	}
 	if len(splitCalls) != 3 {

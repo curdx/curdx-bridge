@@ -153,12 +153,6 @@ func extractConversationsForProvider(provider, workDir, sessionPath, sessionID, 
 	case "codex":
 		reader := comm.NewCodexLogReader("", sessionPath, sessionID, workDir)
 		pairs = reader.LatestConversations(fetchN)
-	case "gemini":
-		reader := comm.NewGeminiLogReader("", workDir)
-		if sessionPath != "" {
-			reader.SetPreferredSession(sessionPath)
-		}
-		pairs = reader.LatestConversations(fetchN)
 	case "claude":
 		reader := comm.NewClaudeLogReader("", workDir)
 		if sessionPath != "" {

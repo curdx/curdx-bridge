@@ -24,7 +24,6 @@ var providerComm = map[string]struct {
 	label       string
 	sessionFile string
 }{
-	"gemini":   {label: "Gemini", sessionFile: ".gemini-session"},
 	"codex":    {label: "Codex", sessionFile: ".codex-session"},
 	"opencode": {label: "OpenCode", sessionFile: ".opencode-session"},
 	"claude":   {label: "Claude", sessionFile: ".claude-session"},
@@ -33,7 +32,6 @@ var providerComm = map[string]struct {
 // providerSpecs maps provider name to its client spec for autostart.
 var providerSpecs = map[string]providers.ProviderClientSpec{
 	"codex":    providers.CaskClientSpec,
-	"gemini":   providers.GaskClientSpec,
 	"opencode": providers.OaskClientSpec,
 	"claude":   providers.LaskClientSpec,
 }
@@ -42,7 +40,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: curdx-ping <provider> [--session-file FILE] [--autostart]")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, claude")
+	fmt.Fprintln(os.Stderr, "  codex, opencode, claude")
 }
 
 func main() {

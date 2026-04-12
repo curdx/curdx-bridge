@@ -28,22 +28,20 @@ type ContextTransfer struct {
 
 // Supported providers and sources.
 var (
-	SupportedProviders    = []string{"codex", "gemini", "opencode"}
-	SupportedSources      = []string{"auto", "claude", "codex", "gemini", "opencode"}
+	SupportedProviders    = []string{"codex", "opencode"}
+	SupportedSources      = []string{"auto", "claude", "codex", "opencode"}
 	SourceSessionFiles    = map[string]string{
 		"claude":   ".claude-session",
 		"codex":    ".codex-session",
-		"gemini":   ".gemini-session",
 		"opencode": ".opencode-session",
 	}
-	DefaultSourceOrder    = []string{"claude", "codex", "gemini", "opencode"}
+	DefaultSourceOrder    = []string{"claude", "codex", "opencode"}
 	DefaultFallbackPairs  = 50
 )
 
 // Provider command map for send_to_provider.
 var providerCmdMap = map[string]string{
 	"codex":    "cask",
-	"gemini":   "gask",
 	"opencode": "oask",
 }
 
@@ -294,8 +292,6 @@ func (ct *ContextTransfer) extractByProvider(
 		return ct.extractFromClaude(sessionPath, lastN, includeStats)
 	case "codex":
 		return ct.extractFromGeneric("codex", sessionPath, lastN, sourceSessionID)
-	case "gemini":
-		return ct.extractFromGeneric("gemini", sessionPath, lastN, sourceSessionID)
 	case "opencode":
 		return ct.extractFromGeneric("opencode", sessionPath, lastN, sourceSessionID)
 	default:
@@ -352,8 +348,8 @@ func (ct *ContextTransfer) extractFromClaude(
 	}, nil
 }
 
-// extractFromGeneric handles codex, gemini, opencode providers.
-// In the Go port, the per-provider log readers (CodexLogReader, GeminiLogReader, etc.)
+// extractFromGeneric handles codex, opencode providers.
+// In the Go port, the per-provider log readers (CodexLogReader, etc.)
 // are not available. We use the session data to find the log path and parse it
 // with the claude parser as a best-effort extraction, since the JSONL format
 // is similar. For providers that don't have JSONL logs, we return session-not-found.

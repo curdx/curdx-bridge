@@ -18,8 +18,8 @@ Transfer conversation context between CURDX providers.
 
 Options:
   -n, --last N         Number of conversation pairs (default: 3)
-  --from, --source P   Source provider: auto|claude|codex|gemini|opencode (default: auto)
-  -t, --to P           Target provider: codex|gemini|opencode (default: codex)
+  --from, --source P   Source provider: auto|claude|codex|opencode (default: auto)
+  -t, --to P           Target provider: codex|opencode (default: codex)
   --send               Send to provider via ask (default: disabled)
   -d, --dry-run        Preview output without sending
   -o, --output PATH    Write output to file
@@ -50,11 +50,11 @@ type args struct {
 }
 
 var validSourceProviders = map[string]bool{
-	"auto": true, "claude": true, "codex": true, "gemini": true, "opencode": true,
+	"auto": true, "claude": true, "codex": true, "opencode": true,
 }
 
 var validTargetProviders = map[string]bool{
-	"codex": true, "gemini": true, "opencode": true,
+	"codex": true, "opencode": true,
 }
 
 var validFormats = map[string]bool{

@@ -268,7 +268,6 @@ func providerLabel(provider string) string {
 	labels := map[string]string{
 		"claude":   "Claude",
 		"codex":    "Codex",
-		"gemini":   "Gemini",
 		"opencode": "OpenCode",
 		"auto":     "Auto",
 	}

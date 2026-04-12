@@ -1,6 +1,6 @@
 ---
 name: ping
-description: Test connectivity with AI provider (gemini/codex/opencode/claude).
+description: Test connectivity with AI provider (codex/opencode/claude).
 metadata:
   short-description: Test AI provider connectivity
 ---
@@ -12,7 +12,6 @@ Test connectivity with specified AI provider.
 ## Usage
 
 The first argument must be the provider name:
-- `gemini` - Test Gemini
 - `codex` - Test Codex
 - `opencode` - Test OpenCode
 - `claude` - Test Claude
@@ -25,6 +24,5 @@ curdx-ping $ARGUMENTS
 
 ## Examples
 
-- `/ping gemini`
 - `/ping codex`
 - `/ping claude`

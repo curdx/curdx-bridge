@@ -25,7 +25,6 @@ import (
 
 // ProviderDaemons maps provider names to their daemon command names.
 var ProviderDaemons = map[string]string{
-	"gemini":    "gask",
 	"codex":     "cask",
 	"opencode":  "oask",
 	"claude":    "lask",
@@ -40,26 +39,23 @@ var ProviderDisplayNames = map[string]string{
 var CallerSessionFiles = map[string]string{
 	"claude":    ".claude-session",
 	"codex":     ".codex-session",
-	"gemini":    ".gemini-session",
 	"opencode":  ".opencode-session",
 }
 
 // CallerPaneEnvHints maps callers to env vars that may carry their pane info.
 var CallerPaneEnvHints = map[string][2]string{
 	"codex":     {"CODEX_TMUX_SESSION", "CODEX_WEZTERM_PANE"},
-	"gemini":    {"GEMINI_TMUX_SESSION", "GEMINI_WEZTERM_PANE"},
 	"opencode":  {"OPENCODE_TMUX_SESSION", "OPENCODE_WEZTERM_PANE"},
 }
 
 // CallerEnvHints maps callers to env vars that indicate the caller is active.
 var CallerEnvHints = map[string][2]string{
 	"codex":     {"CODEX_SESSION_ID", "CODEX_RUNTIME_DIR"},
-	"gemini":    {"GEMINI_SESSION_ID", "GEMINI_RUNTIME_DIR"},
 	"opencode":  {"OPENCODE_SESSION_ID", "OPENCODE_RUNTIME_DIR"},
 }
 
 var validCallers = map[string]bool{
-	"claude": true, "codex": true, "gemini": true, "opencode": true,
+	"claude": true, "codex": true, "opencode": true,
 	"email": true, "manual": true,
 }
 
@@ -529,7 +525,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: ask <provider> [options] <message>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Providers:")
-	fmt.Fprintln(os.Stderr, "  gemini, codex, opencode, claude")
+	fmt.Fprintln(os.Stderr, "  codex, opencode, claude")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Options:")
 	fmt.Fprintln(os.Stderr, "  -h, --help              Show this help message")

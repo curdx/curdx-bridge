@@ -275,9 +275,7 @@ func cmdRemoveLegacyMDRules(args []string) error {
 	content := string(data)
 
 	// We need to remove sections that start with specific ## headings and extend
-	// to the next ## heading (or end of file). For the "Codex Collaboration Rules"
-	// heading specifically, we must NOT stop at "## Gemini" (treat Gemini sections
-	// as part of the Codex section -- they will be removed by their own pattern).
+	// to the next ## heading (or end of file).
 	//
 	// Go's RE2 does not support lookahead, so we use a function-based approach:
 	// find each heading, then scan forward to find where the section ends.
@@ -285,16 +283,8 @@ func cmdRemoveLegacyMDRules(args []string) error {
 	headings := []string{
 		"## Codex Collaboration Rules",
 		"## Codex 协作规则",
-		"## Gemini Collaboration Rules",
-		"## Gemini 协作规则",
 		"## OpenCode Collaboration Rules",
 		"## OpenCode 协作规则",
-	}
-
-	// Build a set of heading prefixes to treat as "continue" for Codex rules.
-	geminiPrefixes := []string{
-		"## Gemini Collaboration Rules",
-		"## Gemini 协作规则",
 	}
 
 	for _, heading := range headings {
@@ -303,9 +293,7 @@ func cmdRemoveLegacyMDRules(args []string) error {
 			if idx < 0 {
 				break
 			}
-			// Find end of this section: next "## " that is NOT a Gemini heading
-			// (for Codex rules), or end of file.
-			isCodexRule := strings.HasPrefix(heading, "## Codex")
+			// Find end of this section: next "## " or end of file.
 			end := len(content)
 			pos := idx + len(heading)
 			for pos < len(content) {
@@ -313,22 +301,7 @@ func cmdRemoveLegacyMDRules(args []string) error {
 				if nlIdx < 0 {
 					break
 				}
-				nextHeadingStart := pos + nlIdx + 1 // position of "## "
-				// Check if this next heading is a Gemini heading (skip it for Codex rules).
-				if isCodexRule {
-					isGemini := false
-					for _, gp := range geminiPrefixes {
-						if strings.HasPrefix(content[nextHeadingStart:], gp) {
-							isGemini = true
-							break
-						}
-					}
-					if isGemini {
-						pos = nextHeadingStart + 1
-						continue
-					}
-				}
-				end = nextHeadingStart
+				end = pos + nlIdx + 1
 				break
 			}
 			content = content[:idx] + content[end:]

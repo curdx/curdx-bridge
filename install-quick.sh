@@ -186,7 +186,7 @@ install_claude_skills() {
   mkdir -p "$dst"
 
   # Clean obsolete skills
-  for obs in cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto; do
+  for obs in cask oask lask cpend opend lpend cping oping lping ping auto; do
     [[ -d "$dst/$obs" ]] && rm -rf "$dst/$obs"
   done
 
@@ -232,7 +232,7 @@ install_codex_skills() {
   mkdir -p "$dst"
 
   # Clean obsolete skills
-  for obs in cask gask oask lask cpend gpend opend lpend cping gping oping lping; do
+  for obs in cask oask lask cpend opend lpend cping oping lping; do
     [[ -d "$dst/$obs" ]] && rm -rf "$dst/$obs"
   done
 
