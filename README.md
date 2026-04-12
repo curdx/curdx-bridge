@@ -1,12 +1,11 @@
 <div align="center">
 
-# CURDX Bridge v5.2.9
+# CURDX Bridge
 
-**Multi-AI Split-Pane Terminal — Claude · Codex · Gemini**
+**Multi-AI Split-Pane Terminal — Claude · Codex · Gemini · OpenCode**
 
-One terminal, multiple AI agents, real collaboration.
+One terminal, four AI agents, real collaboration.
 
-[![Version](https://img.shields.io/badge/version-5.2.9-orange.svg)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Go 1.22+](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://golang.org/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)]()
@@ -17,19 +16,21 @@ One terminal, multiple AI agents, real collaboration.
 
 ---
 
+<div align="center">
+<img src="docs/screenshot.png" alt="CURDX Bridge — four AI agents in split panes" width="800" />
+<br/>
+<em>Claude, Codex, Gemini, and OpenCode working side by side in one terminal</em>
+</div>
+
+---
+
 ## What is this?
 
 CURDX Bridge puts multiple AI coding agents into split terminal panes. You talk to Claude as usual — when you need a second opinion, just say "let Codex review this" or "ask Gemini for ideas". Claude handles the coordination automatically.
 
-```
-┌─────────────────────┬──────────────────────┐
-│                     │       Codex          │
-│      Claude         │    (Reviewer)        │
-│   You talk here     ├──────────────────────┤
-│                     │       Gemini         │
-│                     │   (Brainstormer)     │
-└─────────────────────┴──────────────────────┘
-```
+<div align="center">
+<img src="docs/layout.svg" alt="CURDX Bridge layout — Claude left, Codex/Gemini/OpenCode right" width="680" />
+</div>
 
 No switching tabs. No copy-pasting context. Just talk.
 
@@ -44,10 +45,11 @@ curl -fsSL https://raw.githubusercontent.com/curdx/curdx-bridge/main/install.sh 
 ### 2. Run
 
 ```bash
-curdx                          # Default: Claude + Codex + Gemini
-curdx claude codex             # Just two providers
-curdx -r                       # Resume previous session
-curdx -r claude codex gemini   # Resume with specific providers
+curdx                                  # Default: Claude + Codex + Gemini
+curdx claude codex gemini opencode     # All four providers
+curdx claude codex                     # Just two providers
+curdx -r                               # Resume previous session
+curdx -r claude codex gemini           # Resume with specific providers
 ```
 
 That's it. Panes appear, providers boot up, you start talking to Claude.
@@ -79,7 +81,7 @@ You:    Looks good. Apply Codex's suggestions and commit.
 Claude: [makes changes, commits]
 ```
 
-**That's the whole workflow.** Claude is your main interface. Codex and Gemini are collaborators it can call on.
+**That's the whole workflow.** Claude is your main interface. Codex, Gemini, and OpenCode are collaborators it can call on.
 
 ### Behind the scenes
 
@@ -97,6 +99,7 @@ Each provider runs in its own pane — you can watch them think in real time.
 | **Designer** | Claude | Plans, implements, orchestrates |
 | **Reviewer** | Codex | Scores code/plans (1-10 rubrics) |
 | **Inspiration** | Gemini | Brainstorms alternatives (reference only) |
+| **Collaborator** | OpenCode | Additional AI perspective |
 
 The review framework has pass/fail gates — code must score ≥ 7 before shipping. Up to 3 review rounds, then escalates to you.
 
@@ -108,13 +111,14 @@ You rarely need these — Claude handles them — but they exist:
 # Direct communication
 cask "message"    # Send to Codex
 gask "message"    # Send to Gemini
+oask "message"    # Send to OpenCode
 lask "message"    # Send to Claude
 
 # Check latest replies
-cpend / gpend / lpend
+cpend / gpend / opend / lpend
 
 # Test connectivity
-cping / gping / lping
+cping / gping / oping / lping
 
 # Session management
 curdx kill              # Kill all sessions
@@ -129,6 +133,7 @@ curdx kill codex -f     # Force kill specific provider
 | **Claude Code** | `npm install -g @anthropic-ai/claude-code` |
 | **Codex CLI** (optional) | `npm install -g @openai/codex` |
 | **Gemini CLI** (optional) | See provider docs |
+| **OpenCode CLI** (optional) | See provider docs |
 
 Make sure each provider CLI works standalone first.
 
@@ -143,14 +148,14 @@ macOS (Intel/Apple Silicon) · Linux (x86-64/ARM64) · Windows (x86-64 + WSL)
 Place in `.curdx/curdx.config` (project-level) or `~/.curdx/curdx.config` (global):
 
 ```
-claude codex gemini
+claude codex gemini opencode
 ```
 
 Or JSON for advanced options:
 
 ```json
 {
-  "providers": ["claude", "codex", "gemini"],
+  "providers": ["claude", "codex", "gemini", "opencode"],
   "flags": { "resume": true, "auto": true }
 }
 ```
@@ -181,6 +186,10 @@ cd curdx-bridge
 | `Another instance running` | `curdx kill` then retry |
 
 Debug mode: `CURDX_DEBUG=1 curdx`
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 

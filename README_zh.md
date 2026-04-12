@@ -1,12 +1,11 @@
 <div align="center">
 
-# CURDX Bridge v5.2.9
+# CURDX Bridge
 
-**多 AI 分屏终端 — Claude · Codex · Gemini**
+**多 AI 分屏终端 — Claude · Codex · Gemini · OpenCode**
 
-一个终端，多个 AI，真正的协作。
+一个终端，四个 AI，真正的协作。
 
-[![Version](https://img.shields.io/badge/version-5.2.9-orange.svg)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Go 1.22+](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://golang.org/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)]()
@@ -17,19 +16,21 @@
 
 ---
 
+<div align="center">
+<img src="docs/screenshot.png" alt="CURDX Bridge — 四个 AI 在分屏面板中协作" width="800" />
+<br/>
+<em>Claude、Codex、Gemini、OpenCode 在同一终端中并肩工作</em>
+</div>
+
+---
+
 ## 这是什么？
 
 CURDX Bridge 把多个 AI 编程助手放进终端分屏。你像平时一样和 Claude 聊天 — 需要第二意见时，说一句"让 Codex 审查下代码"或"问问 Gemini 有什么想法"，Claude 自动协调。
 
-```
-┌─────────────────────┬──────────────────────┐
-│                     │       Codex          │
-│      Claude         │     (评审员)         │
-│    你在这里聊天      ├──────────────────────┤
-│                     │       Gemini         │
-│                     │     (创意源)         │
-└─────────────────────┴──────────────────────┘
-```
+<div align="center">
+<img src="docs/layout.svg" alt="CURDX Bridge 布局 — 左 Claude，右 Codex/Gemini/OpenCode" width="680" />
+</div>
 
 不用切标签页。不用复制粘贴上下文。直接说。
 
@@ -44,10 +45,11 @@ curl -fsSL https://raw.githubusercontent.com/curdx/curdx-bridge/main/install.sh 
 ### 2. 启动
 
 ```bash
-curdx                          # 默认：Claude + Codex + Gemini
-curdx claude codex             # 只启动两个
-curdx -r                       # 恢复上次会话
-curdx -r claude codex gemini   # 恢复指定 Provider 的会话
+curdx                                  # 默认：Claude + Codex + Gemini
+curdx claude codex gemini opencode     # 全部四个 Provider
+curdx claude codex                     # 只启动两个
+curdx -r                               # 恢复上次会话
+curdx -r claude codex gemini           # 恢复指定 Provider 的会话
 ```
 
 面板出现，Provider 启动，开始聊天。
@@ -79,7 +81,7 @@ Claude: [异步询问 Gemini]
 Claude: [修改代码，提交]
 ```
 
-**就是这样。** Claude 是你的主界面，Codex 和 Gemini 是它的协作者。
+**就是这样。** Claude 是你的主界面，Codex、Gemini 和 OpenCode 是它的协作者。
 
 ### 背后的原理
 
@@ -97,6 +99,7 @@ Claude: [修改代码，提交]
 | **设计师** | Claude | 规划、实现、协调 |
 | **评审员** | Codex | 代码/方案评分（1-10 多维度） |
 | **灵感源** | Gemini | 发散思路（仅参考） |
+| **协作者** | OpenCode | 额外的 AI 视角 |
 
 评审框架有通过/失败门禁 — 评分 ≥ 7 才能通过，最多 3 轮评审，之后交给你决定。
 
@@ -108,13 +111,14 @@ Claude: [修改代码，提交]
 # 直接通信
 cask "消息"    # 发给 Codex
 gask "消息"    # 发给 Gemini
+oask "消息"    # 发给 OpenCode
 lask "消息"    # 发给 Claude
 
 # 查看最新回复
-cpend / gpend / lpend
+cpend / gpend / opend / lpend
 
 # 测试连通性
-cping / gping / lping
+cping / gping / oping / lping
 
 # 会话管理
 curdx kill              # 终止所有会话
@@ -129,6 +133,7 @@ curdx kill codex -f     # 强制终止指定 Provider
 | **Claude Code** | `npm install -g @anthropic-ai/claude-code` |
 | **Codex CLI**（可选） | `npm install -g @openai/codex` |
 | **Gemini CLI**（可选） | 参考官方文档 |
+| **OpenCode CLI**（可选） | 参考官方文档 |
 
 确保每个 Provider CLI 能单独运行。
 
@@ -143,14 +148,14 @@ macOS（Intel / Apple Silicon）· Linux（x86-64 / ARM64）· Windows（x86-64 
 放在 `.curdx/curdx.config`（项目级）或 `~/.curdx/curdx.config`（全局）：
 
 ```
-claude codex gemini
+claude codex gemini opencode
 ```
 
 JSON 高级配置：
 
 ```json
 {
-  "providers": ["claude", "codex", "gemini"],
+  "providers": ["claude", "codex", "gemini", "opencode"],
   "flags": { "resume": true, "auto": true }
 }
 ```
@@ -181,6 +186,10 @@ cd curdx-bridge
 | 提示已有实例运行 | `curdx kill` 后重试 |
 
 调试模式：`CURDX_DEBUG=1 curdx`
+
+## 更新日志
+
+详见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 许可证
 

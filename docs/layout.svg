@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" font-family="'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1b26"/>
+      <stop offset="100%" stop-color="#16161e"/>
+    </linearGradient>
+    <linearGradient id="claude-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a1f3d"/>
+      <stop offset="100%" stop-color="#1e1630"/>
+    </linearGradient>
+    <linearGradient id="codex-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2b1a"/>
+      <stop offset="100%" stop-color="#142014"/>
+    </linearGradient>
+    <linearGradient id="gemini-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b1f1a"/>
+      <stop offset="100%" stop-color="#201814"/>
+    </linearGradient>
+    <linearGradient id="opencode-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2535"/>
+      <stop offset="100%" stop-color="#141c28"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer frame -->
+  <rect width="720" height="400" rx="10" fill="url(#bg)" stroke="#3b3b4f" stroke-width="1.5"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="720" height="28" rx="10" fill="#24253a"/>
+  <rect x="0" y="14" width="720" height="14" fill="#24253a"/>
+  <circle cx="18" cy="14" r="5" fill="#ff5f57"/>
+  <circle cx="36" cy="14" r="5" fill="#febc2e"/>
+  <circle cx="54" cy="14" r="5" fill="#28c840"/>
+  <text x="360" y="18" fill="#787c99" font-size="11" text-anchor="middle">CURDX Bridge</text>
+
+  <!-- Claude pane (left half) -->
+  <rect x="8" y="34" width="346" height="358" rx="6" fill="url(#claude-bg)" stroke="#4a3f6b" stroke-width="1"/>
+  <rect x="8" y="34" width="346" height="22" rx="6" fill="#4a3f6b" opacity="0.5"/>
+  <rect x="8" y="50" width="346" height="6" fill="url(#claude-bg)"/>
+  <text x="181" y="49" fill="#c8a2ff" font-size="10" text-anchor="middle" font-weight="bold">Claude — Designer</text>
+  <text x="20" y="78" fill="#565f89" font-size="11">$</text>
+  <text x="34" y="78" fill="#9ece6a" font-size="11">You talk here</text>
+  <rect x="20" y="86" width="1" height="12" fill="#c8a2ff" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0;0.8" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Role labels for Claude -->
+  <text x="20" y="120" fill="#565f89" font-size="10">→ Plans, implements, orchestrates</text>
+  <text x="20" y="136" fill="#565f89" font-size="10">→ 规划、实现、协调</text>
+
+  <!-- Codex pane (top right) -->
+  <rect x="362" y="34" width="350" height="116" rx="6" fill="url(#codex-bg)" stroke="#3b5a3b" stroke-width="1"/>
+  <rect x="362" y="34" width="350" height="22" rx="6" fill="#3b5a3b" opacity="0.5"/>
+  <rect x="362" y="50" width="350" height="6" fill="url(#codex-bg)"/>
+  <text x="537" y="49" fill="#9ece6a" font-size="10" text-anchor="middle" font-weight="bold">Codex — Reviewer</text>
+  <text x="374" y="78" fill="#565f89" font-size="11">$</text>
+  <text x="388" y="78" fill="#73daca" font-size="11">Score: 8.5/10</text>
+  <text x="374" y="98" fill="#565f89" font-size="10">→ Code review (1-10 rubrics)</text>
+  <text x="374" y="114" fill="#565f89" font-size="10">→ 代码评审（1-10 评分）</text>
+
+  <!-- Gemini pane (middle right) -->
+  <rect x="362" y="156" width="350" height="116" rx="6" fill="url(#gemini-bg)" stroke="#5a4a3b" stroke-width="1"/>
+  <rect x="362" y="156" width="350" height="22" rx="6" fill="#5a4a3b" opacity="0.5"/>
+  <rect x="362" y="172" width="350" height="6" fill="url(#gemini-bg)"/>
+  <text x="537" y="171" fill="#e0af68" font-size="10" text-anchor="middle" font-weight="bold">Gemini — Inspiration</text>
+  <text x="374" y="200" fill="#565f89" font-size="11">$</text>
+  <text x="388" y="200" fill="#e0af68" font-size="11">Alternative: ...</text>
+  <text x="374" y="220" fill="#565f89" font-size="10">→ Brainstorms ideas (reference only)</text>
+  <text x="374" y="236" fill="#565f89" font-size="10">→ 发散思路（仅参考）</text>
+
+  <!-- OpenCode pane (bottom right) -->
+  <rect x="362" y="278" width="350" height="114" rx="6" fill="url(#opencode-bg)" stroke="#3b4f6b" stroke-width="1"/>
+  <rect x="362" y="278" width="350" height="22" rx="6" fill="#3b4f6b" opacity="0.5"/>
+  <rect x="362" y="294" width="350" height="6" fill="url(#opencode-bg)"/>
+  <text x="537" y="293" fill="#7aa2f7" font-size="10" text-anchor="middle" font-weight="bold">OpenCode — Collaborator</text>
+  <text x="374" y="322" fill="#565f89" font-size="11">$</text>
+  <text x="388" y="322" fill="#7aa2f7" font-size="11">Analyzing ...</text>
+  <text x="374" y="342" fill="#565f89" font-size="10">→ Additional AI perspective</text>
+  <text x="374" y="358" fill="#565f89" font-size="10">→ 额外的 AI 视角</text>
+</svg>
