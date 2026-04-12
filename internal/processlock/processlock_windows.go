@@ -31,6 +31,16 @@ func isPIDAlive(pid int) bool {
 	return true
 }
 
+// isProcessStuck is a no-op on Windows; stopped/zombie states are a Unix concept.
+func isProcessStuck(pid int) bool {
+	return false
+}
+
+// killStuckProcess is a no-op on Windows.
+func killStuckProcess(pid int) bool {
+	return false
+}
+
 // lockFile acquires an exclusive non-blocking lock on f using LockFileEx.
 func lockFile(f *os.File) bool {
 	var overlapped syscall.Overlapped

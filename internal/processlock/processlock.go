@@ -48,7 +48,8 @@ func NewProviderLock(provider string, timeout float64, cwd string) *ProviderLock
 	}
 }
 
-// checkStaleLock checks if the current lock holder is dead, allowing us to take over.
+// checkStaleLock checks if the current lock holder is dead or stuck (stopped/zombie),
+// allowing us to take over.
 func (pl *ProviderLock) checkStaleLock() bool {
 	data, err := os.ReadFile(pl.LockFile)
 	if err != nil {
@@ -65,6 +66,14 @@ func (pl *ProviderLock) checkStaleLock() bool {
 	if !isPIDAlive(pid) {
 		os.Remove(pl.LockFile)
 		return true
+	}
+	// Process is alive but may be stuck (stopped/zombie) — kill it and reclaim.
+	if isProcessStuck(pid) {
+		fmt.Fprintf(os.Stderr, "Killing stuck curdx process (pid %d, stopped/zombie).\n", pid)
+		if killStuckProcess(pid) {
+			os.Remove(pl.LockFile)
+			return true
+		}
 	}
 	return false
 }
