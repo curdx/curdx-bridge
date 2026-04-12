@@ -540,11 +540,47 @@ build_go_binaries() {
 
   echo "Building Go binaries..."
   mkdir -p "$BIN_DIR"
+
+  # Resolve version info for ldflags injection
+  local go_version go_commit go_date go_ldflags
+  go_version=""
+  go_commit=""
+  go_date=""
+  if [[ -d "$REPO_ROOT/.git" ]] && command -v git >/dev/null 2>&1; then
+    go_commit="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || true)"
+    go_date="$(git -C "$REPO_ROOT" log -1 --format=%ci 2>/dev/null | cut -d' ' -f1 || true)"
+    # Derive version from git tag
+    go_version="$(git -C "$REPO_ROOT" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || true)"
+  fi
+
+  go_ldflags=""
+  local pkg="github.com/curdx/curdx-bridge/cmd/curdx"
+  if [[ -n "$go_version" ]]; then
+    go_ldflags="$go_ldflags -X main.Version=$go_version"
+  fi
+  if [[ -n "$go_commit" ]]; then
+    go_ldflags="$go_ldflags -X main.GitCommit=$go_commit"
+  fi
+  if [[ -n "$go_date" ]]; then
+    go_ldflags="$go_ldflags -X main.GitDate=$go_date"
+  fi
+
   local built=0
   for target in "$REPO_ROOT"/cmd/*/; do
     local name
     name="$(basename "$target")"
-    if (cd "$REPO_ROOT" && go build -o "$BIN_DIR/$name" "./cmd/$name") 2>/dev/null; then
+    local build_ok=false
+    # Only inject ldflags for the curdx binary (others don't have these vars)
+    if [[ "$name" == "curdx" && -n "$go_ldflags" ]]; then
+      if (cd "$REPO_ROOT" && go build -ldflags "$go_ldflags" -o "$BIN_DIR/$name" "./cmd/$name") 2>/dev/null; then
+        build_ok=true
+      fi
+    else
+      if (cd "$REPO_ROOT" && go build -o "$BIN_DIR/$name" "./cmd/$name") 2>/dev/null; then
+        build_ok=true
+      fi
+    fi
+    if $build_ok; then
       built=$((built + 1))
     else
       echo "WARN: Failed to build $name"
@@ -1013,7 +1049,7 @@ SETTINGS
   fi
 }
 
-CURDX_TMUX_MARKER="# CURDX (Claude Code Bridge) tmux configuration"
+CURDX_TMUX_MARKER="# CURDX (CURDX Bridge) tmux configuration"
 CURDX_TMUX_MARKER_LEGACY="# CURDX tmux configuration"
 
 remove_curdx_tmux_block_from_file() {

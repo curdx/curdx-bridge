@@ -59,7 +59,7 @@ var Messages = map[string]map[string]string{
 		"cleanup_complete":   "Cleanup complete",
 
 		// Banner
-		"banner_title":    "Claude Code Bridge {version}",
+		"banner_title":    "CURDX Bridge {version}",
 		"banner_date":     "{date}",
 		"banner_backends": "Backends: {backends}",
 
@@ -131,7 +131,7 @@ var Messages = map[string]map[string]string{
 		"cleanup_complete":   "清理完成",
 
 		// Banner
-		"banner_title":    "Claude Code Bridge {version}",
+		"banner_title":    "CURDX Bridge {version}",
 		"banner_date":     "{date}",
 		"banner_backends": "后端: {backends}",
 

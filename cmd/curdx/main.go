@@ -31,10 +31,11 @@ import (
 	"github.com/curdx/curdx-bridge/internal/terminal"
 )
 
-const (
-	Version   = "5.2.9"
-	GitCommit = "c539e79"
-	GitDate   = "2026-02-25"
+// Version info — injected at build time via -ldflags.
+var (
+	Version   = "dev"
+	GitCommit = ""
+	GitDate   = ""
 )
 
 var allowedProviders = map[string]bool{
@@ -264,10 +265,22 @@ func findInstallDir() string {
 // cmdVersion implements "curdx version".
 func cmdVersion() int {
 	installDir := findInstallDir()
-	localInfo := getVersionInfo(installDir)
+
+	// Prefer compile-time values; fall back to install-dir probe.
+	localInfo := map[string]string{
+		"version": Version,
+		"commit":  GitCommit,
+		"date":    GitDate,
+	}
+	if localInfo["commit"] == "" {
+		probed := getVersionInfo(installDir)
+		if probed["commit"] != "" {
+			localInfo = probed
+		}
+	}
 	localStr := formatVersionInfo(localInfo)
 
-	fmt.Printf("curdx (Claude Code Bridge) %s\n", localStr)
+	fmt.Printf("curdx (CURDX Bridge) %s\n", localStr)
 	fmt.Printf("Install path: %s\n", installDir)
 	fmt.Println("\nChecking for updates...")
 
@@ -2139,7 +2152,7 @@ func (l *aiLauncher) runUp() int {
 	if GitCommit != "" {
 		versionStr += fmt.Sprintf(" (%s %s)", GitCommit, GitDate)
 	}
-	fmt.Fprintf(os.Stderr, "Claude Code Bridge %s\n", versionStr)
+	fmt.Fprintf(os.Stderr, "CURDX Bridge %s\n", versionStr)
 	fmt.Fprintf(os.Stderr, "%s\n", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Fprintf(os.Stderr, "Backends: %s\n", strings.Join(l.providers, ", "))
 	fmt.Fprintf(os.Stderr, "%s\n", strings.Repeat("=", 50))

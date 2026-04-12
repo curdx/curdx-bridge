@@ -47,8 +47,8 @@ func TestTFormatting(t *testing.T) {
 	langMu.Unlock()
 
 	result := T("banner_title", map[string]string{"version": "1.0"})
-	if result != "Claude Code Bridge 1.0" {
-		t.Errorf("expected 'Claude Code Bridge 1.0', got %q", result)
+	if result != "CURDX Bridge 1.0" {
+		t.Errorf("expected 'CURDX Bridge 1.0', got %q", result)
 	}
 }
 

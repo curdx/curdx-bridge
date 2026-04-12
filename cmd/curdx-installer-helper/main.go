@@ -413,11 +413,11 @@ func cmdRemoveTmuxBlock(args []string) error {
 
 	// New format: block surrounded by "# ===..." lines with known header/footer.
 	//   # ====...
-	//   # CURDX (Claude Code Bridge) tmux configuration
+	//   # CURDX (CURDX Bridge) tmux configuration
 	//   ...
 	//   # End of CURDX tmux configuration
 	//   # ====...
-	reNew := regexp.MustCompile(`(?s)\n*# =+\n# CURDX \(Claude Code Bridge\) tmux configuration.*?# End of CURDX tmux configuration\n# =+`)
+	reNew := regexp.MustCompile(`(?s)\n*# =+\n# CURDX \((?:Claude Code|CURDX) Bridge\) tmux configuration.*?# End of CURDX tmux configuration\n# =+`)
 	content = reNew.ReplaceAllString(content, "")
 
 	// Legacy format: everything from "# CURDX tmux configuration" to EOF.
