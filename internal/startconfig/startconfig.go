@@ -18,7 +18,7 @@ const (
 )
 
 // DefaultProviders is the default set of providers.
-var DefaultProviders = []string{"claude", "codex", "gemini"}
+var DefaultProviders = []string{"claude", "codex", "gemini", "opencode"}
 
 // StartConfig holds parsed start configuration data.
 type StartConfig struct {
@@ -27,9 +27,10 @@ type StartConfig struct {
 }
 
 var allowedProviders = map[string]bool{
-	"codex":  true,
-	"gemini": true,
-	"claude": true,
+	"codex":    true,
+	"gemini":   true,
+	"opencode": true,
+	"claude":   true,
 }
 
 // parseTokens extracts tokens from raw config text, stripping comments and delimiters.

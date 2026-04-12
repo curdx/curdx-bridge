@@ -38,7 +38,7 @@ const (
 )
 
 var allowedProviders = map[string]bool{
-	"codex": true, "gemini": true, "claude": true,
+	"codex": true, "gemini": true, "opencode": true, "claude": true,
 }
 
 // splitProviderTokens splits comma-separated and/or space-separated provider tokens.
@@ -78,8 +78,8 @@ func parseProviders(values []string, allowUnknown bool) []string {
 
 	if len(unknown) > 0 && !allowUnknown {
 		fmt.Fprintf(os.Stderr, "invalid provider(s): %s\n", strings.Join(unknown, ", "))
-		fmt.Fprintln(os.Stderr, "use: curdx codex gemini claude  (spaces)  or  curdx codex,gemini,claude  (commas)")
-		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, claude")
+		fmt.Fprintln(os.Stderr, "use: curdx codex gemini opencode claude  (spaces)  or  curdx codex,gemini,opencode,claude  (commas)")
+		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, opencode, claude")
 		return nil
 	}
 
@@ -115,8 +115,8 @@ func parseProvidersWithCmd(values []string) ([]string, bool) {
 
 	if len(unknown) > 0 {
 		fmt.Fprintf(os.Stderr, "invalid provider(s): %s\n", strings.Join(unknown, ", "))
-		fmt.Fprintln(os.Stderr, "use: curdx codex gemini claude cmd  (spaces)  or  curdx codex,gemini,claude,cmd  (commas)")
-		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, claude, cmd")
+		fmt.Fprintln(os.Stderr, "use: curdx codex gemini opencode claude cmd  (spaces)  or  curdx codex,gemini,opencode,claude,cmd  (commas)")
+		fmt.Fprintln(os.Stderr, "allowed: codex, gemini, opencode, claude, cmd")
 		return nil, cmdEnabled
 	}
 
@@ -503,7 +503,7 @@ func findAllZombieSessions() []map[string]interface{} {
 		return nil
 	}
 
-	pattern := regexp.MustCompile(`^(codex|gemini|claude)-(\d+)-`)
+	pattern := regexp.MustCompile(`^(codex|gemini|opencode|claude)-(\d+)-`)
 	var zombies []map[string]interface{}
 
 	out, err := exec.Command("tmux", "list-sessions", "-F", "#{session_name}").Output()
@@ -624,7 +624,7 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 
 	providers := parseProviders(providerArgs, true)
 	if providers == nil {
-		providers = []string{"codex", "gemini", "claude"}
+		providers = []string{"codex", "gemini", "opencode", "claude"}
 	}
 
 	daemonSpecs := map[string]struct {
@@ -633,6 +633,7 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 	}{
 		"codex":    {"cask", "askd"},
 		"gemini":   {"gask", "askd"},
+		"opencode": {"oask", "askd"},
 		"claude":   {"lask", "askd"},
 	}
 
@@ -1095,6 +1096,8 @@ func (l *aiLauncher) getStartCmd(provider string) string {
 		cmd = l.buildCodexStartCmd()
 	case "gemini":
 		cmd = l.buildGeminiStartCmd()
+	case "opencode":
+		cmd = l.buildOpenCodeStartCmd()
 	case "claude":
 		cmd = l.buildClaudeStartCmd()
 	default:
@@ -1284,6 +1287,18 @@ func (l *aiLauncher) buildGeminiStartCmd() string {
 	if l.resume {
 		cmd += " --resume latest"
 		fmt.Fprintf(os.Stderr, "Resuming Gemini session\n")
+	}
+	return cmd
+}
+
+func (l *aiLauncher) buildOpenCodeStartCmd() string {
+	cmd := os.Getenv("OPENCODE_START_CMD")
+	if strings.TrimSpace(cmd) == "" {
+		cmd = "opencode"
+	}
+	if l.resume {
+		cmd += " --continue"
+		fmt.Fprintf(os.Stderr, "Resuming OpenCode session\n")
 	}
 	return cmd
 }
@@ -1493,6 +1508,18 @@ func (l *aiLauncher) claudeEnvOverrides() map[string]string {
 			env["GEMINI_WEZTERM_PANE"] = paneID
 		} else {
 			env["GEMINI_TMUX_SESSION"] = paneID
+		}
+	}
+	if contains(l.providers, "opencode") {
+		rt := filepath.Join(runtimeBase, "opencode")
+		env["OPENCODE_SESSION_ID"] = l.sessionID
+		env["OPENCODE_RUNTIME_DIR"] = rt
+		env["OPENCODE_TERMINAL"] = l.terminalType
+		paneID := l.providerPaneID("opencode")
+		if l.terminalType == "wezterm" {
+			env["OPENCODE_WEZTERM_PANE"] = paneID
+		} else {
+			env["OPENCODE_TMUX_SESSION"] = paneID
 		}
 	}
 	return env
@@ -1988,7 +2015,7 @@ func (l *aiLauncher) cleanup() {
 	}
 
 	// Mark session files inactive
-	for _, prov := range []string{"codex", "gemini", "claude"} {
+	for _, prov := range []string{"codex", "gemini", "opencode", "claude"} {
 		sessionFile := l.projectSessionFile(fmt.Sprintf(".%s-session", prov))
 		if _, err := os.Stat(sessionFile); err != nil {
 			continue
@@ -2625,7 +2652,7 @@ func run(argv []string) int {
 	if help {
 		fmt.Println("Usage: curdx [providers...] [options]")
 		fmt.Println("")
-		fmt.Println("Providers: codex, gemini, claude (space or comma separated)")
+		fmt.Println("Providers: codex, gemini, opencode, claude (space or comma separated)")
 		fmt.Println("")
 		fmt.Println("Options:")
 		fmt.Println("  -r, --resume, --restore    Resume context")
