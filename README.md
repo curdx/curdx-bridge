@@ -189,7 +189,7 @@ Debug mode: `CURDX_DEBUG=1 curdx`
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for release history.
+See [Releases](https://github.com/curdx/curdx-bridge/releases) for release history.
 
 ## License
 

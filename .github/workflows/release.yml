@@ -83,14 +83,131 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
 
+      - name: Generate release notes
+        id: notes
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          PREV_TAG=$(git tag --sort=-v:refname | grep -A1 "^${TAG}$" | tail -1)
+          if [ "$PREV_TAG" = "$TAG" ] || [ -z "$PREV_TAG" ]; then
+            RANGE="$TAG"
+          else
+            RANGE="${PREV_TAG}..${TAG}"
+          fi
+
+          # Collect commits by category
+          feat="" fix="" docs="" chore="" refactor="" perf="" other=""
+          while IFS= read -r msg; do
+            case "$msg" in
+              feat:*|feat\(*) feat="${feat}${msg#*: }"$'\n' ;;
+              fix:*|fix\(*)   fix="${fix}${msg#*: }"$'\n' ;;
+              docs:*|docs\(*) docs="${docs}${msg#*: }"$'\n' ;;
+              chore:*|chore\(*) chore="${chore}${msg#*: }"$'\n' ;;
+              refactor:*|refactor\(*) refactor="${refactor}${msg#*: }"$'\n' ;;
+              perf:*|perf\(*) perf="${perf}${msg#*: }"$'\n' ;;
+              *)              other="${other}${msg}"$'\n' ;;
+            esac
+          done < <(git log --pretty=format:"%s" "$RANGE" --no-merges)
+
+          # --- Build English section ---
+          EN=""
+          if [ -n "$feat" ]; then
+            EN="${EN}### Added"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$feat"
+            EN="${EN}"$'\n'
+          fi
+          if [ -n "$fix" ]; then
+            EN="${EN}### Fixed"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$fix"
+            EN="${EN}"$'\n'
+          fi
+          if [ -n "$docs" ]; then
+            EN="${EN}### Documentation"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$docs"
+            EN="${EN}"$'\n'
+          fi
+          if [ -n "$refactor" ]; then
+            EN="${EN}### Refactored"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$refactor"
+            EN="${EN}"$'\n'
+          fi
+          if [ -n "$perf" ]; then
+            EN="${EN}### Performance"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$perf"
+            EN="${EN}"$'\n'
+          fi
+          if [ -n "$chore" ]; then
+            EN="${EN}### Maintenance"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$chore"
+            EN="${EN}"$'\n'
+          fi
+          if [ -n "$other" ]; then
+            EN="${EN}### Other"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && EN="${EN}- ${line}"$'\n'; done <<< "$other"
+            EN="${EN}"$'\n'
+          fi
+
+          # --- Build Chinese section (same items, translated headers) ---
+          ZH=""
+          if [ -n "$feat" ]; then
+            ZH="${ZH}### 新增"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$feat"
+            ZH="${ZH}"$'\n'
+          fi
+          if [ -n "$fix" ]; then
+            ZH="${ZH}### 修复"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$fix"
+            ZH="${ZH}"$'\n'
+          fi
+          if [ -n "$docs" ]; then
+            ZH="${ZH}### 文档"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$docs"
+            ZH="${ZH}"$'\n'
+          fi
+          if [ -n "$refactor" ]; then
+            ZH="${ZH}### 重构"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$refactor"
+            ZH="${ZH}"$'\n'
+          fi
+          if [ -n "$perf" ]; then
+            ZH="${ZH}### 性能"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$perf"
+            ZH="${ZH}"$'\n'
+          fi
+          if [ -n "$chore" ]; then
+            ZH="${ZH}### 维护"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$chore"
+            ZH="${ZH}"$'\n'
+          fi
+          if [ -n "$other" ]; then
+            ZH="${ZH}### 其他"$'\n'
+            while IFS= read -r line; do [ -n "$line" ] && ZH="${ZH}- ${line}"$'\n'; done <<< "$other"
+            ZH="${ZH}"$'\n'
+          fi
+
+          # Fallback if no categorized commits found
+          if [ -z "$EN" ]; then
+            EN="Maintenance release."$'\n'
+            ZH="维护版本。"$'\n'
+          fi
+
+          PREV_DISPLAY="${PREV_TAG:-initial}"
+          BODY="## What's Changed"$'\n\n'"${EN}"$'\n'"---"$'\n\n'"## 更新内容"$'\n\n'"${ZH}"$'\n'"---"$'\n\n'"**Full Changelog**: https://github.com/curdx/curdx-bridge/compare/${PREV_DISPLAY}...${TAG}"
+
+          # Write to file to avoid shell escaping issues
+          echo "$BODY" > release_notes.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body_path: release_notes.md
           files: |
             curdx-darwin-amd64.tar.gz
             curdx-darwin-arm64.tar.gz

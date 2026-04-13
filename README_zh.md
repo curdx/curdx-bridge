@@ -189,7 +189,7 @@ cd curdx-bridge
 
 ## 更新日志
 
-详见 [CHANGELOG.md](CHANGELOG.md)。
+详见 [Releases](https://github.com/curdx/curdx-bridge/releases)。
 
 ## 许可证
 
