@@ -5,13 +5,11 @@ package server
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"os"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/curdx/curdx-bridge/internal/providers"
@@ -99,7 +97,8 @@ func (s *AskDaemonServer) ServeForever() error {
 
 func (s *AskDaemonServer) handleConn(conn net.Conn) {
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(5 * time.Minute))
+	// Initial deadline for reading the request line (short).
+	conn.SetDeadline(time.Now().Add(30 * time.Second))
 
 	scanner := bufio.NewScanner(conn)
 	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
@@ -139,8 +138,13 @@ func (s *AskDaemonServer) handleConn(conn net.Conn) {
 		return
 	}
 
-	// Handle request
+	// Handle request — extend deadline based on request timeout_s
 	if s.RequestHandler != nil {
+		connTimeout := 5 * time.Minute
+		if ts, ok := req["timeout_s"].(float64); ok && ts > 0 {
+			connTimeout = time.Duration((ts+30)*float64(time.Second))
+		}
+		conn.SetDeadline(time.Now().Add(connTimeout))
 		resp := s.RequestHandler(req)
 		data, _ := json.Marshal(resp)
 		conn.Write(append(data, '\n'))
@@ -195,22 +199,4 @@ func (s *AskDaemonServer) Stop() {
 	if s.OnStop != nil {
 		s.OnStop()
 	}
-}
-
-func isPIDAlive(pid int) bool {
-	if pid <= 0 {
-		return false
-	}
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-	// Use signal 0 (Unix kill(pid, 0)) to probe process liveness.
-	err = process.Signal(syscall.Signal(0))
-	if err == nil {
-		return true
-	}
-	// EPERM means the process exists but we lack permission to signal it —
-	// it is still alive.
-	return errors.Is(err, syscall.EPERM)
 }

@@ -146,7 +146,7 @@ func SafeWriteSession(sessionFile string, content string) (bool, string) {
 	}
 
 	tmpFile := sessionFile + ".tmp"
-	err := os.WriteFile(tmpFile, []byte(content), 0o644)
+	err := os.WriteFile(tmpFile, []byte(content), 0o600)
 	if err != nil {
 		os.Remove(tmpFile)
 		if os.IsPermission(err) {

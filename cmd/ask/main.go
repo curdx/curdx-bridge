@@ -244,7 +244,7 @@ func appendTaskStatusLine(statusFile, line string) {
 	ts := time.Now().Format("2006-01-02T15:04:05-0700")
 	dir := filepath.Dir(statusFile)
 	_ = os.MkdirAll(dir, 0o755)
-	f, err := os.OpenFile(statusFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	f, err := os.OpenFile(statusFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
 		return
 	}
@@ -689,7 +689,7 @@ func run(argv []string) int {
 
 	taskID := makeTaskID()
 	logDir := filepath.Join(os.TempDir(), "curdx-tasks")
-	_ = os.MkdirAll(logDir, 0o755)
+	_ = os.MkdirAll(logDir, 0o700)
 	logFile := filepath.Join(logDir, fmt.Sprintf("ask-%s-%s.log", provider, taskID))
 	statusFile := filepath.Join(logDir, fmt.Sprintf("ask-%s-%s.status", provider, taskID))
 
@@ -770,10 +770,10 @@ exit "$rc"
 	)
 
 	scriptFile := filepath.Join(logDir, fmt.Sprintf("ask-%s-%s.sh", provider, taskID))
-	_ = os.WriteFile(scriptFile, []byte(bgScript), 0o755)
+	_ = os.WriteFile(scriptFile, []byte(bgScript), 0o700)
 
 	// Run detached
-	logHandle, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	logHandle, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[ERROR] Failed to open log file: %v\n", err)
 		return cliutil.ExitError
@@ -810,7 +810,7 @@ exit "$rc"
 }
 
 func touchFile(path string) {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0o644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0o600)
 	if err == nil {
 		f.Close()
 	}

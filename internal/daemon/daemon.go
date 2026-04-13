@@ -356,14 +356,3 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 	}
 	return resp
 }
-
-func errorResponse(prefix, msg string) map[string]any {
-	return map[string]any{
-		"type":      prefix + ".response",
-		"exit_code": 1,
-		"reply":     msg,
-		"req_id":    "",
-		"done_seen": false,
-		"status":    "failed",
-	}
-}

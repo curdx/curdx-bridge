@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -125,19 +124,13 @@ func parseProvidersWithCmd(values []string) ([]string, bool) {
 }
 
 // isPIDAlive checks if a process with the given PID is running.
+// NOTE: platform-specific implementation would be better but kept inline
+// since this file already uses syscall for signals elsewhere.
 func isPIDAlive(pid int) bool {
 	if pid <= 0 {
 		return false
 	}
-	proc, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-	err = proc.Signal(syscall.Signal(0))
-	if errors.Is(err, syscall.EPERM) {
-		return true // process exists but belongs to another user
-	}
-	return err == nil
+	return isPIDRunning(pid)
 }
 
 // shortProjectID returns a truncated project ID for display (up to 8 chars).
@@ -1746,7 +1739,10 @@ func (l *aiLauncher) startProviderInPane(provider string, parentPane string, dir
 		if err != nil {
 			return "", err
 		}
-		backend.RespawnPane(paneID, fullCmd, paneCwd, "", true)
+		if err := backend.RespawnPane(paneID, fullCmd, paneCwd, "", true); err != nil {
+			fmt.Fprintf(os.Stderr, "[WARN] %s pane respawn failed: %v\n", provider, err)
+			return "", fmt.Errorf("respawn pane for %s: %w", provider, err)
+		}
 		backend.SetPaneTitle(paneID, paneTitleMarker)
 		backend.SetPaneUserOption(paneID, "@curdx_agent", capitalizeFirst(provider))
 		l.tmuxPanes[provider] = paneID
@@ -1802,7 +1798,10 @@ func (l *aiLauncher) startCmdPane(parentPane, direction string) (string, error) 
 		if err != nil {
 			return "", err
 		}
-		backend.RespawnPane(paneID, fullCmd, l.cwd, "", true)
+		if err := backend.RespawnPane(paneID, fullCmd, l.cwd, "", true); err != nil {
+			fmt.Fprintf(os.Stderr, "[WARN] cmd pane respawn failed: %v\n", err)
+			return "", fmt.Errorf("respawn cmd pane: %w", err)
+		}
 		backend.SetPaneTitle(paneID, title)
 		backend.SetPaneUserOption(paneID, "@curdx_agent", "Cmd")
 		l.extraPanes["cmd"] = paneID
