@@ -1,7 +1,58 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Detect if running via pipe (curl | bash) vs direct execution
+if [[ -n "${BASH_SOURCE[0]:-}" && "${BASH_SOURCE[0]}" != "bash" && "${BASH_SOURCE[0]}" != "/dev/stdin" ]]; then
+  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  # Running via curl | bash — download latest release tarball (pre-built binaries)
+  _CURDX_TMPDIR="$(mktemp -d)"
+  trap 'rm -rf "$_CURDX_TMPDIR"' EXIT
+
+  _CURDX_REPO="curdx/curdx-bridge"
+  # Detect OS and architecture
+  _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  _arch="$(uname -m)"
+  case "$_arch" in
+    x86_64)  _arch="amd64" ;;
+    aarch64|arm64) _arch="arm64" ;;
+    *) echo "ERROR: Unsupported architecture: $_arch" >&2; exit 1 ;;
+  esac
+  case "$_os" in
+    linux|darwin) ;;
+    mingw*|msys*|cygwin*) _os="windows" ;;
+    *) echo "ERROR: Unsupported OS: $_os" >&2; exit 1 ;;
+  esac
+
+  _asset="curdx-${_os}-${_arch}"
+  if [[ "$_os" == "windows" ]]; then
+    _asset_file="${_asset}.zip"
+  else
+    _asset_file="${_asset}.tar.gz"
+  fi
+
+  # Fetch latest release download URL
+  _download_url="https://github.com/${_CURDX_REPO}/releases/latest/download/${_asset_file}"
+  echo "Downloading curdx-bridge (${_os}/${_arch})..."
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$_download_url" -o "$_CURDX_TMPDIR/$_asset_file"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO "$_CURDX_TMPDIR/$_asset_file" "$_download_url"
+  else
+    echo "ERROR: curl or wget is required for remote install." >&2
+    exit 1
+  fi
+
+  # Extract
+  echo "Extracting..."
+  if [[ "$_os" == "windows" ]]; then
+    unzip -q "$_CURDX_TMPDIR/$_asset_file" -d "$_CURDX_TMPDIR"
+  else
+    tar xzf "$_CURDX_TMPDIR/$_asset_file" -C "$_CURDX_TMPDIR"
+  fi
+  REPO_ROOT="$_CURDX_TMPDIR/$_asset"
+  _CURDX_PIPED=1
+fi
 INSTALL_PREFIX="${CODEX_INSTALL_PREFIX:-$HOME/.local/share/codex-dual}"
 BIN_DIR="${CODEX_BIN_DIR:-$HOME/.local/bin}"
 readonly REPO_ROOT INSTALL_PREFIX BIN_DIR
@@ -552,6 +603,25 @@ save_wezterm_config() {
 }
 
 build_go_binaries() {
+  mkdir -p "$BIN_DIR"
+
+  # If pre-built binaries exist in REPO_ROOT (release tarball), copy them directly
+  if [[ -x "$REPO_ROOT/curdx" ]]; then
+    echo "Installing pre-built binaries..."
+    local installed=0
+    for bin in "$REPO_ROOT"/curdx "$REPO_ROOT"/curdx-* "$REPO_ROOT"/cxb-*; do
+      [[ -f "$bin" && -x "$bin" ]] || continue
+      local name
+      name="$(basename "$bin")"
+      cp -f "$bin" "$BIN_DIR/$name"
+      chmod +x "$BIN_DIR/$name"
+      installed=$((installed + 1))
+    done
+    echo "  Installed $installed pre-built binaries"
+    return
+  fi
+
+  # Otherwise, build from source
   if ! command -v go >/dev/null 2>&1; then
     echo "ERROR: Go compiler required. Install from https://go.dev/dl/"
     exit 1
@@ -1514,12 +1584,18 @@ uninstall_all() {
 }
 
 main() {
-  if [[ $# -ne 1 ]]; then
-    usage
-    exit 1
+  # When piped (curl | bash), default to "install"
+  local action="${1:-}"
+  if [[ -z "$action" ]]; then
+    if [[ "${_CURDX_PIPED:-0}" == "1" ]]; then
+      action="install"
+    else
+      usage
+      exit 1
+    fi
   fi
 
-  case "$1" in
+  case "$action" in
     install)
       install_all
       ;;
