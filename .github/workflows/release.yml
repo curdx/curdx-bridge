@@ -46,11 +46,11 @@ jobs:
           mkdir -p "$OUTDIR"
 
           # Stub binaries not yet implemented — skip them
-          SKIP="laskd curdx-arch"
+          SKIP=" laskd curdx-arch "
 
           for cmd in cmd/*/; do
             name=$(basename "$cmd")
-            if echo "$SKIP" | grep -qw "$name"; then
+            if echo "$SKIP" | grep -q " ${name} "; then
               echo "Skipping stub: $name"
               continue
             fi
