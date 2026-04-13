@@ -647,7 +647,7 @@ func writeLog(line string) {
 			cacheDir = filepath.Join(home, ".cache", "curdx")
 		}
 	}
-	logPath := filepath.Join(cacheDir, "laskd.log")
+	logPath := filepath.Join(cacheDir, "cxb-claude-askd.log")
 	os.MkdirAll(filepath.Dir(logPath), 0o755)
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {

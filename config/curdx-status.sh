@@ -113,10 +113,10 @@ main() {
     case "$mode" in
         full)
             # Full status with all AIs
-            local claude_s=$(format_ai_status "cask" "C" "$C_ORANGE")
-            local codex_s=$(format_ai_status "cask" "X" "$C_GREEN")
-            local gemini_s=$(format_ai_status "gask" "G" "$C_BLUE")
-            local opencode_s=$(format_ai_status "oask" "O" "$C_PURPLE")
+            local claude_s=$(format_ai_status "cxb-codex-ask" "C" "$C_ORANGE")
+            local codex_s=$(format_ai_status "cxb-codex-ask" "X" "$C_GREEN")
+            local gemini_s=$(format_ai_status "cxb-gemini-ask" "G" "$C_BLUE")
+            local opencode_s=$(format_ai_status "cxb-opencode-ask" "O" "$C_PURPLE")
 
             out=" ${claude_s}${codex_s}${gemini_s}${opencode_s} "
             ;;
@@ -125,13 +125,13 @@ main() {
             # Just daemon status icons
             local output=""
 
-            if [[ $(check_daemon "cask") == "on" ]]; then
+            if [[ $(check_daemon "cxb-codex-ask") == "on" ]]; then
                 output+="${C_GREEN}X${C_RESET}"
             fi
-            if [[ $(check_daemon "gask") == "on" ]]; then
+            if [[ $(check_daemon "cxb-gemini-ask") == "on" ]]; then
                 output+="${C_BLUE}G${C_RESET}"
             fi
-            if [[ $(check_daemon "oask") == "on" ]]; then
+            if [[ $(check_daemon "cxb-opencode-ask") == "on" ]]; then
                 output+="${C_PURPLE}O${C_RESET}"
             fi
 
@@ -146,17 +146,17 @@ main() {
             local icons=""
 
             # Use circles/dots for status
-            if [[ $(check_daemon "cask") == "on" ]]; then
+            if [[ $(check_daemon "cxb-codex-ask") == "on" ]]; then
                 icons+="${C_ORANGE}●${C_RESET} "
             else
                 icons+="${C_DIM}○${C_RESET} "
             fi
-            if [[ $(check_daemon "gask") == "on" ]]; then
+            if [[ $(check_daemon "cxb-gemini-ask") == "on" ]]; then
                 icons+="${C_TEAL}●${C_RESET} "
             else
                 icons+="${C_DIM}○${C_RESET} "
             fi
-            if [[ $(check_daemon "oask") == "on" ]]; then
+            if [[ $(check_daemon "cxb-opencode-ask") == "on" ]]; then
                 icons+="${C_PURPLE}●${C_RESET}"
             else
                 icons+="${C_DIM}○${C_RESET}"
@@ -172,22 +172,22 @@ main() {
             # C - Claude (no daemon, always dim)
             output+="${C_DIM}○${C_RESET} "
 
-            # X - Codex (cask daemon)
-            if [[ $(check_daemon "cask") == "on" ]]; then
+            # X - Codex (cxb-codex-ask daemon)
+            if [[ $(check_daemon "cxb-codex-ask") == "on" ]]; then
                 output+="${C_ORANGE}●${C_RESET} "
             else
                 output+="${C_DIM}○${C_RESET} "
             fi
 
-            # G - Gemini (gask daemon)
-            if [[ $(check_daemon "gask") == "on" ]]; then
+            # G - Gemini (cxb-gemini-ask daemon)
+            if [[ $(check_daemon "cxb-gemini-ask") == "on" ]]; then
                 output+="${C_TEAL}●${C_RESET} "
             else
                 output+="${C_DIM}○${C_RESET} "
             fi
 
-            # O - OpenCode (oask daemon)
-            if [[ $(check_daemon "oask") == "on" ]]; then
+            # O - OpenCode (cxb-opencode-ask daemon)
+            if [[ $(check_daemon "cxb-opencode-ask") == "on" ]]; then
                 output+="${C_PURPLE}●${C_RESET}"
             else
                 output+="${C_DIM}○${C_RESET}"

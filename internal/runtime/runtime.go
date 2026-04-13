@@ -162,7 +162,7 @@ func NormalizeConnectHost(host string) string {
 // Returns empty string if not available.
 func GetDaemonWorkDir(stateFileName string) string {
 	if stateFileName == "" {
-		stateFileName = "askd.json"
+		stateFileName = "cxb-askd.json"
 	}
 	statePath := StateFilePath(stateFileName)
 	data, err := os.ReadFile(statePath)

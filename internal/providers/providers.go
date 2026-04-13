@@ -31,84 +31,84 @@ type ProviderClientSpec struct {
 // Daemon specs
 
 var CaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "caskd",
-	ProtocolPrefix: "cask",
-	StateFileName:  "caskd.json",
-	LogFileName:    "caskd.log",
+	DaemonKey:      "cxb-codex-askd",
+	ProtocolPrefix: "cxb-codex-ask",
+	StateFileName:  "cxb-codex-askd.json",
+	LogFileName:    "cxb-codex-askd.log",
 	IdleTimeoutEnv: "CURDX_CASKD_IDLE_TIMEOUT_S",
-	LockName:       "caskd",
+	LockName:       "cxb-codex-askd",
 }
 
 var GaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "gaskd",
-	ProtocolPrefix: "gask",
-	StateFileName:  "gaskd.json",
-	LogFileName:    "gaskd.log",
+	DaemonKey:      "cxb-gemini-askd",
+	ProtocolPrefix: "cxb-gemini-ask",
+	StateFileName:  "cxb-gemini-askd.json",
+	LogFileName:    "cxb-gemini-askd.log",
 	IdleTimeoutEnv: "CURDX_GASKD_IDLE_TIMEOUT_S",
-	LockName:       "gaskd",
+	LockName:       "cxb-gemini-askd",
 }
 
 var OaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "oaskd",
-	ProtocolPrefix: "oask",
-	StateFileName:  "oaskd.json",
-	LogFileName:    "oaskd.log",
+	DaemonKey:      "cxb-opencode-askd",
+	ProtocolPrefix: "cxb-opencode-ask",
+	StateFileName:  "cxb-opencode-askd.json",
+	LogFileName:    "cxb-opencode-askd.log",
 	IdleTimeoutEnv: "CURDX_OASKD_IDLE_TIMEOUT_S",
-	LockName:       "oaskd",
+	LockName:       "cxb-opencode-askd",
 }
 
 var LaskdSpec = ProviderDaemonSpec{
-	DaemonKey:      "laskd",
-	ProtocolPrefix: "lask",
-	StateFileName:  "laskd.json",
-	LogFileName:    "laskd.log",
+	DaemonKey:      "cxb-claude-askd",
+	ProtocolPrefix: "cxb-claude-ask",
+	StateFileName:  "cxb-claude-askd.json",
+	LogFileName:    "cxb-claude-askd.log",
 	IdleTimeoutEnv: "CURDX_LASKD_IDLE_TIMEOUT_S",
-	LockName:       "laskd",
+	LockName:       "cxb-claude-askd",
 }
 
 // Client specs
 
 var CaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "cask",
+	ProtocolPrefix:      "cxb-codex-ask",
 	EnabledEnv:          "CURDX_CASKD",
 	AutostartEnvPrimary: "CURDX_CASKD_AUTOSTART",
 	AutostartEnvLegacy:  "CURDX_AUTO_CASKD",
 	StateFileEnv:        "CURDX_CASKD_STATE_FILE",
 	SessionFilename:     ".codex-session",
-	DaemonBinName:       "askd",
+	DaemonBinName:       "cxb-askd",
 	DaemonModule:        "askd.daemon",
 }
 
 var GaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "gask",
+	ProtocolPrefix:      "cxb-gemini-ask",
 	EnabledEnv:          "CURDX_GASKD",
 	AutostartEnvPrimary: "CURDX_GASKD_AUTOSTART",
 	AutostartEnvLegacy:  "CURDX_AUTO_GASKD",
 	StateFileEnv:        "CURDX_GASKD_STATE_FILE",
 	SessionFilename:     ".gemini-session",
-	DaemonBinName:       "askd",
+	DaemonBinName:       "cxb-askd",
 	DaemonModule:        "askd.daemon",
 }
 
 var OaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "oask",
+	ProtocolPrefix:      "cxb-opencode-ask",
 	EnabledEnv:          "CURDX_OASKD",
 	AutostartEnvPrimary: "CURDX_OASKD_AUTOSTART",
 	AutostartEnvLegacy:  "CURDX_AUTO_OASKD",
 	StateFileEnv:        "CURDX_OASKD_STATE_FILE",
 	SessionFilename:     ".opencode-session",
-	DaemonBinName:       "askd",
+	DaemonBinName:       "cxb-askd",
 	DaemonModule:        "askd.daemon",
 }
 
 var LaskClientSpec = ProviderClientSpec{
-	ProtocolPrefix:      "lask",
+	ProtocolPrefix:      "cxb-claude-ask",
 	EnabledEnv:          "CURDX_LASKD",
 	AutostartEnvPrimary: "CURDX_LASKD_AUTOSTART",
 	AutostartEnvLegacy:  "CURDX_AUTO_LASKD",
 	StateFileEnv:        "CURDX_LASKD_STATE_FILE",
 	SessionFilename:     ".claude-session",
-	DaemonBinName:       "askd",
+	DaemonBinName:       "cxb-askd",
 	DaemonModule:        "askd.daemon",
 }
 

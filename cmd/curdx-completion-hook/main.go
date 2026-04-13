@@ -286,13 +286,13 @@ func findAskCommand() string {
 	var candidates []string
 	if selfPath != "" {
 		selfDir := filepath.Dir(selfPath)
-		candidates = append(candidates, filepath.Join(selfDir, "ask"))
+		candidates = append(candidates, filepath.Join(selfDir, "cxb-ask"))
 	}
 	home, _ := os.UserHomeDir()
 	if home != "" {
 		candidates = append(candidates,
-			filepath.Join(home, ".local", "share", "codex-dual", "bin", "ask"),
-			filepath.Join(home, ".local", "bin", "ask"),
+			filepath.Join(home, ".local", "share", "codex-dual", "bin", "cxb-ask"),
+			filepath.Join(home, ".local", "bin", "cxb-ask"),
 		)
 	}
 	for _, p := range candidates {

@@ -38,7 +38,7 @@ import (
 
 // ProviderCLIConfig holds per-provider configuration for the shared CLI logic.
 type ProviderCLIConfig struct {
-	// CmdName is the CLI command name (e.g. "cask", "gask").
+	// CmdName is the CLI command name (e.g. "cxb-codex-ask", "cxb-gemini-ask").
 	CmdName string
 	// ProviderName is the human-readable provider name (e.g. "Codex", "Gemini").
 	ProviderName string
@@ -338,7 +338,7 @@ func resolveWorkDirWithRegistry(
 	}
 
 	// Try unified askd daemon state
-	daemonWorkDir := runtime.GetDaemonWorkDir("askd.json")
+	daemonWorkDir := runtime.GetDaemonWorkDir("cxb-askd.json")
 	if daemonWorkDir != "" {
 		if _, err := os.Stat(daemonWorkDir); err == nil {
 			found := sessionutil.FindProjectSessionFile(daemonWorkDir, spec.SessionFilename)
@@ -763,7 +763,7 @@ const supervisorPrompt = `## Executor Mode: codex+opencode
 You are the SUPERVISOR, NOT the executor.
 - Do NOT directly edit repo files yourself.
 - Break down tasks into clear instructions for OpenCode.
-- Use oask to delegate execution to OpenCode.
+- Use cxb-opencode-ask to delegate execution to OpenCode.
 - Review OpenCode results and iterate if needed.
 
 `

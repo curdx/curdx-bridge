@@ -18,12 +18,12 @@ import (
 
 // AskdSpec is the daemon spec for the unified ask daemon.
 var AskdSpec = providers.ProviderDaemonSpec{
-	DaemonKey:      "askd",
-	ProtocolPrefix: "ask",
-	StateFileName:  "askd.json",
-	LogFileName:    "askd.log",
+	DaemonKey:      "cxb-askd",
+	ProtocolPrefix: "cxb-ask",
+	StateFileName:  "cxb-askd.json",
+	LogFileName:    "cxb-askd.log",
 	IdleTimeoutEnv: "CURDX_ASKD_IDLE_TIMEOUT_S",
-	LockName:       "askd",
+	LockName:       "cxb-askd",
 }
 
 func nowMs() int64 {
@@ -222,7 +222,7 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 	providerName, _ := req["provider"].(string)
 	if providerName == "" {
 		return map[string]any{
-			"type":      "ask.response",
+			"type":      "cxb-ask.response",
 			"v":         1,
 			"id":        req["id"],
 			"exit_code": 1,
@@ -235,7 +235,7 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 	a := d.Registry.Get(baseProvider)
 	if a == nil {
 		return map[string]any{
-			"type":      "ask.response",
+			"type":      "cxb-ask.response",
 			"v":         1,
 			"id":        req["id"],
 			"exit_code": 1,
@@ -246,7 +246,7 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 	caller, _ := req["caller"].(string)
 	if caller == "" {
 		return map[string]any{
-			"type":      "ask.response",
+			"type":      "cxb-ask.response",
 			"v":         1,
 			"id":        req["id"],
 			"exit_code": 1,
@@ -294,7 +294,7 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 	task := d.pool.submit(poolKey, provRequest)
 	if task == nil {
 		return map[string]any{
-			"type":      "ask.response",
+			"type":      "cxb-ask.response",
 			"v":         1,
 			"id":        req["id"],
 			"exit_code": 1,
@@ -327,7 +327,7 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 
 	if result == nil {
 		return map[string]any{
-			"type":      "ask.response",
+			"type":      "cxb-ask.response",
 			"v":         1,
 			"id":        clientID,
 			"exit_code": 2,
@@ -336,7 +336,7 @@ func (d *UnifiedAskDaemon) handleRequest(req map[string]any) map[string]any {
 	}
 
 	resp := map[string]any{
-		"type":      "ask.response",
+		"type":      "cxb-ask.response",
 		"v":         1,
 		"id":        clientID,
 		"req_id":    result.ReqID,

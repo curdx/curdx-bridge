@@ -46,7 +46,7 @@ jobs:
           mkdir -p "$OUTDIR"
 
           # Stub binaries not yet implemented — skip them
-          SKIP=" laskd curdx-arch "
+          SKIP=" cxb-claude-askd curdx-arch "
 
           for cmd in cmd/*/; do
             name=$(basename "$cmd")

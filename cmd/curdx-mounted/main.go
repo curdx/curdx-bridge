@@ -37,8 +37,8 @@ func sessionFileExists(cwd, provider string) bool {
 
 // isDaemonOnline checks if the unified askd daemon is reachable.
 func isDaemonOnline() bool {
-	stateFile := runtime.StateFilePath("askd.json")
-	return rpc.PingDaemon("ask", 0.5, stateFile)
+	stateFile := runtime.StateFilePath("cxb-askd.json")
+	return rpc.PingDaemon("cxb-ask", 0.5, stateFile)
 }
 
 func main() {

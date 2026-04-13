@@ -1,0 +1,34 @@
+---
+name: cxb-fresh
+description: Send /new to a provider's pane to start a new session without context injection.
+metadata:
+  short-description: Start new session in provider
+---
+
+# Auto New Session
+
+Send `/new` command directly to a provider's terminal pane to start a new session.
+
+## Usage
+
+```
+autonew <provider>
+```
+
+Providers: gemini, codex, opencode, claude
+
+## Execution (MANDATORY)
+
+```bash
+cxb-autonew $PROVIDER
+```
+
+## Rules
+
+- This command sends `/new` directly to the provider's pane without any wrapping.
+- Use this to clear/reset a provider's session.
+
+## Examples
+
+- `/cxb-fresh gemini` - Start new Gemini session
+- `/cxb-fresh codex` - Start new Codex session

@@ -85,7 +85,7 @@ Claude: [修改代码，提交]
 
 ### 背后的原理
 
-当你说"让 Codex 审查下"，Claude 用内置技能（`/ask`、`/pend`）来：
+当你说"让 Codex 审查下"，Claude 用内置技能（`/cxb-ask`、`/cxb-reply`）来：
 1. 通过异步协议把请求发到 Codex 面板
 2. 等 Codex 完成（你能看到它在自己的面板里工作）
 3. 把结果带回你的对话
@@ -109,16 +109,16 @@ Claude: [修改代码，提交]
 
 ```bash
 # 直接通信
-cask "消息"    # 发给 Codex
-gask "消息"    # 发给 Gemini
-oask "消息"    # 发给 OpenCode
-lask "消息"    # 发给 Claude
+cxb-codex-ask "消息"    # 发给 Codex
+cxb-gemini-ask "消息"    # 发给 Gemini
+cxb-opencode-ask "消息"    # 发给 OpenCode
+cxb-claude-ask "消息"    # 发给 Claude
 
 # 查看最新回复
-cpend / gpend / opend / lpend
+cxb-codex-pend / cxb-gemini-pend / cxb-opencode-pend / cxb-claude-pend
 
 # 测试连通性
-cping / gping / oping / lping
+cxb-codex-ping / cxb-gemini-ping / cxb-opencode-ping / cxb-claude-ping
 
 # 会话管理
 curdx kill              # 终止所有会话

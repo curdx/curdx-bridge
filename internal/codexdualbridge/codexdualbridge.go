@@ -240,7 +240,7 @@ func timestamp() string {
 }
 
 func generateMarker() string {
-	return fmt.Sprintf("ask-%d-%d", time.Now().Unix(), os.Getpid())
+	return fmt.Sprintf("cxb-ask-%d-%d", time.Now().Unix(), os.Getpid())
 }
 
 func min(a, b float64) float64 {

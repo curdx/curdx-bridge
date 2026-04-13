@@ -2,6 +2,6 @@
 ## AI Collaboration
 
 For full CURDX multi-agent configuration, see `~/.claude/rules/curdx-config.md`.
-Key commands: `/ask <provider>` to consult, `/cping <provider>` to check connectivity, `/pend <provider>` to view replies.
+Key commands: `/cxb-ask <provider>` to consult, `/cxb-ping <provider>` to check connectivity, `/cxb-reply <provider>` to view replies.
 Providers: `codex`, `gemini`, `opencode`, `claude`
 <!-- CURDX_CONFIG_END -->

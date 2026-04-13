@@ -42,9 +42,9 @@ var (
 
 // Provider command map for send_to_provider.
 var providerCmdMap = map[string]string{
-	"codex":    "cask",
-	"gemini":   "gask",
-	"opencode": "oask",
+	"codex":    "cxb-codex-ask",
+	"gemini":   "cxb-gemini-ask",
+	"opencode": "cxb-opencode-ask",
 }
 
 // NewContextTransfer creates a new ContextTransfer.
@@ -445,7 +445,7 @@ func (ct *ContextTransfer) SendToProvider(context *TransferContext, provider str
 
 	cmd := providerCmdMap[provider]
 	if cmd == "" {
-		cmd = "ask"
+		cmd = "cxb-ask"
 	}
 
 	// Pass formatted content via stdin to avoid exceeding ARG_MAX.

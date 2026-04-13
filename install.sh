@@ -60,8 +60,8 @@ msg() {
       en_msg="Detected WSL environment"
       zh_msg="检测到 WSL 环境" ;;
     same_env_required)
-      en_msg="curdx/ask/ping/pend must run in the same environment as codex/gemini."
-      zh_msg="curdx/ask/ping/pend 必须与 codex/gemini 在同一环境运行。" ;;
+      en_msg="curdx/cxb-ask/ping/cxb-pend must run in the same environment as codex/gemini."
+      zh_msg="curdx/cxb-ask/ping/cxb-pend 必须与 codex/gemini 在同一环境运行。" ;;
     confirm_wsl_native)
       en_msg="Please confirm: you will install and run codex/gemini in WSL (not Windows native)."
       zh_msg="请确认：你将在 WSL 中安装并运行 codex/gemini（不是 Windows 原生）。" ;;
@@ -101,25 +101,25 @@ if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
 fi
 
 SCRIPTS_TO_LINK=(
-  bin/cask
-  bin/cpend
-  bin/cping
-  bin/gask
-  bin/gpend
-  bin/gping
-  bin/oask
-  bin/opend
-  bin/oping
-  bin/lask
-  bin/lpend
-  bin/lping
-  bin/ask
+  bin/cxb-codex-ask
+  bin/cxb-codex-pend
+  bin/cxb-codex-ping
+  bin/cxb-gemini-ask
+  bin/cxb-gemini-pend
+  bin/cxb-gemini-ping
+  bin/cxb-opencode-ask
+  bin/cxb-opencode-pend
+  bin/cxb-opencode-ping
+  bin/cxb-llm-ask
+  bin/cxb-llm-pend
+  bin/cxb-llm-ping
+  bin/cxb-ask
   bin/curdx-ping
-  bin/pend
-  bin/autonew
+  bin/cxb-pend
+  bin/cxb-autonew
   bin/curdx-completion-hook
   bin/maild
-  bin/ctx-transfer
+  bin/cxb-ctx-transfer
   curdx
 )
 
@@ -142,6 +142,25 @@ LEGACY_SCRIPTS=(
   gaskd
   oaskd
   laskd
+  cask
+  gask
+  lask
+  oask
+  cpend
+  gpend
+  lpend
+  opend
+  cping
+  gping
+  lping
+  oping
+  ask
+  pend
+  askd
+  laskd
+  autoloop
+  autonew
+  ctx-transfer
 )
 
 usage() {
@@ -362,7 +381,7 @@ confirm_backend_env_wsl() {
   echo "================================================================"
   echo "WARN: Detected WSL environment"
   echo "================================================================"
-  echo "curdx/ask/ping/pend must run in the same environment as codex/gemini."
+  echo "curdx/cxb-ask/ping/cxb-pend must run in the same environment as codex/gemini."
   echo
   echo "Please confirm: you will install and run codex/gemini in WSL (not Windows native)."
   echo "If you plan to run codex/gemini in Windows native, exit and run on Windows side:"
@@ -760,7 +779,7 @@ install_claude_skills() {
   mkdir -p "$skills_dst"
 
   # Clean up obsolete CURDX skills (replaced by unified ask/cping/pend)
-  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto"
+  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping ping auto tp tr all-plan ask pend autonew file-op mounted continue review"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
       rm -rf "$skills_dst/$obs_skill"
@@ -809,7 +828,7 @@ install_claude_skills() {
   fi
 
   # Make autoloop scripts executable
-  local autoloop_sh="$skills_dst/tr/scripts/autoloop.sh"
+  local autoloop_sh="$skills_dst/cxb-task-run/scripts/autoloop.sh"
   [[ -f "$autoloop_sh" ]] && chmod +x "$autoloop_sh"
 
   echo "Updated Claude skills directory: $skills_dst"
@@ -826,7 +845,7 @@ install_codex_skills() {
   mkdir -p "$skills_dst"
 
   # Clean up obsolete CURDX skills (replaced by unified ask/ping/pend)
-  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping"
+  local obsolete_skills="cask gask oask lask cpend gpend opend lpend cping gping oping lping all-plan ask pend ping file-op mounted"
   for obs_skill in $obsolete_skills; do
     if [[ -d "$skills_dst/$obs_skill" ]]; then
       rm -rf "$skills_dst/$obs_skill"
@@ -1001,9 +1020,9 @@ install_settings_permissions() {
   mkdir -p "$HOME/.claude"
 
   local perms_to_add=(
-    'Bash(ask *)'
+    'Bash(cxb-ask *)'
     'Bash(curdx-ping *)'
-    'Bash(pend *)'
+    'Bash(cxb-pend *)'
   )
 
   if [[ ! -f "$settings_file" ]]; then
@@ -1011,9 +1030,9 @@ install_settings_permissions() {
 {
 	  "permissions": {
 	    "allow": [
-	      "Bash(ask *)",
+	      "Bash(cxb-ask *)",
 	      "Bash(curdx-ping *)",
-	      "Bash(pend *)"
+	      "Bash(cxb-pend *)"
 	    ],
     "deny": []
   }
@@ -1026,6 +1045,8 @@ SETTINGS
   # Remove legacy permissions from previous versions
   local perms_to_remove=(
     'Bash(ping *)'
+    'Bash(ask *)'
+    'Bash(pend *)'
   )
   for old_perm in "${perms_to_remove[@]}"; do
     if grep -q "$old_perm" "$settings_file" 2>/dev/null; then
@@ -1251,7 +1272,7 @@ cleanup_legacy_files() {
   local cleaned=0
 
   # Legacy daemon scripts in bin/
-  local legacy_daemons="caskd gaskd oaskd laskd"
+  local legacy_daemons="caskd gaskd oaskd laskd askd laskd"
   for daemon in $legacy_daemons; do
     if [[ -f "$BIN_DIR/$daemon" ]]; then
       rm -f "$BIN_DIR/$daemon"
@@ -1363,6 +1384,8 @@ uninstall_settings_permissions() {
     'Bash(ping *)'
     'Bash(curdx-ping *)'
     'Bash(pend *)'
+    'Bash(cxb-ask *)'
+    'Bash(cxb-pend *)'
     'Bash(cask:*)'
     'Bash(cpend)'
     'Bash(cping)'
@@ -1372,6 +1395,15 @@ uninstall_settings_permissions() {
     'Bash(oask:*)'
     'Bash(opend)'
     'Bash(oping)'
+    'Bash(cxb-codex-ask:*)'
+    'Bash(cxb-codex-pend)'
+    'Bash(cxb-codex-ping)'
+    'Bash(cxb-gemini-ask:*)'
+    'Bash(cxb-gemini-pend)'
+    'Bash(cxb-gemini-ping)'
+    'Bash(cxb-opencode-ask:*)'
+    'Bash(cxb-opencode-pend)'
+    'Bash(cxb-opencode-ping)'
   )
 
   local has_perms=0
@@ -1393,7 +1425,7 @@ uninstall_settings_permissions() {
 
 uninstall_claude_skills() {
   local skills_dst="$HOME/.claude/skills"
-  local curdx_skills="ask cping ping pend autonew mounted all-plan docs tp tr file-op review"
+  local curdx_skills="ask cping ping pend autonew mounted all-plan docs tp tr file-op review cxb-ask cxb-reply cxb-fresh cxb-mounted cxb-coplan cxb-task-plan cxb-task-run cxb-file-op cxb-review continue cxb-continue"
 
   if [[ ! -d "$skills_dst" ]]; then
     return
@@ -1410,7 +1442,7 @@ uninstall_claude_skills() {
 
 uninstall_codex_skills() {
   local skills_dst="${CODEX_HOME:-$HOME/.codex}/skills"
-  local curdx_skills="ask ping pend autonew mounted all-plan file-op"
+  local curdx_skills="ask ping pend autonew mounted all-plan file-op cxb-ask cxb-reply cxb-fresh cxb-mounted cxb-coplan cxb-file-op"
 
   if [[ ! -d "$skills_dst" ]]; then
     return

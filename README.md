@@ -85,7 +85,7 @@ Claude: [makes changes, commits]
 
 ### Behind the scenes
 
-When you say "let Codex review this", Claude uses built-in skills (`/ask`, `/pend`) to:
+When you say "let Codex review this", Claude uses built-in skills (`/cxb-ask`, `/cxb-reply`) to:
 1. Send your request to the Codex pane via async protocol
 2. Wait for Codex to finish (you can see it working in its pane)
 3. Bring the result back into your conversation
@@ -109,16 +109,16 @@ You rarely need these — Claude handles them — but they exist:
 
 ```bash
 # Direct communication
-cask "message"    # Send to Codex
-gask "message"    # Send to Gemini
-oask "message"    # Send to OpenCode
-lask "message"    # Send to Claude
+cxb-codex-ask "message"    # Send to Codex
+cxb-gemini-ask "message"    # Send to Gemini
+cxb-opencode-ask "message"    # Send to OpenCode
+cxb-claude-ask "message"    # Send to Claude
 
 # Check latest replies
-cpend / gpend / opend / lpend
+cxb-codex-pend / cxb-gemini-pend / cxb-opencode-pend / cxb-claude-pend
 
 # Test connectivity
-cping / gping / oping / lping
+cxb-codex-ping / cxb-gemini-ping / cxb-opencode-ping / cxb-claude-ping
 
 # Session management
 curdx kill              # Kill all sessions

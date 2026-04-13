@@ -36,10 +36,10 @@ var (
 
 // providers maps provider name -> {ask, pend, ping} command names.
 var providers = map[string]map[string]string{
-	"codex":    {"ask": "cask", "pend": "cpend", "ping": "cping"},
-	"gemini":   {"ask": "gask", "pend": "gpend", "ping": "gping"},
-	"claude":   {"ask": "lask", "pend": "lpend", "ping": "lping"},
-	"opencode": {"ask": "oask", "pend": "opend", "ping": "oping"},
+	"codex":    {"ask": "cxb-codex-ask", "pend": "cxb-codex-pend", "ping": "cxb-codex-ping"},
+	"gemini":   {"ask": "cxb-gemini-ask", "pend": "cxb-gemini-pend", "ping": "cxb-gemini-ping"},
+	"claude":   {"ask": "cxb-claude-ask", "pend": "cxb-claude-pend", "ping": "cxb-claude-ping"},
+	"opencode": {"ask": "cxb-opencode-ask", "pend": "cxb-opencode-pend", "ping": "cxb-opencode-ping"},
 }
 
 // providerOrder preserves iteration order matching Python.
@@ -52,18 +52,18 @@ type aliasEntry struct {
 }
 
 var aliasTools = []aliasEntry{
-	{"cask", "codex", "ask"},
-	{"gask", "gemini", "ask"},
-	{"lask", "claude", "ask"},
-	{"oask", "opencode", "ask"},
-	{"cpend", "codex", "pend"},
-	{"gpend", "gemini", "pend"},
-	{"lpend", "claude", "pend"},
-	{"opend", "opencode", "pend"},
-	{"cping", "codex", "ping"},
-	{"gping", "gemini", "ping"},
-	{"lping", "claude", "ping"},
-	{"oping", "opencode", "ping"},
+	{"cxb-codex-ask", "codex", "ask"},
+	{"cxb-gemini-ask", "gemini", "ask"},
+	{"cxb-claude-ask", "claude", "ask"},
+	{"cxb-opencode-ask", "opencode", "ask"},
+	{"cxb-codex-pend", "codex", "pend"},
+	{"cxb-gemini-pend", "gemini", "pend"},
+	{"cxb-claude-pend", "claude", "pend"},
+	{"cxb-opencode-pend", "opencode", "pend"},
+	{"cxb-codex-ping", "codex", "ping"},
+	{"cxb-gemini-ping", "gemini", "ping"},
+	{"cxb-claude-ping", "claude", "ping"},
+	{"cxb-opencode-ping", "opencode", "ping"},
 }
 
 var aliasMap = func() map[string][2]string {

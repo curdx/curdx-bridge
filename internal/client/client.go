@@ -105,7 +105,7 @@ func StateFileFromEnv(spec providers.ProviderClientSpec) string {
 		return env
 	}
 	// All providers now use unified askd state file
-	return runtime.StateFilePath("askd.json")
+	return runtime.StateFilePath("cxb-askd.json")
 }
 
 // TryDaemonRequest sends a request to the daemon and returns the response.
@@ -163,7 +163,7 @@ func TryDaemonRequest(stateFile string, req map[string]any, timeoutS float64) (m
 // MaybeStartDaemon starts the daemon if not running.
 func MaybeStartDaemon(spec providers.ProviderClientSpec) error {
 	stateFile := StateFileFromEnv(spec)
-	if rpc.PingDaemon("ask", 0.5, stateFile) {
+	if rpc.PingDaemon("cxb-ask", 0.5, stateFile) {
 		return nil // Already running
 	}
 
@@ -191,7 +191,7 @@ func WaitForDaemonReady(spec providers.ProviderClientSpec, timeoutS float64) boo
 	stateFile := StateFileFromEnv(spec)
 	deadline := time.Now().Add(time.Duration(timeoutS * float64(time.Second)))
 	for time.Now().Before(deadline) {
-		if rpc.PingDaemon("ask", 0.2, stateFile) {
+		if rpc.PingDaemon("cxb-ask", 0.2, stateFile) {
 			return true
 		}
 		time.Sleep(100 * time.Millisecond)

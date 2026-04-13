@@ -637,10 +637,10 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 		protocolPrefix string
 		daemonBinName  string
 	}{
-		"codex":    {"cask", "askd"},
-		"gemini":   {"gask", "askd"},
-		"opencode": {"oask", "askd"},
-		"claude":   {"lask", "askd"},
+		"codex":    {"cxb-codex-ask", "cxb-askd"},
+		"gemini":   {"cxb-gemini-ask", "cxb-askd"},
+		"opencode": {"cxb-opencode-ask", "cxb-askd"},
+		"claude":   {"cxb-claude-ask", "cxb-askd"},
 	}
 
 	cwd, _ := os.Getwd()
@@ -1844,10 +1844,10 @@ func (l *aiLauncher) startClaudeInCurrentPane() int {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Available commands:")
 	if contains(l.providers, "codex") {
-		fmt.Fprintln(os.Stderr, "   cask/cping/cpend - Codex communication")
+		fmt.Fprintln(os.Stderr, "   cxb-codex-ask/cxb-codex-ping/cxb-codex-pend - Codex communication")
 	}
 	if contains(l.providers, "gemini") {
-		fmt.Fprintln(os.Stderr, "   gask/gping/gpend - Gemini communication")
+		fmt.Fprintln(os.Stderr, "   cxb-gemini-ask/cxb-gemini-ping/cxb-gemini-pend - Gemini communication")
 	}
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintf(os.Stderr, "Executing: %s\n", strings.Join(cmdParts, " "))
@@ -2053,8 +2053,8 @@ func (l *aiLauncher) cleanup() {
 	}
 
 	// Shutdown askd daemon
-	stateFile := rtpkg.StateFilePath("askd.json")
-	rpc.ShutdownDaemon("ask", 1.0, stateFile)
+	stateFile := rtpkg.StateFilePath("cxb-askd.json")
+	rpc.ShutdownDaemon("cxb-ask", 1.0, stateFile)
 
 	// Remove runtime dir
 	os.RemoveAll(l.runtimeDir)
@@ -2064,8 +2064,8 @@ func (l *aiLauncher) cleanup() {
 
 // startAskdDaemon starts the unified askd daemon.
 func (l *aiLauncher) startAskdDaemon() {
-	stateFile := rtpkg.StateFilePath("askd.json")
-	if rpc.PingDaemon("ask", 0.5, stateFile) {
+	stateFile := rtpkg.StateFilePath("cxb-askd.json")
+	if rpc.PingDaemon("cxb-ask", 0.5, stateFile) {
 		st := rpc.ReadState(stateFile)
 		if st != nil {
 			h, _ := st["host"].(string)
@@ -2074,9 +2074,9 @@ func (l *aiLauncher) startAskdDaemon() {
 				p = int(v)
 			}
 			if h != "" && p > 0 {
-				fmt.Fprintf(os.Stderr, "askd already running at %s:%d\n", h, p)
+				fmt.Fprintf(os.Stderr, "cxb-askd already running at %s:%d\n", h, p)
 			} else {
-				fmt.Fprintf(os.Stderr, "askd already running\n")
+				fmt.Fprintf(os.Stderr, "cxb-askd already running\n")
 			}
 		}
 		return
@@ -2086,19 +2086,19 @@ func (l *aiLauncher) startAskdDaemon() {
 	if selfPath == "" {
 		return
 	}
-	askdPath := filepath.Join(filepath.Dir(selfPath), "askd")
+	askdPath := filepath.Join(filepath.Dir(selfPath), "cxb-askd")
 	if _, err := os.Stat(askdPath); err != nil {
 		return
 	}
 
-	fmt.Fprintf(os.Stderr, "Starting askd daemon...\n")
+	fmt.Fprintf(os.Stderr, "Starting cxb-askd daemon...\n")
 	cmd := exec.Command(askdPath)
 	cmd.Env = append(os.Environ(), "CURDX_PARENT_PID="+strconv.Itoa(os.Getpid()))
 	cmd.Stdin = nil
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 	if err := cmd.Start(); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to start askd: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Failed to start cxb-askd: %v\n", err)
 		return
 	}
 	go func() { _ = cmd.Wait() }()
@@ -2106,7 +2106,7 @@ func (l *aiLauncher) startAskdDaemon() {
 	// Wait for daemon to become reachable
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
-		if rpc.PingDaemon("ask", 0.2, stateFile) {
+		if rpc.PingDaemon("cxb-ask", 0.2, stateFile) {
 			st := rpc.ReadState(stateFile)
 			if st != nil {
 				h, _ := st["host"].(string)
@@ -2115,16 +2115,16 @@ func (l *aiLauncher) startAskdDaemon() {
 					p = int(v)
 				}
 				if h != "" && p > 0 {
-					fmt.Fprintf(os.Stderr, "askd started at %s:%d\n", h, p)
+					fmt.Fprintf(os.Stderr, "cxb-askd started at %s:%d\n", h, p)
 				} else {
-					fmt.Fprintf(os.Stderr, "askd started\n")
+					fmt.Fprintf(os.Stderr, "cxb-askd started\n")
 				}
 			}
 			return
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	fmt.Fprintf(os.Stderr, "askd start requested, but daemon not reachable yet\n")
+	fmt.Fprintf(os.Stderr, "cxb-askd start requested, but daemon not reachable yet\n")
 }
 
 // cmdSettings returns the resolved cmd pane settings.

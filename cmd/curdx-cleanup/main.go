@@ -38,7 +38,7 @@ func cleanupStaleStateFiles() []string {
 	}
 
 	var removed []string
-	pattern := filepath.Join(cacheDir, "*", "askd.json")
+	pattern := filepath.Join(cacheDir, "*", "cxb-askd.json")
 	matches, _ := filepath.Glob(pattern)
 	for _, stateFile := range matches {
 		data, err := os.ReadFile(stateFile)
@@ -109,7 +109,7 @@ func listRunningDaemons() []daemonInfo {
 	}
 
 	var daemons []daemonInfo
-	pattern := filepath.Join(cacheDir, "*", "askd.json")
+	pattern := filepath.Join(cacheDir, "*", "cxb-askd.json")
 	matches, _ := filepath.Glob(pattern)
 	for _, stateFile := range matches {
 		data, err := os.ReadFile(stateFile)
@@ -169,7 +169,7 @@ func main() {
 	flag.Parse()
 
 	if *listFlag || (!*cleanFlag && !*killZombies) {
-		fmt.Println("=== Running askd daemons ===")
+		fmt.Println("=== Running cxb-askd daemons ===")
 		daemons := listRunningDaemons()
 		if len(daemons) == 0 {
 			fmt.Println("No running daemons found")
