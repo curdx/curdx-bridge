@@ -6,7 +6,7 @@
 
 一个终端，四个 AI，真正的协作。
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Go 1.22+](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://golang.org/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)]()
 
@@ -193,7 +193,7 @@ cd curdx-bridge
 
 ## 许可证
 
-AGPL-3.0，详见 [LICENSE](LICENSE)。
+MIT，详见 [LICENSE](LICENSE)。
 
 ## 致谢
 

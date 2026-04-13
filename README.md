@@ -6,7 +6,7 @@
 
 One terminal, four AI agents, real collaboration.
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Go 1.22+](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://golang.org/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)]()
 
@@ -193,7 +193,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 
-AGPL-3.0. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
 
 ## Acknowledgements
 
