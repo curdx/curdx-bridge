@@ -17,7 +17,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) + [Conventional Commits]
 - README rewritten with screenshot, SVG layout diagram, and OpenCode provider docs
 
 ### Fixed
-- Version injected via ldflags and binary renamed to CURDX Bridge
+- Version injected via ldflags and binary renamed to CurdX Bridge
 
 ## [v0.1.2] — 2026-04-12
 
@@ -69,7 +69,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) + [Conventional Commits]
 - 重写 README，加入截图、SVG 布局图和 OpenCode 文档
 
 ### 修复
-- 构建时通过 ldflags 注入版本号，二进制文件重命名为 CURDX Bridge
+- 构建时通过 ldflags 注入版本号，二进制文件重命名为 CurdX Bridge
 
 ## [v0.1.2] — 2026-04-12
 

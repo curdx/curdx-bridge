@@ -1,6 +1,6 @@
 <div align="center">
 
-# CURDX Bridge
+# CurdX Bridge
 
 **Multi-AI Split-Pane Terminal — Claude · Codex · Gemini · OpenCode**
 
@@ -17,7 +17,7 @@ One terminal, four AI agents, real collaboration.
 ---
 
 <div align="center">
-<img src="docs/screenshot.png" alt="CURDX Bridge — four AI agents in split panes" width="800" />
+<img src="docs/screenshot.png" alt="CurdX Bridge — four AI agents in split panes" width="800" />
 <br/>
 <em>Claude, Codex, Gemini, and OpenCode working side by side in one terminal</em>
 </div>
@@ -26,10 +26,10 @@ One terminal, four AI agents, real collaboration.
 
 ## What is this?
 
-CURDX Bridge puts multiple AI coding agents into split terminal panes. You talk to Claude as usual — when you need a second opinion, just say "let Codex review this" or "ask Gemini for ideas". Claude handles the coordination automatically.
+CurdX Bridge puts multiple AI coding agents into split terminal panes. You talk to Claude as usual — when you need a second opinion, just say "let Codex review this" or "ask Gemini for ideas". Claude handles the coordination automatically.
 
 <div align="center">
-<img src="docs/layout.svg" alt="CURDX Bridge layout — Claude left, Codex/Gemini/OpenCode right" width="680" />
+<img src="docs/layout.svg" alt="CurdX Bridge layout — Claude left, Codex/Gemini/OpenCode right" width="680" />
 </div>
 
 No switching tabs. No copy-pasting context. Just talk.
@@ -197,6 +197,6 @@ AGPL-3.0. See [LICENSE](LICENSE).
 
 ## Acknowledgements
 
-CURDX Bridge is a Go rewrite inspired by [**Claude Code Bridge**](https://github.com/bfly123/claude_code_bridge) by [bfly123](https://github.com/bfly123). The original CCB pioneered multi-AI split-pane terminal collaboration in Python. CURDX Bridge inherits the core idea — multiple AI agents visible and controllable in one workspace — while reimplementing everything in Go with a streamlined protocol.
+CurdX Bridge is a Go rewrite inspired by [**Claude Code Bridge**](https://github.com/bfly123/claude_code_bridge) by [bfly123](https://github.com/bfly123). The original CCB pioneered multi-AI split-pane terminal collaboration in Python. CurdX Bridge inherits the core idea — multiple AI agents visible and controllable in one workspace — while reimplementing everything in Go with a streamlined protocol.
 
 Thanks to bfly123 for open-sourcing the project that started it all.

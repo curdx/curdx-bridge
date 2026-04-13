@@ -1,6 +1,6 @@
 <div align="center">
 
-# CURDX Bridge
+# CurdX Bridge
 
 **多 AI 分屏终端 — Claude · Codex · Gemini · OpenCode**
 
@@ -17,7 +17,7 @@
 ---
 
 <div align="center">
-<img src="docs/screenshot.png" alt="CURDX Bridge — 四个 AI 在分屏面板中协作" width="800" />
+<img src="docs/screenshot.png" alt="CurdX Bridge — 四个 AI 在分屏面板中协作" width="800" />
 <br/>
 <em>Claude、Codex、Gemini、OpenCode 在同一终端中并肩工作</em>
 </div>
@@ -26,10 +26,10 @@
 
 ## 这是什么？
 
-CURDX Bridge 把多个 AI 编程助手放进终端分屏。你像平时一样和 Claude 聊天 — 需要第二意见时，说一句"让 Codex 审查下代码"或"问问 Gemini 有什么想法"，Claude 自动协调。
+CurdX Bridge 把多个 AI 编程助手放进终端分屏。你像平时一样和 Claude 聊天 — 需要第二意见时，说一句"让 Codex 审查下代码"或"问问 Gemini 有什么想法"，Claude 自动协调。
 
 <div align="center">
-<img src="docs/layout.svg" alt="CURDX Bridge 布局 — 左 Claude，右 Codex/Gemini/OpenCode" width="680" />
+<img src="docs/layout.svg" alt="CurdX Bridge 布局 — 左 Claude，右 Codex/Gemini/OpenCode" width="680" />
 </div>
 
 不用切标签页。不用复制粘贴上下文。直接说。
@@ -197,6 +197,6 @@ AGPL-3.0，详见 [LICENSE](LICENSE)。
 
 ## 致谢
 
-CURDX Bridge 是受 [**Claude Code Bridge**](https://github.com/bfly123/claude_code_bridge)（作者 [bfly123](https://github.com/bfly123)）启发的 Go 重写版。原版 CCB 用 Python 首创了多 AI 分屏终端协作。CURDX Bridge 继承了核心理念 — 多个 AI 在同一工作区可见可控 — 用 Go 重新实现并精简了通信协议。
+CurdX Bridge 是受 [**Claude Code Bridge**](https://github.com/bfly123/claude_code_bridge)（作者 [bfly123](https://github.com/bfly123)）启发的 Go 重写版。原版 CCB 用 Python 首创了多 AI 分屏终端协作。CurdX Bridge 继承了核心理念 — 多个 AI 在同一工作区可见可控 — 用 Go 重新实现并精简了通信协议。
 
 感谢 bfly123 开源了这个开创性的项目。
