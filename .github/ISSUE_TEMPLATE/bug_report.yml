@@ -1,0 +1,71 @@
+name: Bug Report / 报告 Bug
+description: Report a bug to help us improve. / 报告一个 Bug 帮助我们改进。
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please fill out the sections below.
+        感谢反馈！请填写以下内容。
+
+  - type: input
+    id: version
+    attributes:
+      label: CurdX Bridge version / 版本号
+      description: "Run `curdx --version` to check. / 运行 `curdx --version` 查看。"
+      placeholder: "e.g. 0.1.7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System / 操作系统
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Linux (x86_64)
+        - Linux (ARM64)
+        - Windows (x86_64)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Related provider / 相关 Provider
+      description: "Which provider is involved? / 涉及哪个 Provider？"
+      multiple: true
+      options:
+        - Claude
+        - Codex
+        - Gemini
+        - OpenCode
+        - N/A
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description / Bug 描述
+      description: "What happened? What did you expect? / 发生了什么？你期望什么？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce / 复现步骤
+      description: "Minimal steps to trigger the bug. / 触发 Bug 的最少步骤。"
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / 日志
+      description: "Paste relevant output. Run with `CURDX_DEBUG=1` for verbose logs. / 贴相关输出，可用 `CURDX_DEBUG=1` 获取详细日志。"
+      render: shell

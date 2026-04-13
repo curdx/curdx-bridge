@@ -1,0 +1,43 @@
+name: Feature Request / 功能建议
+description: Suggest a new feature or improvement. / 提出新功能或改进建议。
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We'd love to hear your ideas!
+        欢迎提出你的想法！
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / 问题
+      description: "What problem does this solve? / 这个功能解决什么问题？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution / 建议方案
+      description: "How would you like it to work? / 你希望它怎么工作？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered / 替代方案
+      description: "Any workarounds or alternatives? / 有没有其他方式？"
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Related provider / 相关 Provider
+      multiple: true
+      options:
+        - Claude
+        - Codex
+        - Gemini
+        - OpenCode
+        - N/A
