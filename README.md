@@ -194,9 +194,3 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-## Acknowledgements
-
-CurdX Bridge is a Go rewrite inspired by [**Claude Code Bridge**](https://github.com/bfly123/claude_code_bridge) by [bfly123](https://github.com/bfly123). The original CCB pioneered multi-AI split-pane terminal collaboration in Python. CurdX Bridge inherits the core idea — multiple AI agents visible and controllable in one workspace — while reimplementing everything in Go with a streamlined protocol.
-
-Thanks to bfly123 for open-sourcing the project that started it all.

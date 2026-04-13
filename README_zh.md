@@ -194,9 +194,3 @@ cd curdx-bridge
 ## 许可证
 
 MIT，详见 [LICENSE](LICENSE)。
-
-## 致谢
-
-CurdX Bridge 是受 [**Claude Code Bridge**](https://github.com/bfly123/claude_code_bridge)（作者 [bfly123](https://github.com/bfly123)）启发的 Go 重写版。原版 CCB 用 Python 首创了多 AI 分屏终端协作。CurdX Bridge 继承了核心理念 — 多个 AI 在同一工作区可见可控 — 用 Go 重新实现并精简了通信协议。
-
-感谢 bfly123 开源了这个开创性的项目。
