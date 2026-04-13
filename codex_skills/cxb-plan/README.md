@@ -5,12 +5,12 @@ Collaborative planning using abstract roles defined in CLAUDE.md Role Assignment
 ## Usage
 
 ```
-/cxb-coplan <your requirement or feature request>
+/cxb-plan <your requirement or feature request>
 ```
 
 Example:
 ```
-/cxb-coplan Design a caching layer for the API with Redis
+/cxb-plan Design a caching layer for the API with Redis
 ```
 
 ## How It Works

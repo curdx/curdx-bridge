@@ -47,7 +47,7 @@ Implementation detail: Claude must not read repo files directly; request reads v
 
 ### 2. Step Design (Dual Independent Design)
 
-Perform a lightweight dual design for the current step (not the full `/cxb-coplan` flow — step-level design is smaller scope with context already provided by preflight).
+Perform a lightweight dual design for the current step (not the full `/cxb-plan` flow — step-level design is smaller scope with context already provided by preflight).
 
 #### 2.1 Claude Independent Design (local, no provider call)
 

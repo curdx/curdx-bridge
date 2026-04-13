@@ -1425,7 +1425,7 @@ uninstall_settings_permissions() {
 
 uninstall_claude_skills() {
   local skills_dst="$HOME/.claude/skills"
-  local curdx_skills="ask cping ping pend autonew mounted all-plan docs tp tr file-op review cxb-ask cxb-reply cxb-fresh cxb-mounted cxb-coplan cxb-task-plan cxb-task-run cxb-file-op cxb-review continue cxb-continue"
+  local curdx_skills="ask cping ping pend autonew mounted all-plan docs tp tr file-op review cxb-ask cxb-reply cxb-fresh cxb-mounted cxb-plan cxb-task-plan cxb-task-run cxb-file-op cxb-review continue cxb-continue"
 
   if [[ ! -d "$skills_dst" ]]; then
     return
@@ -1442,7 +1442,7 @@ uninstall_claude_skills() {
 
 uninstall_codex_skills() {
   local skills_dst="${CODEX_HOME:-$HOME/.codex}/skills"
-  local curdx_skills="ask ping pend autonew mounted all-plan file-op cxb-ask cxb-reply cxb-fresh cxb-mounted cxb-coplan cxb-file-op"
+  local curdx_skills="ask ping pend autonew mounted all-plan file-op cxb-ask cxb-reply cxb-fresh cxb-mounted cxb-plan cxb-file-op"
 
   if [[ ! -d "$skills_dst" ]]; then
     return

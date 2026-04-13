@@ -1,5 +1,5 @@
 ---
-name: cxb-coplan
+name: cxb-plan
 description: Collaborative planning using abstract roles (designer + inspiration + reviewer).
 metadata:
   short-description: designer plans + inspiration brainstorms + reviewer scores

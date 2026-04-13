@@ -24,19 +24,19 @@ Create executable plan artifacts: `.curdx/todo.md` + `.curdx/state.json` + `.cur
 
 ### 2. Collaborative Design (Plan)
 
-Invoke the `/cxb-coplan` skill with the requirement:
+Invoke the `/cxb-plan` skill with the requirement:
 
 ```
-/cxb-coplan <requirement from $ARGUMENTS>
+/cxb-plan <requirement from $ARGUMENTS>
 ```
 
-The `/cxb-coplan` skill provides a complete collaborative design flow including:
+The `/cxb-plan` skill provides a complete collaborative design flow including:
 1. Requirement clarification
 2. Inspiration consultation (if applicable)
 3. Designer planning
 4. Reviewer scoring
 
-Extract from the `/cxb-coplan` output:
+Extract from the `/cxb-plan` output:
 - **goal**: the task objective
 - **nonGoals**: what NOT to do
 - **steps**: ordered list of step titles
@@ -44,7 +44,7 @@ Extract from the `/cxb-coplan` output:
 
 ### 3. User Confirmation
 
-Show final plan from `/cxb-coplan` output:
+Show final plan from `/cxb-plan` output:
 
 ```
 ## Plan Summary
@@ -120,7 +120,7 @@ Next: Use /cxb-task-run to start execution
 
 ## Principles
 
-1. **Collaborative Design**: Uses `/cxb-coplan` for full collaborative planning flow
+1. **Collaborative Design**: Uses `/cxb-plan` for full collaborative planning flow
 2. **Coarse-grained**: Titles only, details in /cxb-task-run
 3. **Recoverable**: Context enables continuity after /clear
 4. **Research-driven**: Use WebSearch and WebFetch to gather info on unfamiliar tech/APIs/best practices before finalizing the plan
