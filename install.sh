@@ -757,6 +757,10 @@ install_bin_links() {
   for path in "${SCRIPTS_TO_LINK[@]}"; do
     local name
     name="$(basename "$path")"
+    # Skip if already installed (e.g. pre-built binary from release tarball)
+    if [[ -x "$BIN_DIR/$name" ]]; then
+      continue
+    fi
     if [[ ! -f "$INSTALL_PREFIX/$path" ]]; then
       echo "WARN: Script not found $INSTALL_PREFIX/$path, skipping link creation"
       continue
