@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -550,6 +548,16 @@ func run(argv []string) int {
 		return cliutil.ExitError
 	}
 
+	// Internal entry point: `cxb-ask --bg-run <config.json>` is invoked by
+	// spawnBackgroundTask to replace the former `#!/bin/sh` wrapper script.
+	if argv[1] == "--bg-run" {
+		if len(argv) < 3 {
+			fmt.Fprintln(os.Stderr, "[ERROR] --bg-run requires a config path")
+			return cliutil.ExitError
+		}
+		return runBackgroundTask(argv[2])
+	}
+
 	rawProvider := strings.ToLower(argv[1])
 	if rawProvider == "-h" || rawProvider == "--help" {
 		usage()
@@ -705,94 +713,50 @@ func run(argv []string) int {
 
 	askCmd, _ := os.Executable()
 
-	// Build background env lines
-	bgPaneID, bgTerminal := callerPaneInfo()
-	paneEnvLines := ""
-	if bgPaneID != "" {
-		paneEnvLines += fmt.Sprintf("export CURDX_CALLER_PANE_ID=%s\n", shellQuote(bgPaneID))
+	// Collect env overrides the bg wrapper will apply to the child process.
+	// Unlike the previous `#!/bin/sh` wrapper, this path works uniformly on
+	// Unix and Windows because all orchestration happens in Go.
+	bgEnv := map[string]string{
+		"CURDX_REQ_ID":   taskID,
+		"CURDX_CALLER":   caller,
+		"CURDX_WORK_DIR": cwd,
 	}
-	if bgTerminal != "" {
-		paneEnvLines += fmt.Sprintf("export CURDX_CALLER_TERMINAL=%s\n", shellQuote(bgTerminal))
+	if bgPaneID, bgTerminal := callerPaneInfo(); bgPaneID != "" || bgTerminal != "" {
+		if bgPaneID != "" {
+			bgEnv["CURDX_CALLER_PANE_ID"] = bgPaneID
+		}
+		if bgTerminal != "" {
+			bgEnv["CURDX_CALLER_TERMINAL"] = bgTerminal
+		}
 	}
-
-	emailEnvLines := ""
 	if caller == "email" {
 		for _, key := range []string{"CURDX_EMAIL_REQ_ID", "CURDX_EMAIL_MSG_ID", "CURDX_EMAIL_FROM"} {
-			val := os.Getenv(key)
-			if val != "" {
-				emailEnvLines += fmt.Sprintf("export %s=%s\n", key, shellQuote(val))
+			if v := os.Getenv(key); v != "" {
+				bgEnv[key] = v
 			}
 		}
 	}
-
-	curdxRunDir := os.Getenv("CURDX_RUN_DIR")
-	runDirLine := ""
-	if curdxRunDir != "" {
-		runDirLine = fmt.Sprintf("export CURDX_RUN_DIR=%s\n", shellQuote(curdxRunDir))
+	if v := os.Getenv("CURDX_RUN_DIR"); v != "" {
+		bgEnv["CURDX_RUN_DIR"] = v
 	}
 
-	// Generate a random heredoc delimiter to prevent injection when
-	// the user message contains a line matching the delimiter.
-	delimRand := make([]byte, 16)
-	_, _ = rand.Read(delimRand)
-	heredocDelim := "ASKEOF_" + hex.EncodeToString(delimRand)
-
-	bgScript := fmt.Sprintf(`#!/bin/sh
-set +e
-_now() {
-  date '+%%Y-%%m-%%dT%%H:%%M:%%S%%z'
-}
-echo "$(_now) running pid=$$" >> %s
-echo "[CURDX_TASK_START] task=%s provider=%s caller=%s pid=$$"
-export CURDX_REQ_ID=%s
-export CURDX_CALLER=%s
-export CURDX_WORK_DIR=%s
-%s%s%s%s %s --foreground --timeout %g <<'`+heredocDelim+`'
-%s
-`+heredocDelim+`
-rc=$?
-echo "[CURDX_TASK_END] task=%s provider=%s exit_code=$rc"
-echo "$(_now) finished exit_code=$rc" >> %s
-if [ "$rc" -ne 0 ]; then
-  echo "$(_now) failed exit_code=$rc" >> %s
-fi
-exit "$rc"
-`,
-		shellQuote(statusFile),
-		taskID, provider, caller,
-		shellQuote(taskID), shellQuote(caller), shellQuote(cwd),
-		runDirLine, emailEnvLines, paneEnvLines,
-		shellQuote(askCmd), shellQuote(provider), timeout,
-		message,
-		taskID, provider,
-		shellQuote(statusFile),
-		shellQuote(statusFile),
-	)
-
-	scriptFile := filepath.Join(logDir, fmt.Sprintf("cxb-ask-%s-%s.sh", provider, taskID))
-	_ = os.WriteFile(scriptFile, []byte(bgScript), 0o700)
-
-	// Run detached
-	logHandle, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR] Failed to open log file: %v\n", err)
-		return cliutil.ExitError
+	cfg := bgRunConfig{
+		TaskID:     taskID,
+		Provider:   provider,
+		Caller:     caller,
+		WorkDir:    cwd,
+		AskCmd:     askCmd,
+		Timeout:    timeout,
+		StatusFile: statusFile,
+		LogFile:    logFile,
+		Env:        bgEnv,
 	}
 
-	proc := exec.Command("sh", scriptFile)
-	proc.Stdin = nil
-	proc.Stdout = logHandle
-	proc.Stderr = logHandle
-	setSysProcAttr(proc)
-	err = proc.Start()
-	logHandle.Close()
+	bgPid, err := spawnBackgroundTask(cfg, askCmd, message)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[ERROR] Failed to start background task: %v\n", err)
 		return cliutil.ExitError
 	}
-
-	bgPid := proc.Process.Pid
-	go func() { _ = proc.Wait() }()
 
 	appendTaskStatusLine(statusFile, fmt.Sprintf("spawned pid=%d", bgPid))
 
@@ -824,6 +788,3 @@ func mustGetwd() string {
 	return cwd
 }
 
-func shellQuote(s string) string {
-	return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
-}

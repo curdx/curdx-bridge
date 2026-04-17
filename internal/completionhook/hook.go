@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -114,16 +115,35 @@ func findHookScript() string {
 		selfDir = filepath.Dir(selfDir)
 	}
 
+	// On Windows the binary is named with a .exe suffix; elsewhere it is bare.
+	binName := "curdx-completion-hook"
+	if runtime.GOOS == "windows" {
+		binName += ".exe"
+	}
+
 	candidates := []string{}
 	if selfDir != "" {
-		candidates = append(candidates, filepath.Join(selfDir, "curdx-completion-hook"))
+		candidates = append(candidates, filepath.Join(selfDir, binName))
 	}
 
 	home, _ := os.UserHomeDir()
 	if home != "" {
-		candidates = append(candidates, filepath.Join(home, ".local", "bin", "curdx-completion-hook"))
+		candidates = append(candidates, filepath.Join(home, ".local", "bin", binName))
+		if runtime.GOOS == "windows" {
+			// %LOCALAPPDATA%\curdx\bin is where install.ps1 places binaries.
+			if local := os.Getenv("LOCALAPPDATA"); local != "" {
+				candidates = append(candidates, filepath.Join(local, "curdx", "bin", binName))
+			}
+		}
 	}
-	candidates = append(candidates, "/usr/local/bin/curdx-completion-hook")
+	if runtime.GOOS != "windows" {
+		candidates = append(candidates, "/usr/local/bin/"+binName)
+	}
+
+	// Fall back to PATH lookup.
+	if p, err := exec.LookPath(binName); err == nil {
+		candidates = append(candidates, p)
+	}
 
 	for _, p := range candidates {
 		info, err := os.Stat(p)
