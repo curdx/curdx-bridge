@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -14,6 +15,16 @@ import (
 	"github.com/curdx/curdx-bridge/internal/envutil"
 	"github.com/curdx/curdx-bridge/internal/sessionutil"
 )
+
+// defaultTerminalKind picks the assumed terminal backend when a session file
+// doesn't carry one. Windows native has no tmux, so WezTerm is the sane
+// default there.
+func defaultTerminalKind() string {
+	if runtime.GOOS == "windows" {
+		return "wezterm"
+	}
+	return "tmux"
+}
 
 func envFloat(name string, defaultVal float64) float64 {
 	raw := strings.TrimSpace(os.Getenv(name))
@@ -429,7 +440,7 @@ func run(argv []string) int {
 	directTerminal := strings.TrimSpace(os.Getenv("CURDX_CALLER_TERMINAL"))
 
 	var paneID string
-	terminal := "tmux"
+	terminal := defaultTerminalKind()
 	var sessionData map[string]interface{}
 
 	if directPaneID != "" {
@@ -503,7 +514,7 @@ func run(argv []string) int {
 				terminal = strings.TrimSpace(fmt.Sprintf("%v", v))
 			}
 			if terminal == "" {
-				terminal = "tmux"
+				terminal = defaultTerminalKind()
 			}
 			if paneID != "" {
 				// Validate work_dir

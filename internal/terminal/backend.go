@@ -208,11 +208,20 @@ func ResetBackendCache() {
 	backendCache = nil
 }
 
+// defaultBackendKind returns the terminal backend to assume when session data
+// doesn't specify one. Windows native has no tmux, so we fall back to wezterm.
+func defaultBackendKind() string {
+	if IsWindows() && !IsWSL() {
+		return "wezterm"
+	}
+	return "tmux"
+}
+
 // GetBackendForSession returns a backend based on session data.
 func GetBackendForSession(sessionData map[string]interface{}) TerminalBackend {
 	terminal, _ := sessionData["terminal"].(string)
 	if terminal == "" {
-		terminal = "tmux"
+		terminal = defaultBackendKind()
 	}
 	if terminal == "wezterm" {
 		return NewWeztermBackend()
@@ -224,7 +233,7 @@ func GetBackendForSession(sessionData map[string]interface{}) TerminalBackend {
 func GetPaneIDFromSession(sessionData map[string]interface{}) string {
 	terminal, _ := sessionData["terminal"].(string)
 	if terminal == "" {
-		terminal = "tmux"
+		terminal = defaultBackendKind()
 	}
 	if terminal == "wezterm" {
 		id, _ := sessionData["pane_id"].(string)
