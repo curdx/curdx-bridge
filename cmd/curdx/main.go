@@ -663,7 +663,11 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 				if json.Unmarshal(data, &sessionData) == nil {
 					terminalType, _ := sessionData["terminal"].(string)
 					if terminalType == "" {
-						terminalType = "tmux"
+						if runtime.GOOS == "windows" {
+							terminalType = "wezterm"
+						} else {
+							terminalType = "tmux"
+						}
 					}
 
 					paneID := ""
