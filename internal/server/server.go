@@ -163,7 +163,17 @@ func (s *AskDaemonServer) writeState() {
 		state["work_dir"] = s.WorkDir
 	}
 	data, _ := json.MarshalIndent(state, "", "  ")
+	// Create the run dir with owner-only perms if it doesn't exist; avoids
+	// the case where a later write side-effect creates the dir with 0o755
+	// and auxiliary files then land there with default umask.
+	_ = runtime.EnsureRunDir()
 	sessionutil.SafeWriteSession(s.StateFile, string(data))
+	// Belt and suspenders: the token is embedded in the JSON payload, so
+	// enforce 0o600 explicitly after the atomic write. SafeWriteSession
+	// already writes the tmp file at 0o600 and rename preserves that on
+	// Unix, but an overzealous umask or a weird filesystem could still
+	// leave the file world-readable. Chmod is a no-op on Windows.
+	_ = os.Chmod(s.StateFile, 0o600)
 }
 
 func (s *AskDaemonServer) monitorLoop() {

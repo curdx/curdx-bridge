@@ -45,6 +45,23 @@ func StateFilePath(name string) string {
 	return filepath.Join(RunDir(), name+".json")
 }
 
+// EnsureRunDir creates the run directory with owner-only perms (0o700) if it
+// doesn't already exist. If the directory exists with wider perms we leave
+// it alone — tightening an existing user-controlled directory without their
+// consent would be surprising. Callers should invoke this before writing
+// state files so sensitive tokens don't land in a missing-parent error or
+// into a world-accessible cache dir created as a side effect later.
+func EnsureRunDir() error {
+	dir := RunDir()
+	if info, err := os.Stat(dir); err == nil {
+		if !info.IsDir() {
+			return fmt.Errorf("run dir path is not a directory: %s", dir)
+		}
+		return nil
+	}
+	return os.MkdirAll(dir, 0o700)
+}
+
 // LogPath returns the path for a log file (appends .log if needed).
 func LogPath(name string) string {
 	if strings.HasSuffix(name, ".log") {
