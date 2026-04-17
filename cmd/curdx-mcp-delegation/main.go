@@ -309,9 +309,10 @@ func validateSessionFile(sessionFile string) string {
 	if homeResolved == "" {
 		homeResolved = homeDir
 	}
-	tmpResolved, _ := filepath.EvalSymlinks("/tmp")
+	tmpDir := os.TempDir()
+	tmpResolved, _ := filepath.EvalSymlinks(tmpDir)
 	if tmpResolved == "" {
-		tmpResolved = "/tmp"
+		tmpResolved = tmpDir
 	}
 
 	allowed := []string{homeResolved, tmpResolved}

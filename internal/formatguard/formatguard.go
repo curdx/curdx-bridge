@@ -135,6 +135,11 @@ func guessLanguage(blockLines []string) string {
 	if strings.HasPrefix(lower, "#!/bin/bash") || strings.HasPrefix(lower, "#!/usr/bin/env bash") {
 		return "bash"
 	}
+	if strings.HasPrefix(lower, "#!/usr/bin/env pwsh") || strings.HasPrefix(lower, "#!/usr/bin/pwsh") ||
+		strings.HasPrefix(lower, "#requires ") || strings.HasPrefix(lower, "param(") ||
+		strings.HasPrefix(lower, "[cmdletbinding(") {
+		return "powershell"
+	}
 	if strings.HasPrefix(first, "{") || strings.HasPrefix(first, "[") {
 		return "json"
 	}

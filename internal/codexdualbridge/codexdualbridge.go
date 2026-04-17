@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -73,7 +74,11 @@ func NewDualBridge(runtimeDir, sessionID string) (*DualBridge, error) {
 
 	terminalType := os.Getenv("CODEX_TERMINAL")
 	if terminalType == "" {
-		terminalType = "tmux"
+		if runtime.GOOS == "windows" {
+			terminalType = "wezterm"
+		} else {
+			terminalType = "tmux"
+		}
 	}
 
 	var paneID string

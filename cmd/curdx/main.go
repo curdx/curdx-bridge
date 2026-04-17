@@ -663,7 +663,11 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 				if json.Unmarshal(data, &sessionData) == nil {
 					terminalType, _ := sessionData["terminal"].(string)
 					if terminalType == "" {
-						terminalType = "tmux"
+						if runtime.GOOS == "windows" {
+							terminalType = "wezterm"
+						} else {
+							terminalType = "tmux"
+						}
 					}
 
 					paneID := ""
@@ -2171,9 +2175,13 @@ func (l *aiLauncher) runUp() int {
 		fmt.Fprintln(os.Stderr, "No terminal backend detected (WezTerm or tmux)")
 		fmt.Fprintln(os.Stderr, "   Solutions:")
 		fmt.Fprintln(os.Stderr, "   - Install WezTerm (recommended): https://wezfurlong.org/wezterm/")
-		fmt.Fprintln(os.Stderr, "   - Or install tmux")
-		if _, err := exec.LookPath("tmux"); err == nil {
-			fmt.Fprintln(os.Stderr, "   - tmux is installed, but you're not inside a tmux session (run `tmux` first)")
+		if runtime.GOOS != "windows" {
+			fmt.Fprintln(os.Stderr, "   - Or install tmux")
+			if _, err := exec.LookPath("tmux"); err == nil {
+				fmt.Fprintln(os.Stderr, "   - tmux is installed, but you're not inside a tmux session (run `tmux` first)")
+			}
+		} else {
+			fmt.Fprintln(os.Stderr, "   - tmux is not supported on Windows natively; use WezTerm or run curdx inside WSL")
 		}
 		fmt.Fprintln(os.Stderr, "   - Or set CURDX_TERMINAL=wezterm and configure CODEX_WEZTERM_BIN")
 		return 2

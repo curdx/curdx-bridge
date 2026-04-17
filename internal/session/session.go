@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -76,10 +77,14 @@ func getString(data map[string]interface{}, key string) string {
 	return strings.TrimSpace(fmt.Sprintf("%v", v))
 }
 
-// getTerminal extracts the terminal type, defaulting to "tmux".
+// getTerminal extracts the terminal type, defaulting to the platform-native
+// multiplexer ("wezterm" on Windows, "tmux" elsewhere).
 func getTerminal(data map[string]interface{}) string {
 	t := getString(data, "terminal")
 	if t == "" {
+		if runtime.GOOS == "windows" {
+			return "wezterm"
+		}
 		return "tmux"
 	}
 	return t
