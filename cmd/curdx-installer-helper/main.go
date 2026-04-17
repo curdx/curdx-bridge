@@ -146,23 +146,23 @@ func cmdRemoveCodexMCP(args []string) error {
 	}
 
 	// Decode into ordered-preserving structure using interface{}.
-	var root map[string]interface{}
+	var root map[string]any
 	if err := json.Unmarshal(data, &root); err != nil {
 		return err
 	}
 
-	projects, ok := root["projects"].(map[string]interface{})
+	projects, ok := root["projects"].(map[string]any)
 	if !ok {
 		return nil // nothing to do
 	}
 
 	var removed []string
 	for proj, cfgRaw := range projects {
-		cfg, ok := cfgRaw.(map[string]interface{})
+		cfg, ok := cfgRaw.(map[string]any)
 		if !ok {
 			continue
 		}
-		servers, ok := cfg["mcpServers"].(map[string]interface{})
+		servers, ok := cfg["mcpServers"].(map[string]any)
 		if !ok {
 			continue
 		}
@@ -362,7 +362,7 @@ func cmdSettingsAddPermission(args []string) error {
 		}
 	}
 	allow = append(allow, perm)
-	root["permissions"].(map[string]interface{})["allow"] = allow
+	root["permissions"].(map[string]any)["allow"] = allow
 
 	return writeJSONFile(path, root)
 }
@@ -383,14 +383,14 @@ func cmdSettingsRemovePermission(args []string) error {
 	}
 
 	allow := ensurePermissionsAllow(root)
-	filtered := make([]interface{}, 0, len(allow))
+	filtered := make([]any, 0, len(allow))
 	for _, v := range allow {
 		if s, ok := v.(string); ok && s == perm {
 			continue
 		}
 		filtered = append(filtered, v)
 	}
-	root["permissions"].(map[string]interface{})["allow"] = filtered
+	root["permissions"].(map[string]any)["allow"] = filtered
 
 	return writeJSONFile(path, root)
 }
@@ -457,60 +457,60 @@ func cmdFileReplace(args []string) error {
 
 // readJSONObject reads a JSON file and returns the top-level object.
 // If the file does not exist, returns an empty map.
-func readJSONObject(path string) (map[string]interface{}, error) {
+func readJSONObject(path string) (map[string]any, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return make(map[string]interface{}), nil
+			return make(map[string]any), nil
 		}
 		return nil, err
 	}
-	var root map[string]interface{}
+	var root map[string]any
 	if err := json.Unmarshal(data, &root); err != nil {
 		return nil, err
 	}
 	if root == nil {
-		root = make(map[string]interface{})
+		root = make(map[string]any)
 	}
 	return root, nil
 }
 
 // ensurePermissionsAllow makes sure root["permissions"]["allow"] exists as a
 // []interface{} and returns it.
-func ensurePermissionsAllow(root map[string]interface{}) []interface{} {
+func ensurePermissionsAllow(root map[string]any) []any {
 	permsRaw, ok := root["permissions"]
 	if !ok {
-		perms := map[string]interface{}{
-			"allow": []interface{}{},
-			"deny":  []interface{}{},
+		perms := map[string]any{
+			"allow": []any{},
+			"deny":  []any{},
 		}
 		root["permissions"] = perms
-		return perms["allow"].([]interface{})
+		return perms["allow"].([]any)
 	}
-	perms, ok := permsRaw.(map[string]interface{})
+	perms, ok := permsRaw.(map[string]any)
 	if !ok {
-		perms = map[string]interface{}{
-			"allow": []interface{}{},
-			"deny":  []interface{}{},
+		perms = map[string]any{
+			"allow": []any{},
+			"deny":  []any{},
 		}
 		root["permissions"] = perms
-		return perms["allow"].([]interface{})
+		return perms["allow"].([]any)
 	}
 	allowRaw, ok := perms["allow"]
 	if !ok {
-		perms["allow"] = []interface{}{}
-		return perms["allow"].([]interface{})
+		perms["allow"] = []any{}
+		return perms["allow"].([]any)
 	}
-	allow, ok := allowRaw.([]interface{})
+	allow, ok := allowRaw.([]any)
 	if !ok {
-		perms["allow"] = []interface{}{}
-		return perms["allow"].([]interface{})
+		perms["allow"] = []any{}
+		return perms["allow"].([]any)
 	}
 	return allow
 }
 
 // writeJSONFile marshals data with indent 2 and writes it to path.
-func writeJSONFile(path string, data interface{}) error {
+func writeJSONFile(path string, data any) error {
 	out, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return err

@@ -12,16 +12,16 @@ import (
 )
 
 // ReadState reads and parses a JSON state file. Returns nil on any error.
-func ReadState(stateFile string) map[string]interface{} {
+func ReadState(stateFile string) map[string]any {
 	data, err := os.ReadFile(stateFile)
 	if err != nil {
 		return nil
 	}
-	var obj interface{}
+	var obj any
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return nil
 	}
-	m, ok := obj.(map[string]interface{})
+	m, ok := obj.(map[string]any)
 	if !ok {
 		return nil
 	}
@@ -49,7 +49,7 @@ func PingDaemon(protocolPrefix string, timeoutS float64, stateFile string) bool 
 	}
 	defer conn.Close()
 
-	req := map[string]interface{}{
+	req := map[string]any{
 		"type":  protocolPrefix + ".ping",
 		"v":     1,
 		"id":    "ping",
@@ -73,7 +73,7 @@ func PingDaemon(protocolPrefix string, timeoutS float64, stateFile string) bool 
 	}
 	line := scanner.Text()
 
-	var resp map[string]interface{}
+	var resp map[string]any
 	if err := json.Unmarshal([]byte(line), &resp); err != nil {
 		return false
 	}
@@ -120,7 +120,7 @@ func ShutdownDaemon(protocolPrefix string, timeoutS float64, stateFile string) b
 	}
 	defer conn.Close()
 
-	req := map[string]interface{}{
+	req := map[string]any{
 		"type":  protocolPrefix + ".shutdown",
 		"v":     1,
 		"id":    "shutdown",
@@ -146,7 +146,7 @@ func ShutdownDaemon(protocolPrefix string, timeoutS float64, stateFile string) b
 }
 
 // extractConnectionInfo pulls host, port, and token from the state dict.
-func extractConnectionInfo(st map[string]interface{}) (host string, port int, token string, ok bool) {
+func extractConnectionInfo(st map[string]any) (host string, port int, token string, ok bool) {
 	// host: prefer connect_host, fall back to host
 	if h, exists := st["connect_host"]; exists {
 		host, _ = h.(string)

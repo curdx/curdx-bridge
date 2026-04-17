@@ -210,11 +210,11 @@ func extractConversationsForProvider(provider, workDir, sessionPath, sessionID, 
 		return nil
 	}
 
-	totalText := ""
+	var totalText strings.Builder
 	for _, c := range conversations {
-		totalText += c[0] + c[1]
+		totalText.WriteString(c[0] + c[1])
 	}
-	tokenEstimate := formatter.EstimateTokens(totalText)
+	tokenEstimate := formatter.EstimateTokens(totalText.String())
 
 	sid := sessionID
 	if sid == "" && sessionPath != "" {
@@ -224,7 +224,7 @@ func extractConversationsForProvider(provider, workDir, sessionPath, sessionID, 
 		sid = "unknown"
 	}
 
-	meta := map[string]interface{}{"provider": provider}
+	meta := map[string]any{"provider": provider}
 	if sessionPath != "" {
 		meta["session_path"] = sessionPath
 	}

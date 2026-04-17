@@ -111,14 +111,14 @@ func (r *CodexLogReader) extractCWDFromLog(logPath string) string {
 		return ""
 	}
 
-	var entry map[string]interface{}
+	var entry map[string]any
 	if json.Unmarshal([]byte(firstLine), &entry) != nil {
 		return ""
 	}
 	if strOrEmpty(entry["type"]) != "session_meta" {
 		return ""
 	}
-	payload, _ := entry["payload"].(map[string]interface{})
+	payload, _ := entry["payload"].(map[string]any)
 	if payload == nil {
 		return ""
 	}
@@ -292,7 +292,7 @@ func (r *CodexLogReader) LatestMessage() string {
 		if !strings.HasPrefix(line, "{") {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if json.Unmarshal([]byte(line), &entry) != nil {
 			continue
 		}
@@ -319,7 +319,7 @@ func (r *CodexLogReader) LatestConversations(n int) []ConvPair {
 		if !strings.HasPrefix(line, "{") {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if json.Unmarshal([]byte(line), &entry) != nil {
 			continue
 		}
@@ -376,17 +376,17 @@ func ExtractSessionID(logPath string) string {
 	if m != "" {
 		return m
 	}
-	var entry map[string]interface{}
+	var entry map[string]any
 	if json.Unmarshal([]byte(strings.TrimSpace(firstLine)), &entry) != nil {
 		return ""
 	}
-	payload, _ := entry["payload"].(map[string]interface{})
+	payload, _ := entry["payload"].(map[string]any)
 	candidates := []string{
 		strOrEmpty(entry["session_id"]),
 	}
 	if payload != nil {
 		candidates = append(candidates, strOrEmpty(payload["id"]))
-		if sess, ok := payload["session"].(map[string]interface{}); ok {
+		if sess, ok := payload["session"].(map[string]any); ok {
 			candidates = append(candidates, strOrEmpty(sess["id"]))
 		}
 	}
@@ -404,11 +404,11 @@ func ExtractSessionID(logPath string) string {
 // ---------------------------------------------------------------------------
 
 // codexExtractMessage extracts an assistant reply from a Codex JSONL entry.
-func codexExtractMessage(entry map[string]interface{}) string {
+func codexExtractMessage(entry map[string]any) string {
 	entryType := strOrEmpty(entry["type"])
-	payload, _ := entry["payload"].(map[string]interface{})
+	payload, _ := entry["payload"].(map[string]any)
 	if payload == nil {
-		payload = map[string]interface{}{}
+		payload = map[string]any{}
 	}
 
 	if entryType == "response_item" {
@@ -419,10 +419,10 @@ func codexExtractMessage(entry map[string]interface{}) string {
 			return ""
 		}
 		content := payload["content"]
-		if items, ok := content.([]interface{}); ok {
+		if items, ok := content.([]any); ok {
 			var texts []string
 			for _, raw := range items {
-				item, ok := raw.(map[string]interface{})
+				item, ok := raw.(map[string]any)
 				if !ok {
 					continue
 				}
@@ -474,11 +474,11 @@ func codexExtractMessage(entry map[string]interface{}) string {
 }
 
 // codexExtractUserMessage extracts a user question from a Codex JSONL entry.
-func codexExtractUserMessage(entry map[string]interface{}) string {
+func codexExtractUserMessage(entry map[string]any) string {
 	entryType := strOrEmpty(entry["type"])
-	payload, _ := entry["payload"].(map[string]interface{})
+	payload, _ := entry["payload"].(map[string]any)
 	if payload == nil {
-		payload = map[string]interface{}{}
+		payload = map[string]any{}
 	}
 
 	if entryType == "event_msg" && strOrEmpty(payload["type"]) == "user_message" {
@@ -489,10 +489,10 @@ func codexExtractUserMessage(entry map[string]interface{}) string {
 
 	if entryType == "response_item" {
 		if strOrEmpty(payload["type"]) == "message" && strOrEmpty(payload["role"]) == "user" {
-			if content, ok := payload["content"].([]interface{}); ok {
+			if content, ok := payload["content"].([]any); ok {
 				var texts []string
 				for _, raw := range content {
-					item, ok := raw.(map[string]interface{})
+					item, ok := raw.(map[string]any)
 					if !ok {
 						continue
 					}
@@ -513,7 +513,7 @@ func codexExtractUserMessage(entry map[string]interface{}) string {
 }
 
 // codexExtractEvent extracts a (role, text) event from a Codex JSONL entry.
-func codexExtractEvent(entry map[string]interface{}) *Event {
+func codexExtractEvent(entry map[string]any) *Event {
 	if userMsg := codexExtractUserMessage(entry); userMsg != "" {
 		return &Event{Role: "user", Text: userMsg}
 	}
@@ -532,10 +532,7 @@ func (r *CodexLogReader) readSince(state CodexLogState, timeout time.Duration, b
 	currentPath := state.LogPath
 	offset := state.Offset
 
-	rescanInterval := timeout / 2
-	if rescanInterval < 200*time.Millisecond {
-		rescanInterval = 200 * time.Millisecond
-	}
+	rescanInterval := max(timeout/2, 200*time.Millisecond)
 	if rescanInterval > 2*time.Second {
 		rescanInterval = 2 * time.Second
 	}
@@ -606,10 +603,7 @@ func (r *CodexLogReader) readEventSince(state CodexLogState, timeout time.Durati
 	currentPath := state.LogPath
 	offset := state.Offset
 
-	rescanInterval := timeout / 2
-	if rescanInterval < 200*time.Millisecond {
-		rescanInterval = 200 * time.Millisecond
-	}
+	rescanInterval := max(timeout/2, 200*time.Millisecond)
 	if rescanInterval > 2*time.Second {
 		rescanInterval = 2 * time.Second
 	}
@@ -721,7 +715,7 @@ func (r *CodexLogReader) readLinesFrom(logPath string, offset int64) (string, in
 				if line == "" {
 					continue
 				}
-				var entry map[string]interface{}
+				var entry map[string]any
 				if json.Unmarshal([]byte(line), &entry) != nil {
 					continue
 				}
@@ -763,7 +757,7 @@ func (r *CodexLogReader) readEventLinesFrom(logPath string, offset int64) (*Even
 				if line == "" {
 					continue
 				}
-				var entry map[string]interface{}
+				var entry map[string]any
 				if json.Unmarshal([]byte(line), &entry) != nil {
 					continue
 				}
@@ -808,10 +802,7 @@ func iterLinesReverse(logPath string, maxBytes, maxLines int) []string {
 
 	for position > 0 && bytesRead < maxBytes && len(lines) < maxLines {
 		remaining := maxBytes - bytesRead
-		readSize := 8192
-		if int(position) < readSize {
-			readSize = int(position)
-		}
+		readSize := min(int(position), 8192)
 		if remaining < readSize {
 			readSize = remaining
 		}

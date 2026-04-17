@@ -3,6 +3,7 @@ package filewatcher
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -64,13 +65,7 @@ func TestSessionFileWatcherEmitsOnCreate(t *testing.T) {
 
 	mu.Lock()
 	defer mu.Unlock()
-	found := false
-	for _, p := range paths {
-		if p == "test.jsonl" {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(paths, "test.jsonl")
 	if !found {
 		t.Errorf("expected test.jsonl in callback paths, got %v", paths)
 	}

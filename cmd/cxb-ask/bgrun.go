@@ -108,12 +108,12 @@ func mergeEnv(base []string, extra map[string]string) []string {
 	}
 	keep := make([]string, 0, len(base)+len(extra))
 	for _, kv := range base {
-		eq := strings.IndexByte(kv, '=')
-		if eq < 0 {
+		before, _, ok := strings.Cut(kv, "=")
+		if !ok {
 			keep = append(keep, kv)
 			continue
 		}
-		if _, override := extra[kv[:eq]]; !override {
+		if _, override := extra[before]; !override {
 			keep = append(keep, kv)
 		}
 	}

@@ -9,15 +9,17 @@ import (
 // OpenCodeProjectSession represents an OpenCode provider session.
 type OpenCodeProjectSession struct {
 	SessionFile string
-	Data        map[string]interface{}
+	Data        map[string]any
 }
 
-func (s *OpenCodeProjectSession) Terminal() string           { return getTerminal(s.Data) }
-func (s *OpenCodeProjectSession) PaneID() string             { return getPaneID(s.Data) }
-func (s *OpenCodeProjectSession) PaneTitleMarker() string    { return getString(s.Data, "pane_title_marker") }
-func (s *OpenCodeProjectSession) WorkDir() string            { return getWorkDir(s.Data, s.SessionFile) }
-func (s *OpenCodeProjectSession) RuntimeDir() string         { return getRuntimeDir(s.Data, s.SessionFile) }
-func (s *OpenCodeProjectSession) StartCmd() string           { return getString(s.Data, "start_cmd") }
+func (s *OpenCodeProjectSession) Terminal() string { return getTerminal(s.Data) }
+func (s *OpenCodeProjectSession) PaneID() string   { return getPaneID(s.Data) }
+func (s *OpenCodeProjectSession) PaneTitleMarker() string {
+	return getString(s.Data, "pane_title_marker")
+}
+func (s *OpenCodeProjectSession) WorkDir() string    { return getWorkDir(s.Data, s.SessionFile) }
+func (s *OpenCodeProjectSession) RuntimeDir() string { return getRuntimeDir(s.Data, s.SessionFile) }
+func (s *OpenCodeProjectSession) StartCmd() string   { return getString(s.Data, "start_cmd") }
 
 // SessionID returns the CURDX session ID (legacy compat).
 func (s *OpenCodeProjectSession) SessionID() string {

@@ -32,7 +32,7 @@ type TerminalBackend interface {
 
 // GetBackendFunc is the function used to obtain a TerminalBackend from session data.
 // Set externally to avoid circular dependency with the terminal package.
-var GetBackendFunc func(data map[string]interface{}) TerminalBackend
+var GetBackendFunc func(data map[string]any) TerminalBackend
 
 // nowStr returns the current time formatted for session file timestamps.
 func nowStr() string {
@@ -40,7 +40,7 @@ func nowStr() string {
 }
 
 // readJSON reads a JSON file, returning an empty map on any error.
-func readJSON(path string) map[string]interface{} {
+func readJSON(path string) map[string]any {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil
@@ -49,7 +49,7 @@ func readJSON(path string) map[string]interface{} {
 	if len(raw) >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF {
 		raw = raw[3:]
 	}
-	var obj map[string]interface{}
+	var obj map[string]any
 	if err := json.Unmarshal(raw, &obj); err != nil {
 		return nil
 	}
@@ -60,7 +60,7 @@ func readJSON(path string) map[string]interface{} {
 }
 
 // writeBack persists session data to the session file.
-func writeBack(sessionFile string, data map[string]interface{}) {
+func writeBack(sessionFile string, data map[string]any) {
 	payload, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return
@@ -69,7 +69,7 @@ func writeBack(sessionFile string, data map[string]interface{}) {
 }
 
 // getString safely extracts a trimmed string from a map key.
-func getString(data map[string]interface{}, key string) string {
+func getString(data map[string]any, key string) string {
 	v, ok := data[key]
 	if !ok || v == nil {
 		return ""
@@ -79,7 +79,7 @@ func getString(data map[string]interface{}, key string) string {
 
 // getTerminal extracts the terminal type, defaulting to the platform-native
 // multiplexer ("wezterm" on Windows, "tmux" elsewhere).
-func getTerminal(data map[string]interface{}) string {
+func getTerminal(data map[string]any) string {
 	t := getString(data, "terminal")
 	if t == "" {
 		if runtime.GOOS == "windows" {
@@ -91,7 +91,7 @@ func getTerminal(data map[string]interface{}) string {
 }
 
 // getPaneID extracts the pane_id, falling back to tmux_session for tmux terminals.
-func getPaneID(data map[string]interface{}) string {
+func getPaneID(data map[string]any) string {
 	v := getString(data, "pane_id")
 	if v == "" && getTerminal(data) == "tmux" {
 		v = getString(data, "tmux_session")
@@ -100,7 +100,7 @@ func getPaneID(data map[string]interface{}) string {
 }
 
 // getWorkDir extracts work_dir with a fallback to the session file's parent directory.
-func getWorkDir(data map[string]interface{}, sessionFile string) string {
+func getWorkDir(data map[string]any, sessionFile string) string {
 	v := getString(data, "work_dir")
 	if v != "" {
 		return v
@@ -109,7 +109,7 @@ func getWorkDir(data map[string]interface{}, sessionFile string) string {
 }
 
 // getRuntimeDir extracts runtime_dir with a fallback to the session file's parent directory.
-func getRuntimeDir(data map[string]interface{}, sessionFile string) string {
+func getRuntimeDir(data map[string]any, sessionFile string) string {
 	v := getString(data, "runtime_dir")
 	if v != "" {
 		return v
@@ -136,7 +136,7 @@ type EnsurePaneResult struct {
 // 1. Check existing pane_id + cwd ownership
 // 2. Resolve by title marker
 // 3. Respawn dead tmux panes
-func ensurePane(sessionFile string, data map[string]interface{}, hasRespawn bool) EnsurePaneResult {
+func ensurePane(sessionFile string, data map[string]any, hasRespawn bool) EnsurePaneResult {
 	if GetBackendFunc == nil {
 		return EnsurePaneResult{OK: false, Err: "Terminal backend not available"}
 	}
@@ -244,7 +244,7 @@ func findProjectSessionFile(workDir, baseFilename, instance string) string {
 }
 
 // computeSessionKey computes the routing key for a provider session.
-func computeSessionKey(prefix string, data map[string]interface{}, sessionFile, instance string) string {
+func computeSessionKey(prefix string, data map[string]any, sessionFile, instance string) string {
 	pid := getString(data, "curdx_project_id")
 	if pid == "" {
 		workDir := getWorkDir(data, sessionFile)

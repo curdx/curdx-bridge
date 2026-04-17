@@ -69,7 +69,7 @@ func run() int {
 	pid := projectid.ComputeCURDXProjectID(workDir)
 
 	// Wire up the pane registry backend so LoadRegistryByProjectID can check pane liveness.
-	paneregistry.GetBackendFunc = func(record map[string]interface{}) paneregistry.TerminalBackend {
+	paneregistry.GetBackendFunc = func(record map[string]any) paneregistry.TerminalBackend {
 		b := terminal.GetBackendForSession(record)
 		if b == nil {
 			return nil
@@ -116,11 +116,11 @@ func run() int {
 }
 
 // extractProviderPaneID extracts the pane_id for a provider from a registry record.
-func extractProviderPaneID(record map[string]interface{}, provider string) string {
+func extractProviderPaneID(record map[string]any, provider string) string {
 	if provRaw, ok := record["providers"]; ok {
-		if provMap, ok := provRaw.(map[string]interface{}); ok {
+		if provMap, ok := provRaw.(map[string]any); ok {
 			if entry, ok := provMap[provider]; ok {
-				if entryMap, ok := entry.(map[string]interface{}); ok {
+				if entryMap, ok := entry.(map[string]any); ok {
 					if paneID, ok := entryMap["pane_id"]; ok {
 						s := strings.TrimSpace(fmt.Sprintf("%v", paneID))
 						if s != "" && s != "<nil>" {

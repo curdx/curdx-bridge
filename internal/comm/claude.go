@@ -107,7 +107,7 @@ func candidateProjectDirs(root, workDir string) []string {
 // ---------------------------------------------------------------------------
 
 // claudeExtractMessage extracts a message with the given role from a Claude JSONL entry.
-func claudeExtractMessage(entry map[string]interface{}, role string) string {
+func claudeExtractMessage(entry map[string]any, role string) string {
 	if entry == nil {
 		return ""
 	}
@@ -115,7 +115,7 @@ func claudeExtractMessage(entry map[string]interface{}, role string) string {
 
 	// 1. response_item entries
 	if entryType == "response_item" {
-		payload, _ := entry["payload"].(map[string]interface{})
+		payload, _ := entry["payload"].(map[string]any)
 		if payload == nil || strOrEmpty(payload["type"]) != "message" {
 			return ""
 		}
@@ -127,7 +127,7 @@ func claudeExtractMessage(entry map[string]interface{}, role string) string {
 
 	// 2. event_msg entries
 	if entryType == "event_msg" {
-		payload, _ := entry["payload"].(map[string]interface{})
+		payload, _ := entry["payload"].(map[string]any)
 		if payload == nil {
 			return ""
 		}
@@ -146,7 +146,7 @@ func claudeExtractMessage(entry map[string]interface{}, role string) string {
 	}
 
 	// 3. Default Claude log shape: {"message": {"role": ..., "content": ...}}
-	if msgObj, ok := entry["message"].(map[string]interface{}); ok {
+	if msgObj, ok := entry["message"].(map[string]any); ok {
 		msgRole := strings.ToLower(strings.TrimSpace(coalesce(strOrEmpty(msgObj["role"]), entryType)))
 		if msgRole != role {
 			return ""
@@ -176,13 +176,13 @@ type ClaudeLogState struct {
 
 // ClaudeLogReader reads Claude session logs from ~/.claude/projects/<key>.
 type ClaudeLogReader struct {
-	Root              string
-	WorkDir           string
-	preferredSession  string
-	useSessionsIndex  bool
-	includeSubagents  bool
-	pollInterval      time.Duration
-	mu                sync.Mutex
+	Root             string
+	WorkDir          string
+	preferredSession string
+	useSessionsIndex bool
+	includeSubagents bool
+	pollInterval     time.Duration
+	mu               sync.Mutex
 }
 
 // NewClaudeLogReader creates a new ClaudeLogReader.
@@ -261,11 +261,11 @@ func (r *ClaudeLogReader) parseSessionsIndex() string {
 	if err != nil {
 		return ""
 	}
-	var payload map[string]interface{}
+	var payload map[string]any
 	if json.Unmarshal(data, &payload) != nil {
 		return ""
 	}
-	entries, _ := payload["entries"].([]interface{})
+	entries, _ := payload["entries"].([]any)
 	candidates := make(map[string]bool)
 	for _, c := range candidateProjectPaths(r.WorkDir) {
 		candidates[c] = true
@@ -274,7 +274,7 @@ func (r *ClaudeLogReader) parseSessionsIndex() string {
 	var bestPath string
 	bestMtime := int64(-1)
 	for _, raw := range entries {
-		entry, ok := raw.(map[string]interface{})
+		entry, ok := raw.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -348,7 +348,7 @@ func (r *ClaudeLogReader) sessionIsSidechain(path string) *bool {
 			if line == "" || lineCount > 20 {
 				continue
 			}
-			var entry map[string]interface{}
+			var entry map[string]any
 			if json.Unmarshal([]byte(line), &entry) != nil {
 				continue
 			}
@@ -535,7 +535,7 @@ func (r *ClaudeLogReader) LatestMessage() string {
 		if line == "" {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if json.Unmarshal([]byte(line), &entry) != nil {
 			continue
 		}
@@ -566,7 +566,7 @@ func (r *ClaudeLogReader) LatestConversations(n int) []ConvPair {
 		if line == "" {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if json.Unmarshal([]byte(line), &entry) != nil {
 			continue
 		}
@@ -699,7 +699,7 @@ func readNewClaudeMessages(path string, state ClaudeLogState) (string, ClaudeLog
 		if line == "" {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if json.Unmarshal([]byte(line), &entry) != nil {
 			continue
 		}
@@ -751,7 +751,7 @@ func readNewClaudeEvents(path string, state ClaudeLogState) ([]Event, ClaudeLogS
 		if line == "" {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if json.Unmarshal([]byte(line), &entry) != nil {
 			continue
 		}

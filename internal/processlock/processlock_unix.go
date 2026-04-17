@@ -30,9 +30,9 @@ func isProcessStuck(pid int) bool {
 	data, err := os.ReadFile(fmt.Sprintf("/proc/%d/status", pid))
 	if err == nil {
 		// Linux: parse /proc/<pid>/status
-		for _, line := range strings.Split(string(data), "\n") {
-			if strings.HasPrefix(line, "State:") {
-				state := strings.TrimSpace(strings.TrimPrefix(line, "State:"))
+		for line := range strings.SplitSeq(string(data), "\n") {
+			if after, ok := strings.CutPrefix(line, "State:"); ok {
+				state := strings.TrimSpace(after)
 				return strings.HasPrefix(state, "T") || strings.HasPrefix(state, "Z")
 			}
 		}

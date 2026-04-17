@@ -7,16 +7,18 @@ import (
 // CodexProjectSession represents a Codex provider session.
 type CodexProjectSession struct {
 	SessionFile string
-	Data        map[string]interface{}
+	Data        map[string]any
 }
 
-func (s *CodexProjectSession) Terminal() string           { return getTerminal(s.Data) }
-func (s *CodexProjectSession) PaneID() string             { return getPaneID(s.Data) }
-func (s *CodexProjectSession) PaneTitleMarker() string    { return getString(s.Data, "pane_title_marker") }
-func (s *CodexProjectSession) CodexSessionPath() string   { return getString(s.Data, "codex_session_path") }
-func (s *CodexProjectSession) CodexSessionID() string     { return getString(s.Data, "codex_session_id") }
-func (s *CodexProjectSession) WorkDir() string            { return getWorkDir(s.Data, s.SessionFile) }
-func (s *CodexProjectSession) RuntimeDir() string         { return getRuntimeDir(s.Data, s.SessionFile) }
+func (s *CodexProjectSession) Terminal() string        { return getTerminal(s.Data) }
+func (s *CodexProjectSession) PaneID() string          { return getPaneID(s.Data) }
+func (s *CodexProjectSession) PaneTitleMarker() string { return getString(s.Data, "pane_title_marker") }
+func (s *CodexProjectSession) CodexSessionPath() string {
+	return getString(s.Data, "codex_session_path")
+}
+func (s *CodexProjectSession) CodexSessionID() string { return getString(s.Data, "codex_session_id") }
+func (s *CodexProjectSession) WorkDir() string        { return getWorkDir(s.Data, s.SessionFile) }
+func (s *CodexProjectSession) RuntimeDir() string     { return getRuntimeDir(s.Data, s.SessionFile) }
 
 func (s *CodexProjectSession) StartCmd() string {
 	// Prefer explicit codex_start_cmd when present.

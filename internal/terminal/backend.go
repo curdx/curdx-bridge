@@ -218,7 +218,7 @@ func defaultBackendKind() string {
 }
 
 // GetBackendForSession returns a backend based on session data.
-func GetBackendForSession(sessionData map[string]interface{}) TerminalBackend {
+func GetBackendForSession(sessionData map[string]any) TerminalBackend {
 	terminal, _ := sessionData["terminal"].(string)
 	if terminal == "" {
 		terminal = defaultBackendKind()
@@ -230,7 +230,7 @@ func GetBackendForSession(sessionData map[string]interface{}) TerminalBackend {
 }
 
 // GetPaneIDFromSession extracts pane ID from session data.
-func GetPaneIDFromSession(sessionData map[string]interface{}) string {
+func GetPaneIDFromSession(sessionData map[string]any) string {
 	terminal, _ := sessionData["terminal"].(string)
 	if terminal == "" {
 		terminal = defaultBackendKind()
@@ -329,7 +329,7 @@ func loadCachedWeztermBin() string {
 		if err != nil {
 			continue
 		}
-		for _, line := range strings.Split(string(data), "\n") {
+		for line := range strings.SplitSeq(string(data), "\n") {
 			if strings.HasPrefix(line, "CODEX_WEZTERM_BIN=") {
 				path := strings.TrimSpace(strings.SplitN(line, "=", 2)[1])
 				if path != "" {

@@ -8,6 +8,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -59,7 +60,7 @@ func usage() {
 
 func main() {
 	// Wire up the session package's backend resolver so EnsurePane works.
-	session.GetBackendFunc = func(data map[string]interface{}) session.TerminalBackend {
+	session.GetBackendFunc = func(data map[string]any) session.TerminalBackend {
 		t, _ := data["terminal"].(string)
 		if t == "wezterm" {
 			return terminal.NewWeztermBackend()
@@ -132,18 +133,12 @@ func main() {
 	providers := allProviders
 	if providersList != "" {
 		providers = nil
-		for _, p := range strings.Split(providersList, ",") {
+		for p := range strings.SplitSeq(providersList, ",") {
 			p = strings.TrimSpace(strings.ToLower(p))
 			if p == "" {
 				continue
 			}
-			valid := false
-			for _, ap := range allProviders {
-				if p == ap {
-					valid = true
-					break
-				}
-			}
+			valid := slices.Contains(allProviders, p)
 			if !valid {
 				fmt.Fprintf(os.Stderr, "Unknown provider: %s\n", p)
 				fmt.Fprintf(os.Stderr, "Available: %s\n", strings.Join(allProviders, ", "))

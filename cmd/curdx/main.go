@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"os/exec"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,7 +47,7 @@ var allowedProviders = map[string]bool{
 func splitProviderTokens(values []string) []string {
 	var parts []string
 	for _, item := range values {
-		for _, part := range strings.Split(item, ",") {
+		for part := range strings.SplitSeq(item, ",") {
 			p := strings.TrimSpace(strings.ToLower(part))
 			if p != "" {
 				parts = append(parts, p)
@@ -148,10 +150,7 @@ func getVersionInfo(dirPath string) map[string]string {
 	data, err := os.ReadFile(curdxFile)
 	if err == nil {
 		lines := strings.Split(string(data), "\n")
-		limit := len(lines)
-		if limit > 60 {
-			limit = 60
-		}
+		limit := min(len(lines), 60)
 		for _, line := range lines[:limit] {
 			line = strings.TrimSpace(line)
 			if strings.HasPrefix(line, "VERSION") && strings.Contains(line, "=") {
@@ -315,7 +314,7 @@ func getRemoteVersionInfo() map[string]string {
 	if err != nil {
 		return nil
 	}
-	var data map[string]interface{}
+	var data map[string]any
 	if json.Unmarshal(out, &data) != nil {
 		return nil
 	}
@@ -325,8 +324,8 @@ func getRemoteVersionInfo() map[string]string {
 		commit = sha[:7]
 	}
 	date := ""
-	if commitObj, ok := data["commit"].(map[string]interface{}); ok {
-		if committer, ok := commitObj["committer"].(map[string]interface{}); ok {
+	if commitObj, ok := data["commit"].(map[string]any); ok {
+		if committer, ok := commitObj["committer"].(map[string]any); ok {
 			if dateStr, ok := committer["date"].(string); ok && len(dateStr) >= 10 {
 				date = dateStr[:10]
 			}
@@ -501,7 +500,7 @@ func showUpgradeInfo(installDir string, oldInfo map[string]string) {
 }
 
 // findAllZombieSessions finds tmux sessions whose parent process is dead.
-func findAllZombieSessions() []map[string]interface{} {
+func findAllZombieSessions() []map[string]any {
 	if runtime.GOOS == "windows" {
 		return nil
 	}
@@ -510,14 +509,14 @@ func findAllZombieSessions() []map[string]interface{} {
 	}
 
 	pattern := regexp.MustCompile(`^(codex|gemini|opencode|claude)-(\d+)-`)
-	var zombies []map[string]interface{}
+	var zombies []map[string]any
 
 	out, err := exec.Command("tmux", "list-sessions", "-F", "#{session_name}").Output()
 	if err != nil {
 		return nil
 	}
 
-	for _, session := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+	for session := range strings.SplitSeq(strings.TrimSpace(string(out)), "\n") {
 		session = strings.TrimSpace(session)
 		if session == "" {
 			continue
@@ -533,7 +532,7 @@ func findAllZombieSessions() []map[string]interface{} {
 		if isPIDAlive(parentPID) {
 			continue
 		}
-		zombies = append(zombies, map[string]interface{}{
+		zombies = append(zombies, map[string]any{
 			"session":    session,
 			"provider":   m[1],
 			"parent_pid": parentPID,
@@ -595,7 +594,7 @@ func findDaemonPIDsByName(daemonName string) []int {
 	if err != nil {
 		return pids
 	}
-	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSpace(string(out)), "\n") {
 		line = strings.TrimSpace(line)
 		if line != "" {
 			if pid, err := strconv.Atoi(line); err == nil {
@@ -659,7 +658,7 @@ func cmdKill(providerArgs []string, force, yes bool) int {
 				if len(data) >= 3 && data[0] == 0xef && data[1] == 0xbb && data[2] == 0xbf {
 					data = data[3:]
 				}
-				var sessionData map[string]interface{}
+				var sessionData map[string]any
 				if json.Unmarshal(data, &sessionData) == nil {
 					terminalType, _ := sessionData["terminal"].(string)
 					if terminalType == "" {
@@ -883,7 +882,7 @@ type aiLauncher struct {
 	cwd           string
 	projectRoot   string
 	sessionID     string
-	curdxPID        int
+	curdxPID      int
 	projectID     string
 	projectRunDir string
 	runtimeDir    string
@@ -891,19 +890,19 @@ type aiLauncher struct {
 	anchorProv    string
 	anchorPaneID  string
 
-	tmuxPanes   map[string]string
+	tmuxPanes    map[string]string
 	weztermPanes map[string]string
-	extraPanes  map[string]string
+	extraPanes   map[string]string
 
-	cleaned    bool
-	cleanedMu  sync.Mutex
+	cleaned   bool
+	cleanedMu sync.Mutex
 
-	launchArgs map[string]interface{}
-	launchEnv  map[string]interface{}
-	cmdConfig  map[string]interface{}
+	launchArgs map[string]any
+	launchEnv  map[string]any
+	cmdConfig  map[string]any
 }
 
-func newAILauncher(providers []string, resume, auto bool, cmdConfig, launchArgs, launchEnv map[string]interface{}) *aiLauncher {
+func newAILauncher(providers []string, resume, auto bool, cmdConfig, launchArgs, launchEnv map[string]any) *aiLauncher {
 	cwd, _ := os.Getwd()
 	if cwd == "" {
 		cwd = "."
@@ -943,10 +942,10 @@ func newAILauncher(providers []string, resume, auto bool, cmdConfig, launchArgs,
 	}
 
 	if launchArgs == nil {
-		launchArgs = map[string]interface{}{}
+		launchArgs = map[string]any{}
 	}
 	if launchEnv == nil {
-		launchEnv = map[string]interface{}{}
+		launchEnv = map[string]any{}
 	}
 
 	return &aiLauncher{
@@ -956,7 +955,7 @@ func newAILauncher(providers []string, resume, auto bool, cmdConfig, launchArgs,
 		cwd:           cwd,
 		projectRoot:   projectRoot,
 		sessionID:     sessionID,
-		curdxPID:        pid,
+		curdxPID:      pid,
 		projectID:     curdxProjectID,
 		projectRunDir: projectRunDir,
 		runtimeDir:    runtimeDir,
@@ -996,7 +995,7 @@ func (l *aiLauncher) providerEnvOverrides(provider string) map[string]string {
 	}
 	// Merge per-provider launch_env
 	if extra, ok := l.launchEnv[prov]; ok {
-		if m, ok := extra.(map[string]interface{}); ok {
+		if m, ok := extra.(map[string]any); ok {
 			for k, v := range m {
 				env[strings.TrimSpace(k)] = fmt.Sprintf("%v", v)
 			}
@@ -1169,10 +1168,7 @@ func (l *aiLauncher) latestCodexSessionID() string {
 		return ""
 	}
 	logs := collectCodexSessionLogs(root)
-	limit := codexSessionScanLimit()
-	if limit > len(logs) {
-		limit = len(logs)
-	}
+	limit := min(codexSessionScanLimit(), len(logs))
 	for _, log := range logs[:limit] {
 		sid, cwdNorm := readCodexSessionMetaHead(log.path, 30)
 		if sid == "" || cwdNorm == "" {
@@ -1253,7 +1249,7 @@ func readCodexSessionMetaHead(logPath string, maxLines int) (sessionID string, c
 	defer f.Close()
 
 	reader := bufio.NewReaderSize(f, 64*1024)
-	for i := 0; i < maxLines; i++ {
+	for range maxLines {
 		line, err := reader.ReadString('\n')
 		line = strings.TrimSpace(line)
 		if line != "" {
@@ -1536,12 +1532,7 @@ func (l *aiLauncher) claudeEnvOverrides() map[string]string {
 }
 
 func contains(ss []string, s string) bool {
-	for _, v := range ss {
-		if v == s {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ss, s)
 }
 
 // projectConfigDir returns the resolved project config dir.
@@ -1559,10 +1550,10 @@ func (l *aiLauncher) writeProviderSession(provider, paneID, paneTitleMarker, sta
 	sessionFilename := fmt.Sprintf(".%s-session", provider)
 	sessionFile := l.projectSessionFile(sessionFilename)
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"session_id":        l.sessionID,
-		"curdx_session_id":    l.sessionID,
-		"curdx_project_id":    l.projectID,
+		"curdx_session_id":  l.sessionID,
+		"curdx_project_id":  l.projectID,
 		"runtime_dir":       filepath.Join(l.runtimeDir, provider),
 		"terminal":          l.terminalType,
 		"pane_id":           paneID,
@@ -1590,17 +1581,17 @@ func (l *aiLauncher) writeProviderSession(provider, paneID, paneTitleMarker, sta
 	sessionutil.SafeWriteSession(sessionFile, string(payload))
 
 	// Update pane registry
-	provEntry := map[string]interface{}{
+	provEntry := map[string]any{
 		"pane_id":           paneID,
 		"pane_title_marker": paneTitleMarker,
 		"session_file":      sessionFile,
 	}
-	paneregistry.UpsertRegistry(map[string]interface{}{
+	paneregistry.UpsertRegistry(map[string]any{
 		"curdx_session_id": l.sessionID,
 		"curdx_project_id": l.projectID,
-		"work_dir":       l.projectRoot,
-		"terminal":       l.terminalType,
-		"providers": map[string]interface{}{
+		"work_dir":         l.projectRoot,
+		"terminal":         l.terminalType,
+		"providers": map[string]any{
 			provider: provEntry,
 		},
 	})
@@ -1610,16 +1601,16 @@ func (l *aiLauncher) writeProviderSession(provider, paneID, paneTitleMarker, sta
 func (l *aiLauncher) writeClaudeSession(paneID, paneTitleMarker string) {
 	sessionFile := l.projectSessionFile(".claude-session")
 
-	data := map[string]interface{}{
-		"session_id":        l.sessionID,
-		"curdx_project_id":    l.projectID,
-		"work_dir":          l.projectRoot,
-		"work_dir_norm":     projectid.NormalizeWorkDir(l.projectRoot),
-		"start_dir":         l.cwd,
-		"terminal":          l.terminalType,
-		"active":            true,
-		"started_at":        time.Now().Format("2006-01-02 15:04:05"),
-		"updated_at":        time.Now().Format("2006-01-02 15:04:05"),
+	data := map[string]any{
+		"session_id":       l.sessionID,
+		"curdx_project_id": l.projectID,
+		"work_dir":         l.projectRoot,
+		"work_dir_norm":    projectid.NormalizeWorkDir(l.projectRoot),
+		"start_dir":        l.cwd,
+		"terminal":         l.terminalType,
+		"active":           true,
+		"started_at":       time.Now().Format("2006-01-02 15:04:05"),
+		"updated_at":       time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if paneID != "" {
 		data["pane_id"] = paneID
@@ -1635,13 +1626,13 @@ func (l *aiLauncher) writeClaudeSession(paneID, paneTitleMarker string) {
 	sessionutil.SafeWriteSession(sessionFile, string(payload))
 
 	if paneID != "" {
-		paneregistry.UpsertRegistry(map[string]interface{}{
+		paneregistry.UpsertRegistry(map[string]any{
 			"curdx_session_id": l.sessionID,
 			"curdx_project_id": l.projectID,
-			"work_dir":       l.projectRoot,
-			"terminal":       l.terminalType,
-			"providers": map[string]interface{}{
-				"claude": map[string]interface{}{
+			"work_dir":         l.projectRoot,
+			"terminal":         l.terminalType,
+			"providers": map[string]any{
+				"claude": map[string]any{
 					"pane_id":           paneID,
 					"pane_title_marker": paneTitleMarker,
 					"session_file":      sessionFile,
@@ -1937,9 +1928,7 @@ func (l *aiLauncher) buildClaudeEnv() map[string]string {
 		}
 	}
 	// Merge claude overrides
-	for k, v := range l.claudeEnvOverrides() {
-		env[k] = v
-	}
+	maps.Copy(env, l.claudeEnvOverrides())
 	return env
 }
 
@@ -1959,9 +1948,7 @@ func (l *aiLauncher) mergeEnv(overrides map[string]string) map[string]string {
 			env["PATH"] = binDir + ":" + currentPath
 		}
 	}
-	for k, v := range overrides {
-		env[k] = v
-	}
+	maps.Copy(env, overrides)
 	return env
 }
 
@@ -2043,7 +2030,7 @@ func (l *aiLauncher) cleanup() {
 		if len(raw) >= 3 && raw[0] == 0xef && raw[1] == 0xbb && raw[2] == 0xbf {
 			raw = raw[3:]
 		}
-		var data map[string]interface{}
+		var data map[string]any
 		if json.Unmarshal(raw, &data) != nil {
 			continue
 		}
@@ -2255,10 +2242,7 @@ func (l *aiLauncher) runUp() int {
 
 	leftItems := []string{l.anchorProv}
 	if leftSlots > 0 {
-		n := leftSlots
-		if n > len(remaining) {
-			n = len(remaining)
-		}
+		n := min(leftSlots, len(remaining))
 		leftItems = append(leftItems, remaining[:n]...)
 	}
 
@@ -2362,13 +2346,6 @@ func (l *aiLauncher) runUp() int {
 	default:
 		return rc
 	}
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // -----------------------------------------------------------------------
@@ -2510,7 +2487,7 @@ func cmdStart(providerArgs []string, resume, auto bool) int {
 		// Use config file providers or defaults
 		if rawProviders, ok := configData["providers"]; ok {
 			switch rp := rawProviders.(type) {
-			case []interface{}:
+			case []any:
 				for _, p := range rp {
 					if s, ok := p.(string); ok {
 						providers = append(providers, s)
@@ -2537,7 +2514,7 @@ func cmdStart(providerArgs []string, resume, auto bool) int {
 	}
 
 	// Read flags from config
-	flags, _ := configData["flags"].(map[string]interface{})
+	flags, _ := configData["flags"].(map[string]any)
 	if flags != nil {
 		if !resume {
 			if v, ok := flags["resume"]; ok && isTruthyVal(v) {
@@ -2561,32 +2538,32 @@ func cmdStart(providerArgs []string, resume, auto bool) int {
 	}
 
 	// Resolve cmd config
-	var cmdConfig map[string]interface{}
+	var cmdConfig map[string]any
 	if rawCmd, ok := configData["cmd"]; ok {
 		switch v := rawCmd.(type) {
 		case bool:
-			cmdConfig = map[string]interface{}{"enabled": v}
-		case map[string]interface{}:
+			cmdConfig = map[string]any{"enabled": v}
+		case map[string]any:
 			cmdConfig = v
 		}
 	}
 	if requestedCmdEnabled {
 		if cmdConfig == nil {
-			cmdConfig = map[string]interface{}{}
+			cmdConfig = map[string]any{}
 		}
 		cmdConfig["enabled"] = true
 	}
 
 	// Launch args and env from config
-	var launchArgs map[string]interface{}
+	var launchArgs map[string]any
 	if raw, ok := configData["launch_args"]; ok {
-		if m, ok := raw.(map[string]interface{}); ok {
+		if m, ok := raw.(map[string]any); ok {
 			launchArgs = m
 		}
 	}
-	var launchEnv map[string]interface{}
+	var launchEnv map[string]any
 	if raw, ok := configData["launch_env"]; ok {
-		if m, ok := raw.(map[string]interface{}); ok {
+		if m, ok := raw.(map[string]any); ok {
 			launchEnv = m
 		}
 	}
@@ -2595,7 +2572,7 @@ func cmdStart(providerArgs []string, resume, auto bool) int {
 	return launcher.runUp()
 }
 
-func isTruthyVal(v interface{}) bool {
+func isTruthyVal(v any) bool {
 	switch val := v.(type) {
 	case bool:
 		return val
@@ -2693,12 +2670,7 @@ func run(argv []string) int {
 
 // containsFlag checks if any arg matches the given flag.
 func containsFlag(args []string, flag string) bool {
-	for _, a := range args {
-		if a == flag {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(args, flag)
 }
 
 // filterFlags removes flags (starting with -) from args.

@@ -74,7 +74,7 @@ func debugLog(message string) {
 	fmt.Fprintf(os.Stderr, "[completion-hook-debug] %s\n", message)
 }
 
-func loadSessionFile(sessionPath string) map[string]interface{} {
+func loadSessionFile(sessionPath string) map[string]any {
 	data, err := os.ReadFile(sessionPath)
 	if err != nil {
 		return nil
@@ -83,7 +83,7 @@ func loadSessionFile(sessionPath string) map[string]interface{} {
 	if len(data) >= 3 && data[0] == 0xef && data[1] == 0xbb && data[2] == 0xbf {
 		data = data[3:]
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal(data, &m); err != nil {
 		return nil
 	}
@@ -130,7 +130,7 @@ func workDirsCompatible(sessionWorkDir, requestWorkDir string) bool {
 	return pathIsSameOrParent(sessionWorkDir, requestWorkDir)
 }
 
-func sendViaTerminal(paneID, message, terminal string, sessionData map[string]interface{}) bool {
+func sendViaTerminal(paneID, message, terminal string, sessionData map[string]any) bool {
 	if terminal == "wezterm" {
 		return sendViaWezterm(paneID, message, sessionData)
 	}
@@ -189,7 +189,7 @@ func sendWeztermEnter(baseArgs []string, paneID string) bool {
 	return false
 }
 
-func sendViaWezterm(paneID, message string, sessionData map[string]interface{}) bool {
+func sendViaWezterm(paneID, message string, sessionData map[string]any) bool {
 	wezterm := findWeztermCLI()
 	if wezterm == "" {
 		return false
@@ -239,7 +239,7 @@ func sendViaTmux(paneID, message string) bool {
 		maxRetries := 3
 		enterDelay := envFloat("CURDX_TMUX_ENTER_DELAY", 0.5)
 		retryDelay := envFloat("CURDX_TMUX_ENTER_RETRY_DELAY", 0.08)
-		for attempt := 0; attempt < maxRetries; attempt++ {
+		for attempt := range maxRetries {
 			if enterDelay > 0 {
 				time.Sleep(time.Duration(enterDelay * float64(time.Second)))
 			}
@@ -441,7 +441,7 @@ func run(argv []string) int {
 
 	var paneID string
 	terminal := defaultTerminalKind()
-	var sessionData map[string]interface{}
+	var sessionData map[string]any
 
 	if directPaneID != "" {
 		paneID = directPaneID

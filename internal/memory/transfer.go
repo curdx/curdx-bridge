@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -28,16 +29,16 @@ type ContextTransfer struct {
 
 // Supported providers and sources.
 var (
-	SupportedProviders    = []string{"codex", "gemini", "opencode"}
-	SupportedSources      = []string{"auto", "claude", "codex", "gemini", "opencode"}
-	SourceSessionFiles    = map[string]string{
+	SupportedProviders = []string{"codex", "gemini", "opencode"}
+	SupportedSources   = []string{"auto", "claude", "codex", "gemini", "opencode"}
+	SourceSessionFiles = map[string]string{
 		"claude":   ".claude-session",
 		"codex":    ".codex-session",
 		"gemini":   ".gemini-session",
 		"opencode": ".opencode-session",
 	}
-	DefaultSourceOrder    = []string{"claude", "codex", "gemini", "opencode"}
-	DefaultFallbackPairs  = 50
+	DefaultSourceOrder   = []string{"claude", "codex", "gemini", "opencode"}
+	DefaultFallbackPairs = 50
 )
 
 // Provider command map for send_to_provider.
@@ -72,7 +73,7 @@ func (ct *ContextTransfer) normalizeProvider(provider string) string {
 	return v
 }
 
-func (ct *ContextTransfer) loadSessionData(provider string) (string, map[string]interface{}) {
+func (ct *ContextTransfer) loadSessionData(provider string) (string, map[string]any) {
 	filename, ok := SourceSessionFiles[provider]
 	if !ok {
 		return "", nil
@@ -92,7 +93,7 @@ func (ct *ContextTransfer) loadSessionData(provider string) (string, map[string]
 	if len(raw) >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF {
 		raw = raw[3:]
 	}
-	var data map[string]interface{}
+	var data map[string]any
 	if err := json.Unmarshal(raw, &data); err != nil {
 		return sessionFile, nil
 	}
@@ -179,11 +180,11 @@ func (ct *ContextTransfer) contextFromPairs(
 
 	cleanedPairs = ct.Formatter.TruncateToLimit(cleanedPairs, ct.MaxTokens)
 
-	totalText := ""
+	var totalText strings.Builder
 	for _, pair := range cleanedPairs {
-		totalText += pair[0] + pair[1]
+		totalText.WriteString(pair[0] + pair[1])
 	}
-	tokenEstimate := ct.Formatter.EstimateTokens(totalText)
+	tokenEstimate := ct.Formatter.EstimateTokens(totalText.String())
 
 	metadata := map[string]any{"provider": provider}
 	if sessionPath != "" {
@@ -336,11 +337,11 @@ func (ct *ContextTransfer) extractFromClaude(
 	}
 	pairs = ct.Formatter.TruncateToLimit(pairs, ct.MaxTokens)
 
-	totalText := ""
+	var totalText strings.Builder
 	for _, pair := range pairs {
-		totalText += pair[0] + pair[1]
+		totalText.WriteString(pair[0] + pair[1])
 	}
-	tokenEstimate := ct.Formatter.EstimateTokens(totalText)
+	tokenEstimate := ct.Formatter.EstimateTokens(totalText.String())
 
 	return &TransferContext{
 		Conversations:   pairs,
@@ -430,13 +431,7 @@ func (ct *ContextTransfer) FormatOutput(context *TransferContext, format string,
 
 // SendToProvider sends context to a provider via ask command.
 func (ct *ContextTransfer) SendToProvider(context *TransferContext, provider string, format string) (bool, string) {
-	supported := false
-	for _, p := range SupportedProviders {
-		if p == provider {
-			supported = true
-			break
-		}
-	}
+	supported := slices.Contains(SupportedProviders, provider)
 	if !supported {
 		return false, fmt.Sprintf("Unsupported provider: %s", provider)
 	}

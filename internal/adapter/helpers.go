@@ -50,8 +50,10 @@ func envBoolDefault(name string, defaultVal bool) bool {
 }
 
 // intPtr returns a pointer to an int value.
+//
+//go:fix inline
 func intPtr(v int) *int {
-	return &v
+	return new(v)
 }
 
 // expandHome expands a leading "~/" to the user's home directory.
@@ -74,10 +76,7 @@ func tailStateForJSONL(logPath string, tailBytes int64) (sessionPath string, off
 		return logPath, 0
 	}
 	size := fi.Size()
-	offset = size - tailBytes
-	if offset < 0 {
-		offset = 0
-	}
+	offset = max(size-tailBytes, 0)
 	return logPath, offset
 }
 
@@ -91,9 +90,6 @@ func tailStateForPaneLog(logPath string, tailBytes int64) (paneLogPath string, o
 		return logPath, 0
 	}
 	size := fi.Size()
-	offset = size - tailBytes
-	if offset < 0 {
-		offset = 0
-	}
+	offset = max(size-tailBytes, 0)
 	return logPath, offset
 }

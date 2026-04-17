@@ -14,7 +14,7 @@ import (
 // CodexLogReader tests
 // =========================================================================
 
-func writeCodexLog(t *testing.T, dir string, entries []map[string]interface{}) string {
+func writeCodexLog(t *testing.T, dir string, entries []map[string]any) string {
 	t.Helper()
 	logDir := filepath.Join(dir, "sessions")
 	if err := os.MkdirAll(logDir, 0o755); err != nil {
@@ -34,14 +34,14 @@ func writeCodexLog(t *testing.T, dir string, entries []map[string]interface{}) s
 
 func TestCodex_LatestMessageExtractsReply(t *testing.T) {
 	dir := t.TempDir()
-	logPath := writeCodexLog(t, dir, []map[string]interface{}{
+	logPath := writeCodexLog(t, dir, []map[string]any{
 		{
 			"type": "response_item",
-			"payload": map[string]interface{}{
+			"payload": map[string]any{
 				"type": "message",
 				"role": "assistant",
-				"content": []interface{}{
-					map[string]interface{}{"type": "output_text", "text": "Hello from Codex"},
+				"content": []any{
+					map[string]any{"type": "output_text", "text": "Hello from Codex"},
 				},
 			},
 		},
@@ -60,24 +60,24 @@ func TestCodex_LatestMessageExtractsReply(t *testing.T) {
 
 func TestCodex_LatestMessageSkipsUserMessages(t *testing.T) {
 	dir := t.TempDir()
-	logPath := writeCodexLog(t, dir, []map[string]interface{}{
+	logPath := writeCodexLog(t, dir, []map[string]any{
 		{
 			"type": "response_item",
-			"payload": map[string]interface{}{
+			"payload": map[string]any{
 				"type": "message",
 				"role": "user",
-				"content": []interface{}{
-					map[string]interface{}{"type": "input_text", "text": "user question"},
+				"content": []any{
+					map[string]any{"type": "input_text", "text": "user question"},
 				},
 			},
 		},
 		{
 			"type": "response_item",
-			"payload": map[string]interface{}{
+			"payload": map[string]any{
 				"type": "message",
 				"role": "assistant",
-				"content": []interface{}{
-					map[string]interface{}{"type": "output_text", "text": "assistant reply"},
+				"content": []any{
+					map[string]any{"type": "output_text", "text": "assistant reply"},
 				},
 			},
 		},
@@ -104,21 +104,21 @@ func TestCodex_ExtractSessionID(t *testing.T) {
 
 func TestCodex_LatestConversations(t *testing.T) {
 	dir := t.TempDir()
-	logPath := writeCodexLog(t, dir, []map[string]interface{}{
+	logPath := writeCodexLog(t, dir, []map[string]any{
 		{
 			"type": "event_msg",
-			"payload": map[string]interface{}{
+			"payload": map[string]any{
 				"type":    "user_message",
 				"message": "What is Go?",
 			},
 		},
 		{
 			"type": "response_item",
-			"payload": map[string]interface{}{
+			"payload": map[string]any{
 				"type": "message",
 				"role": "assistant",
-				"content": []interface{}{
-					map[string]interface{}{"type": "output_text", "text": "Go is a programming language."},
+				"content": []any{
+					map[string]any{"type": "output_text", "text": "Go is a programming language."},
 				},
 			},
 		},
@@ -142,12 +142,12 @@ func TestCodex_LatestConversations(t *testing.T) {
 // GeminiLogReader tests (ported from test_gemini_comm.py)
 // =========================================================================
 
-func writeGeminiSession(t *testing.T, path string, messages []map[string]interface{}, sessionID string) {
+func writeGeminiSession(t *testing.T, path string, messages []map[string]any, sessionID string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"sessionId": sessionID,
 		"messages":  messages,
 	}
@@ -163,7 +163,7 @@ func TestGemini_CaptureStateFindsSluifiedSuffixProjectHash(t *testing.T) {
 	os.MkdirAll(workDir, 0o755)
 	root := filepath.Join(dir, "gemini-root")
 	sessionPath := filepath.Join(root, "claude-code-bridge-1", "chats", "session-a.json")
-	writeGeminiSession(t, sessionPath, []map[string]interface{}{
+	writeGeminiSession(t, sessionPath, []map[string]any{
 		{"type": "user", "content": "hello"},
 		{"type": "gemini", "id": "g1", "content": "world"},
 	}, "sid-1")
@@ -187,7 +187,7 @@ func TestGemini_WaitForMessageReadsReply(t *testing.T) {
 	root := filepath.Join(dir, "gemini-root")
 	sessionPath := filepath.Join(root, "claude-code-bridge-1", "chats", "session-b.json")
 
-	messages := []map[string]interface{}{
+	messages := []map[string]any{
 		{"type": "user", "content": fmt.Sprintf("CURDX_REQ_ID: %s\nquestion", reqID)},
 	}
 	writeGeminiSession(t, sessionPath, messages, "sid-2")
@@ -196,7 +196,7 @@ func TestGemini_WaitForMessageReadsReply(t *testing.T) {
 	state := reader.CaptureState()
 
 	// Add gemini reply
-	messages = append(messages, map[string]interface{}{
+	messages = append(messages, map[string]any{
 		"type":    "gemini",
 		"id":      "g2",
 		"content": fmt.Sprintf("ok\nCURDX_DONE: %s", reqID),
@@ -222,7 +222,7 @@ func TestGemini_LatestMessage(t *testing.T) {
 	os.MkdirAll(workDir, 0o755)
 	root := filepath.Join(dir, "gemini-root")
 	sessionPath := filepath.Join(root, "myproject", "chats", "session-c.json")
-	writeGeminiSession(t, sessionPath, []map[string]interface{}{
+	writeGeminiSession(t, sessionPath, []map[string]any{
 		{"type": "user", "content": "hi"},
 		{"type": "gemini", "id": "g1", "content": "first reply"},
 		{"type": "user", "content": "another"},
@@ -243,7 +243,7 @@ func TestGemini_LatestConversations(t *testing.T) {
 	os.MkdirAll(workDir, 0o755)
 	root := filepath.Join(dir, "gemini-root")
 	sessionPath := filepath.Join(root, "myproject", "chats", "session-d.json")
-	writeGeminiSession(t, sessionPath, []map[string]interface{}{
+	writeGeminiSession(t, sessionPath, []map[string]any{
 		{"type": "user", "content": "q1"},
 		{"type": "gemini", "id": "g1", "content": "a1"},
 		{"type": "user", "content": "q2"},

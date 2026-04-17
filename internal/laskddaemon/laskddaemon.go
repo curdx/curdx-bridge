@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -191,7 +192,7 @@ func readSessionMeta(logPath string) (cwd string, sid string, isSidechain *bool)
 		if line == "" {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if err := json.Unmarshal([]byte(line), &entry); err != nil {
 			continue
 		}
@@ -264,7 +265,7 @@ func inferWorkDirFromSessionFile(sessionFile string) string {
 	return parent
 }
 
-func ensureClaudeSessionWorkDirFields(payload map[string]interface{}, sessionFile string) string {
+func ensureClaudeSessionWorkDirFields(payload map[string]any, sessionFile string) string {
 	if payload == nil {
 		return ""
 	}
@@ -303,11 +304,11 @@ type mtimeItem struct {
 
 type mtimeHeap []mtimeItem
 
-func (h mtimeHeap) Len() int            { return len(h) }
-func (h mtimeHeap) Less(i, j int) bool   { return h[i].mtime < h[j].mtime }
-func (h mtimeHeap) Swap(i, j int)        { h[i], h[j] = h[j], h[i] }
-func (h *mtimeHeap) Push(x interface{})  { *h = append(*h, x.(mtimeItem)) }
-func (h *mtimeHeap) Pop() interface{} {
+func (h mtimeHeap) Len() int           { return len(h) }
+func (h mtimeHeap) Less(i, j int) bool { return h[i].mtime < h[j].mtime }
+func (h mtimeHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h *mtimeHeap) Push(x any)        { *h = append(*h, x.(mtimeItem)) }
+func (h *mtimeHeap) Pop() any {
 	old := *h
 	n := len(old)
 	item := old[n-1]
@@ -406,7 +407,7 @@ func parseSessionsIndex(workDir, root string) string {
 		return ""
 	}
 
-	var payload map[string]interface{}
+	var payload map[string]any
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return ""
 	}
@@ -415,7 +416,7 @@ func parseSessionsIndex(workDir, root string) string {
 	if !ok {
 		return ""
 	}
-	entriesSlice, ok := entriesRaw.([]interface{})
+	entriesSlice, ok := entriesRaw.([]any)
 	if !ok {
 		return ""
 	}
@@ -424,7 +425,7 @@ func parseSessionsIndex(workDir, root string) string {
 	bestMtime := int64(-1)
 
 	for _, eRaw := range entriesSlice {
-		entry, ok := eRaw.(map[string]interface{})
+		entry, ok := eRaw.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -660,14 +661,14 @@ func writeLog(line string) {
 // ── Session Entry ──
 
 type sessionEntry struct {
-	workDir        string
-	session        *session.ClaudeProjectSession
-	sessionFile    string
-	fileMtime      float64
-	lastCheck      float64
-	valid          bool
+	workDir         string
+	session         *session.ClaudeProjectSession
+	sessionFile     string
+	fileMtime       float64
+	lastCheck       float64
+	valid           bool
 	nextBindRefresh float64
-	bindBackoffS   float64
+	bindBackoffS    float64
 }
 
 // ── Watcher Entry ──
@@ -890,10 +891,7 @@ func (r *LaskdSessionRegistry) monitorLoop() {
 func (r *LaskdSessionRegistry) checkAllSessions() {
 	now := float64(time.Now().Unix())
 	refreshIntervalS := envFloat("CURDX_LASKD_BIND_REFRESH_INTERVAL", 60.0)
-	scanLimit := envInt("CURDX_LASKD_BIND_SCAN_LIMIT", 400)
-	if scanLimit < 50 {
-		scanLimit = 50
-	}
+	scanLimit := max(envInt("CURDX_LASKD_BIND_SCAN_LIMIT", 400), 50)
 	if scanLimit > 20000 {
 		scanLimit = 20000
 	}
@@ -1077,13 +1075,7 @@ func (r *LaskdSessionRegistry) projectDirsForWorkDir(workDir string, includeMiss
 		if alt == primary {
 			continue
 		}
-		alreadyIn := false
-		for _, d := range dirs {
-			if d == alt {
-				alreadyIn = true
-				break
-			}
-		}
+		alreadyIn := slices.Contains(dirs, alt)
 		if alreadyIn {
 			continue
 		}
@@ -1203,7 +1195,7 @@ func (r *LaskdSessionRegistry) stopRootWatcher() {
 // ── Log meta reading with retry ──
 
 func (r *LaskdSessionRegistry) readLogMetaWithRetry(logPath string) (cwd string, sid string, isSidechain *bool) {
-	for attempt := 0; attempt < 2; attempt++ {
+	for attempt := range 2 {
 		c, s, sc := readSessionMeta(logPath)
 		if c != "" || s != "" || (sc != nil && *sc) {
 			return c, s, sc
@@ -1240,7 +1232,7 @@ func (r *LaskdSessionRegistry) logHasUserMessages(logPath string, scanLines int)
 		if line == "" {
 			continue
 		}
-		var entry map[string]interface{}
+		var entry map[string]any
 		if err := json.Unmarshal([]byte(line), &entry); err != nil {
 			continue
 		}
@@ -1251,7 +1243,7 @@ func (r *LaskdSessionRegistry) logHasUserMessages(logPath string, scanLines int)
 		if entryType == "user" || entryType == "assistant" {
 			return true
 		}
-		if msg, ok := entry["message"].(map[string]interface{}); ok {
+		if msg, ok := entry["message"].(map[string]any); ok {
 			role := strings.TrimSpace(strings.ToLower(fmt.Sprintf("%v", msg["role"])))
 			if role == "user" || role == "assistant" {
 				return true
@@ -1274,12 +1266,12 @@ func (r *LaskdSessionRegistry) updateSessionFileDirect(sessionFile, logPath, ses
 		return
 	}
 	raw, err := os.ReadFile(sessionFile)
-	var payload map[string]interface{}
+	var payload map[string]any
 	if err == nil {
 		json.Unmarshal(raw, &payload)
 	}
 	if payload == nil {
-		payload = map[string]interface{}{}
+		payload = map[string]any{}
 	}
 
 	oldPath, _ := payload["claude_session_path"].(string)
@@ -1546,24 +1538,24 @@ func (r *LaskdSessionRegistry) onSessionsIndex(projectKey, indexPath string) {
 }
 
 // GetStatus returns the current status of the registry.
-func (r *LaskdSessionRegistry) GetStatus() map[string]interface{} {
+func (r *LaskdSessionRegistry) GetStatus() map[string]any {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	total := len(r.sessions)
 	valid := 0
-	var sessionList []map[string]interface{}
+	var sessionList []map[string]any
 	for _, entry := range r.sessions {
 		if entry.valid {
 			valid++
 		}
-		sessionList = append(sessionList, map[string]interface{}{
+		sessionList = append(sessionList, map[string]any{
 			"work_dir": entry.workDir,
 			"valid":    entry.valid,
 		})
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"total":    total,
 		"valid":    valid,
 		"sessions": sessionList,
@@ -1573,7 +1565,7 @@ func (r *LaskdSessionRegistry) GetStatus() map[string]interface{} {
 // ── Singleton ──
 
 var (
-	singletonMu       sync.Mutex
+	singletonMu        sync.Mutex
 	sessionRegistryPtr *LaskdSessionRegistry
 )
 

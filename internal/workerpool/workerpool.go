@@ -14,30 +14,30 @@ type Task interface {
 	// IsCancelled returns true if the task was cancelled before processing.
 	IsCancelled() bool
 	// SetResult assigns the result value; called by the worker after handling.
-	SetResult(value interface{})
+	SetResult(value any)
 	// Signal marks the task as done (unblocks waiters).
 	Signal()
 }
 
 // TaskHandler processes a single task, returning the result or an error.
-type TaskHandler func(task Task) (interface{}, error)
+type TaskHandler func(task Task) (any, error)
 
 // ErrorHandler converts an error into a fallback result value.
-type ErrorHandler func(err error, task Task) interface{}
+type ErrorHandler func(err error, task Task) any
 
 // BaseSessionWorker is a goroutine-based worker that drains a task channel
 // for a specific session key.  It mirrors Python's BaseSessionWorker (daemon thread + queue.Queue).
 type BaseSessionWorker struct {
-	SessionKey   string
-	taskCh       chan Task
-	cancel       context.CancelFunc
-	ctx          context.Context
-	handleTask   TaskHandler
-	handleError  ErrorHandler
-	done         chan struct{} // closed when the run loop exits
-	startOnce    sync.Once
-	alive        int32 // 1 while running
-	mu           sync.Mutex
+	SessionKey  string
+	taskCh      chan Task
+	cancel      context.CancelFunc
+	ctx         context.Context
+	handleTask  TaskHandler
+	handleError ErrorHandler
+	done        chan struct{} // closed when the run loop exits
+	startOnce   sync.Once
+	alive       int32 // 1 while running
+	mu          sync.Mutex
 }
 
 // NewBaseSessionWorker creates a worker bound to sessionKey.

@@ -51,7 +51,7 @@ func usage() {
 }
 
 func main() {
-	session.GetBackendFunc = func(data map[string]interface{}) session.TerminalBackend {
+	session.GetBackendFunc = func(data map[string]any) session.TerminalBackend {
 		t, _ := data["terminal"].(string)
 		if t == "wezterm" {
 			return terminal.NewWeztermBackend()

@@ -96,10 +96,7 @@ func CreateAutoLayout(
 		}, nil
 	}
 
-	pct := percent
-	if pct < 1 {
-		pct = 1
-	}
+	pct := max(percent, 1)
 	if pct > 99 {
 		pct = 99
 	}

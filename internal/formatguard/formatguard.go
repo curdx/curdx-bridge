@@ -214,7 +214,7 @@ func ensureCodeFences(reply string) string {
 
 func hasUnbalancedFences(text string) bool {
 	count := 0
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		if strings.HasPrefix(strings.TrimLeft(line, " \t"), "```") {
 			count++
 		}
@@ -224,7 +224,7 @@ func hasUnbalancedFences(text string) bool {
 
 func stripFences(text string) string {
 	var lines []string
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		if strings.HasPrefix(strings.TrimLeft(line, " \t"), "```") {
 			continue
 		}

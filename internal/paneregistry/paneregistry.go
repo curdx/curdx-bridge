@@ -5,6 +5,7 @@ package paneregistry
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -62,7 +63,7 @@ func iterRegistryFiles() []string {
 	return paths
 }
 
-func coerceUpdatedAt(value interface{}, fallbackPath string) int64 {
+func coerceUpdatedAt(value any, fallbackPath string) int64 {
 	switch v := value.(type) {
 	case float64:
 		return int64(v)
@@ -103,13 +104,13 @@ func isStale(updatedAt int64, nowOpt ...int64) bool {
 	return (now - updatedAt) > int64(RegistryTTLSeconds)
 }
 
-func loadRegistryFile(path string) map[string]interface{} {
+func loadRegistryFile(path string) map[string]any {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		debug(fmt.Sprintf("Failed to read registry %s: %v", path, err))
 		return nil
 	}
-	var obj map[string]interface{}
+	var obj map[string]any
 	if err := json.Unmarshal(data, &obj); err != nil {
 		debug(fmt.Sprintf("Failed to parse registry %s: %v", path, err))
 		return nil
@@ -117,9 +118,9 @@ func loadRegistryFile(path string) map[string]interface{} {
 	return obj
 }
 
-func providerEntryFromLegacy(data map[string]interface{}, provider string) map[string]interface{} {
+func providerEntryFromLegacy(data map[string]any, provider string) map[string]any {
 	provider = strings.TrimSpace(strings.ToLower(provider))
-	out := map[string]interface{}{}
+	out := map[string]any{}
 
 	copyIfPresent := func(srcKey, dstKey string) {
 		v, ok := data[srcKey]
@@ -152,18 +153,16 @@ func providerEntryFromLegacy(data map[string]interface{}, provider string) map[s
 	return out
 }
 
-func getProvidersMap(data map[string]interface{}) map[string]map[string]interface{} {
+func getProvidersMap(data map[string]any) map[string]map[string]any {
 	pRaw, ok := data["providers"]
 	if ok {
-		if pMap, ok := pRaw.(map[string]interface{}); ok {
-			out := map[string]map[string]interface{}{}
+		if pMap, ok := pRaw.(map[string]any); ok {
+			out := map[string]map[string]any{}
 			for k, v := range pMap {
-				if entry, ok := v.(map[string]interface{}); ok {
+				if entry, ok := v.(map[string]any); ok {
 					key := strings.TrimSpace(strings.ToLower(k))
-					cp := make(map[string]interface{}, len(entry))
-					for ek, ev := range entry {
-						cp[ek] = ev
-					}
+					cp := make(map[string]any, len(entry))
+					maps.Copy(cp, entry)
 					out[key] = cp
 				}
 			}
@@ -172,7 +171,7 @@ func getProvidersMap(data map[string]interface{}) map[string]map[string]interfac
 	}
 
 	// Legacy flat format.
-	out := map[string]map[string]interface{}{}
+	out := map[string]map[string]any{}
 	for _, p := range []string{"codex", "gemini", "opencode", "claude"} {
 		entry := providerEntryFromLegacy(data, p)
 		if len(entry) > 0 {
@@ -190,9 +189,9 @@ type TerminalBackend interface {
 
 // GetBackendFunc is a function type that returns a TerminalBackend for a record's terminal type.
 // This is set externally to avoid circular dependencies with the terminal package.
-var GetBackendFunc func(record map[string]interface{}) TerminalBackend
+var GetBackendFunc func(record map[string]any) TerminalBackend
 
-func providerPaneAlive(record map[string]interface{}, provider string) bool {
+func providerPaneAlive(record map[string]any, provider string) bool {
 	baseProv, _ := providers.ParseQualifiedProvider(provider)
 	provMap := getProvidersMap(record)
 
@@ -239,7 +238,7 @@ func providerPaneAlive(record map[string]interface{}, provider string) bool {
 }
 
 // LoadRegistryBySessionID loads a registry record by session ID.
-func LoadRegistryBySessionID(sessionID string) map[string]interface{} {
+func LoadRegistryBySessionID(sessionID string) map[string]any {
 	if sessionID == "" {
 		return nil
 	}
@@ -260,11 +259,11 @@ func LoadRegistryBySessionID(sessionID string) map[string]interface{} {
 }
 
 // LoadRegistryByClaudePane finds a registry record matching the given claude pane_id.
-func LoadRegistryByClaudePane(paneID string) map[string]interface{} {
+func LoadRegistryByClaudePane(paneID string) map[string]any {
 	if paneID == "" {
 		return nil
 	}
-	var best map[string]interface{}
+	var best map[string]any
 	var bestTS int64 = -1
 
 	for _, path := range iterRegistryFiles() {
@@ -303,7 +302,7 @@ func LoadRegistryByClaudePane(paneID string) map[string]interface{} {
 }
 
 // LoadRegistryByProjectID loads the newest alive registry record matching project+provider.
-func LoadRegistryByProjectID(curdxProjectID, provider string) map[string]interface{} {
+func LoadRegistryByProjectID(curdxProjectID, provider string) map[string]any {
 	proj := strings.TrimSpace(curdxProjectID)
 	prov := strings.TrimSpace(strings.ToLower(provider))
 	if proj == "" || prov == "" {
@@ -312,7 +311,7 @@ func LoadRegistryByProjectID(curdxProjectID, provider string) map[string]interfa
 
 	baseProv, _ := providers.ParseQualifiedProvider(prov)
 
-	var best map[string]interface{}
+	var best map[string]any
 	var bestTS int64 = -1
 	bestNeedsMigration := false
 
@@ -380,7 +379,7 @@ func LoadRegistryByProjectID(curdxProjectID, provider string) map[string]interfa
 }
 
 // UpsertRegistry writes (or merges) a registry record.
-func UpsertRegistry(record map[string]interface{}) bool {
+func UpsertRegistry(record map[string]any) bool {
 	sessionIDRaw, ok := record["curdx_session_id"]
 	if !ok {
 		debug("Registry update skipped: missing curdx_session_id")
@@ -396,11 +395,9 @@ func UpsertRegistry(record map[string]interface{}) bool {
 	dir := filepath.Dir(path)
 	os.MkdirAll(dir, 0o755)
 
-	data := map[string]interface{}{}
+	data := map[string]any{}
 	if existing := loadRegistryFile(path); existing != nil {
-		for k, v := range existing {
-			data[k] = v
-		}
+		maps.Copy(data, existing)
 	}
 
 	// Normalize to the new schema.
@@ -408,15 +405,15 @@ func UpsertRegistry(record map[string]interface{}) bool {
 
 	// Accept incoming nested providers.
 	if incomingProvs, ok := record["providers"]; ok {
-		if ipMap, ok := incomingProvs.(map[string]interface{}); ok {
+		if ipMap, ok := incomingProvs.(map[string]any); ok {
 			for p, entry := range ipMap {
-				eMap, ok := entry.(map[string]interface{})
+				eMap, ok := entry.(map[string]any)
 				if !ok {
 					continue
 				}
 				key := strings.TrimSpace(strings.ToLower(p))
 				if _, exists := provs[key]; !exists {
-					provs[key] = map[string]interface{}{}
+					provs[key] = map[string]any{}
 				}
 				for k, v := range eMap {
 					if v == nil {
@@ -433,7 +430,7 @@ func UpsertRegistry(record map[string]interface{}) bool {
 		if provStr, ok := provRaw.(string); ok && strings.TrimSpace(provStr) != "" {
 			p := strings.TrimSpace(strings.ToLower(provStr))
 			if _, exists := provs[p]; !exists {
-				provs[p] = map[string]interface{}{}
+				provs[p] = map[string]any{}
 			}
 			for k, v := range record {
 				if v == nil {
@@ -457,7 +454,7 @@ func UpsertRegistry(record map[string]interface{}) bool {
 		legacyEntry := providerEntryFromLegacy(record, p)
 		if len(legacyEntry) > 0 {
 			if _, exists := provs[p]; !exists {
-				provs[p] = map[string]interface{}{}
+				provs[p] = map[string]any{}
 			}
 			for k, v := range legacyEntry {
 				if v != nil {
@@ -479,7 +476,7 @@ func UpsertRegistry(record map[string]interface{}) bool {
 	}
 
 	// Convert providers map back to interface{} for JSON.
-	provsIface := make(map[string]interface{}, len(provs))
+	provsIface := make(map[string]any, len(provs))
 	for k, v := range provs {
 		provsIface[k] = v
 	}

@@ -25,7 +25,7 @@ func (b *fakeBackend) FindPaneByTitleMarker(marker string, cwdHint ...string) st
 	return b.markerMap[marker]
 }
 
-func writeRegistryFile(t *testing.T, home, sessionID string, payload map[string]interface{}) string {
+func writeRegistryFile(t *testing.T, home, sessionID string, payload map[string]any) string {
 	t.Helper()
 	dir := filepath.Join(home, ".curdx", "run")
 	os.MkdirAll(dir, 0o755)
@@ -53,7 +53,7 @@ func setupHome(t *testing.T) string {
 func TestUpsertRegistryMergesProviders(t *testing.T) {
 	home := setupHome(t)
 
-	GetBackendFunc = func(record map[string]interface{}) TerminalBackend {
+	GetBackendFunc = func(record map[string]any) TerminalBackend {
 		return &fakeBackend{alive: map[string]bool{"%1": true}}
 	}
 	defer func() { GetBackendFunc = nil }()
@@ -62,13 +62,13 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 	os.MkdirAll(workDir, 0o755)
 	pid := projectid.ComputeCURDXProjectID(workDir)
 
-	ok1 := UpsertRegistry(map[string]interface{}{
+	ok1 := UpsertRegistry(map[string]any{
 		"curdx_session_id": "s1",
 		"curdx_project_id": pid,
-		"work_dir":       workDir,
-		"terminal":       "tmux",
-		"providers": map[string]interface{}{
-			"codex": map[string]interface{}{
+		"work_dir":         workDir,
+		"terminal":         "tmux",
+		"providers": map[string]any{
+			"codex": map[string]any{
 				"pane_id":      "%1",
 				"session_file": filepath.Join(workDir, ".curdx", ".codex-session"),
 			},
@@ -78,13 +78,13 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 		t.Fatal("first upsert failed")
 	}
 
-	ok2 := UpsertRegistry(map[string]interface{}{
+	ok2 := UpsertRegistry(map[string]any{
 		"curdx_session_id": "s1",
 		"curdx_project_id": pid,
-		"work_dir":       workDir,
-		"terminal":       "tmux",
-		"providers": map[string]interface{}{
-			"gemini": map[string]interface{}{
+		"work_dir":         workDir,
+		"terminal":         "tmux",
+		"providers": map[string]any{
+			"gemini": map[string]any{
 				"pane_id":      "%1",
 				"session_file": filepath.Join(workDir, ".curdx", ".gemini-session"),
 			},
@@ -99,7 +99,7 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var data map[string]interface{}
+	var data map[string]any
 	if err := json.Unmarshal(raw, &data); err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestUpsertRegistryMergesProviders(t *testing.T) {
 	if data["curdx_project_id"] != pid {
 		t.Errorf("curdx_project_id = %v, want %v", data["curdx_project_id"], pid)
 	}
-	provs, ok := data["providers"].(map[string]interface{})
+	provs, ok := data["providers"].(map[string]any)
 	if !ok {
 		t.Fatal("providers not a map")
 	}
@@ -129,30 +129,30 @@ func TestLoadRegistryByProjectIDFiltersDeadPanes(t *testing.T) {
 	now := time.Now().Unix()
 
 	// Newer but dead.
-	writeRegistryFile(t, home, "new", map[string]interface{}{
+	writeRegistryFile(t, home, "new", map[string]any{
 		"curdx_session_id": "new",
 		"curdx_project_id": pid,
-		"work_dir":       workDir,
-		"terminal":       "tmux",
-		"updated_at":     float64(now),
-		"providers": map[string]interface{}{
-			"codex": map[string]interface{}{"pane_id": "%dead"},
+		"work_dir":         workDir,
+		"terminal":         "tmux",
+		"updated_at":       float64(now),
+		"providers": map[string]any{
+			"codex": map[string]any{"pane_id": "%dead"},
 		},
 	})
 
 	// Older but alive.
-	writeRegistryFile(t, home, "old", map[string]interface{}{
+	writeRegistryFile(t, home, "old", map[string]any{
 		"curdx_session_id": "old",
 		"curdx_project_id": pid,
-		"work_dir":       workDir,
-		"terminal":       "tmux",
-		"updated_at":     float64(now - 10),
-		"providers": map[string]interface{}{
-			"codex": map[string]interface{}{"pane_id": "%alive"},
+		"work_dir":         workDir,
+		"terminal":         "tmux",
+		"updated_at":       float64(now - 10),
+		"providers": map[string]any{
+			"codex": map[string]any{"pane_id": "%alive"},
 		},
 	})
 
-	GetBackendFunc = func(record map[string]interface{}) TerminalBackend {
+	GetBackendFunc = func(record map[string]any) TerminalBackend {
 		return &fakeBackend{alive: map[string]bool{"%alive": true}}
 	}
 	defer func() { GetBackendFunc = nil }()
@@ -177,17 +177,17 @@ func TestLoadRegistryByProjectIDInfersMissingProjectID(t *testing.T) {
 	now := time.Now().Unix()
 
 	// Legacy record missing curdx_project_id.
-	writeRegistryFile(t, home, "legacy", map[string]interface{}{
+	writeRegistryFile(t, home, "legacy", map[string]any{
 		"curdx_session_id": "legacy",
-		"work_dir":       workDir,
-		"terminal":       "tmux",
-		"updated_at":     float64(now),
-		"providers": map[string]interface{}{
-			"codex": map[string]interface{}{"pane_id": "%1"},
+		"work_dir":         workDir,
+		"terminal":         "tmux",
+		"updated_at":       float64(now),
+		"providers": map[string]any{
+			"codex": map[string]any{"pane_id": "%1"},
 		},
 	})
 
-	GetBackendFunc = func(record map[string]interface{}) TerminalBackend {
+	GetBackendFunc = func(record map[string]any) TerminalBackend {
 		return &fakeBackend{alive: map[string]bool{"%1": true}}
 	}
 	defer func() { GetBackendFunc = nil }()

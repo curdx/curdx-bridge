@@ -12,8 +12,8 @@ import (
 	"github.com/curdx/curdx-bridge/internal/comm"
 	"github.com/curdx/curdx-bridge/internal/completionhook"
 	"github.com/curdx/curdx-bridge/internal/protocol"
-	"github.com/curdx/curdx-bridge/internal/provprotocol"
 	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/provprotocol"
 	"github.com/curdx/curdx-bridge/internal/runtime"
 	"github.com/curdx/curdx-bridge/internal/session"
 	"github.com/curdx/curdx-bridge/internal/terminal"
@@ -65,13 +65,13 @@ func isCancelText(text string) bool {
 }
 
 // readSessionMessages reads and parses messages from a Gemini session JSON file.
-func readSessionMessages(sessionPath string) []map[string]interface{} {
-	for attempt := 0; attempt < 10; attempt++ {
+func readSessionMessages(sessionPath string) []map[string]any {
+	for attempt := range 10 {
 		data, err := os.ReadFile(sessionPath)
 		if err != nil {
 			return nil
 		}
-		var obj map[string]interface{}
+		var obj map[string]any
 		if err := json.Unmarshal(data, &obj); err != nil {
 			if attempt < 9 {
 				time.Sleep(50 * time.Millisecond)
@@ -79,13 +79,13 @@ func readSessionMessages(sessionPath string) []map[string]interface{} {
 			}
 			return nil
 		}
-		messages, ok := obj["messages"].([]interface{})
+		messages, ok := obj["messages"].([]any)
 		if !ok {
-			return []map[string]interface{}{}
+			return []map[string]any{}
 		}
-		var result []map[string]interface{}
+		var result []map[string]any
 		for _, raw := range messages {
-			if m, ok := raw.(map[string]interface{}); ok {
+			if m, ok := raw.(map[string]any); ok {
 				result = append(result, m)
 			}
 		}
@@ -95,7 +95,7 @@ func readSessionMessages(sessionPath string) []map[string]interface{} {
 }
 
 // cancelAppliesToReq checks if a cancel event at cancelIndex applies to our request.
-func cancelAppliesToReq(messages []map[string]interface{}, cancelIndex int, reqID string) bool {
+func cancelAppliesToReq(messages []map[string]any, cancelIndex int, reqID string) bool {
 	needle := fmt.Sprintf("CURDX_REQ_ID: %s", reqID)
 	for j := cancelIndex - 1; j >= 0; j-- {
 		msg := messages[j]
@@ -118,10 +118,7 @@ func detectRequestCancelled(sessionPath string, fromIndex int, reqID string) boo
 	if messages == nil {
 		return false
 	}
-	start := fromIndex
-	if start > len(messages) {
-		start = len(messages)
-	}
+	start := min(fromIndex, len(messages))
 	for i := start; i < len(messages); i++ {
 		msg := messages[i]
 		msgType, _ := msg["type"].(string)
@@ -248,10 +245,7 @@ func (a *GeminiAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 		var waitStep time.Duration
 		if deadline != nil {
 			remaining := time.Until(*deadline)
-			waitStep = 1 * time.Second
-			if remaining < waitStep {
-				waitStep = remaining
-			}
+			waitStep = min(remaining, 1*time.Second)
 		} else {
 			waitStep = 1 * time.Second
 		}
@@ -272,10 +266,7 @@ func (a *GeminiAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 			lastPaneCheck = time.Now()
 		}
 
-		scanFrom := state.MsgCount
-		if scanFrom < 0 {
-			scanFrom = 0
-		}
+		scanFrom := max(state.MsgCount, 0)
 		prevSessionPath := state.SessionPath
 
 		reply, newState := logReader.WaitForMessage(state, waitStep)

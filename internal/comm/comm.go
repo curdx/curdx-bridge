@@ -310,7 +310,7 @@ func newLineScanner(r io.Reader) *bufio.Scanner {
 // JSONL helpers (shared by Claude, Codex, OpenCode, Gemini log readers)
 // ---------------------------------------------------------------------------
 
-func strOrEmpty(v interface{}) string {
+func strOrEmpty(v any) string {
 	if s, ok := v.(string); ok {
 		return s
 	}
@@ -326,7 +326,7 @@ func coalesce(values ...string) string {
 	return ""
 }
 
-func coalesceIface(values ...interface{}) interface{} {
+func coalesceIface(values ...any) any {
 	for _, v := range values {
 		if v != nil {
 			return v
@@ -349,20 +349,20 @@ func expandHome(path string) string {
 }
 
 // extractContentText extracts text from a JSON content field (string or list of blocks).
-func extractContentText(content interface{}) string {
+func extractContentText(content any) string {
 	if content == nil {
 		return ""
 	}
 	if s, ok := content.(string); ok {
 		return strings.TrimSpace(s)
 	}
-	items, ok := content.([]interface{})
+	items, ok := content.([]any)
 	if !ok {
 		return ""
 	}
 	var texts []string
 	for _, raw := range items {
-		item, ok := raw.(map[string]interface{})
+		item, ok := raw.(map[string]any)
 		if !ok {
 			continue
 		}

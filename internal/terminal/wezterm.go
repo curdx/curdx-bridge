@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 )
@@ -120,7 +121,7 @@ func (w *WeztermBackend) sendEnter(paneID string) {
 	}
 
 	maxRetries := 3
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := range maxRetries {
 		if method == "key" || method == "auto" {
 			if w.sendKeyCLI(paneID, "Enter") {
 				return
@@ -228,7 +229,7 @@ type WeztermPaneInfo struct {
 // parseListOutput parses wezterm cli list text output.
 func parseListOutput(text string) []WeztermPaneInfo {
 	var lines []string
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		trimmed := strings.TrimRight(line, " \t\r")
 		if strings.TrimSpace(trimmed) != "" {
 			lines = append(lines, trimmed)
@@ -252,8 +253,8 @@ func parseListOutput(text string) []WeztermPaneInfo {
 	var entries []WeztermPaneInfo
 	digitRe := regexp.MustCompile(`^\d+$`)
 	for _, line := range lines {
-		tokens := strings.Fields(line)
-		for _, tok := range tokens {
+		tokens := strings.FieldsSeq(line)
+		for tok := range tokens {
 			if digitRe.MatchString(tok) {
 				entries = append(entries, WeztermPaneInfo{PaneID: tok})
 				break
@@ -288,10 +289,8 @@ func parseWithHeader(lines []string) []WeztermPaneInfo {
 
 	findCol := func(names ...string) *colDef {
 		for i := range cols {
-			for _, n := range names {
-				if cols[i].name == n {
-					return &cols[i]
-				}
+			if slices.Contains(names, cols[i].name) {
+				return &cols[i]
 			}
 		}
 		return nil
@@ -314,10 +313,7 @@ func parseWithHeader(lines []string) []WeztermPaneInfo {
 				}
 			} else {
 				if paneCol.start < len(line) {
-					end := paneCol.end
-					if end > len(line) {
-						end = len(line)
-					}
+					end := min(paneCol.end, len(line))
 					raw = line[paneCol.start:end]
 				}
 			}
@@ -331,10 +327,7 @@ func parseWithHeader(lines []string) []WeztermPaneInfo {
 				}
 			} else {
 				if titleCol.start < len(line) {
-					end := titleCol.end
-					if end > len(line) {
-						end = len(line)
-					}
+					end := min(titleCol.end, len(line))
 					raw = line[titleCol.start:end]
 				}
 			}
@@ -347,7 +340,7 @@ func parseWithHeader(lines []string) []WeztermPaneInfo {
 	return entries
 }
 
-func (w *WeztermBackend) listPanes() ([]map[string]interface{}, error) {
+func (w *WeztermBackend) listPanes() ([]map[string]any, error) {
 	w.lastListError = ""
 
 	baseArgs := weztermCLIBaseArgs()
@@ -358,7 +351,7 @@ func (w *WeztermBackend) listPanes() ([]map[string]interface{}, error) {
 	setSysProcAttr(cmd)
 	out, err := cmd.Output()
 	if err == nil {
-		var panes []map[string]interface{}
+		var panes []map[string]any
 		if jsonErr := json.Unmarshal(out, &panes); jsonErr != nil {
 			w.lastListError = fmt.Sprintf("wezterm cli list json parse failed: %v", jsonErr)
 		} else {
@@ -393,9 +386,9 @@ func (w *WeztermBackend) listPanes() ([]map[string]interface{}, error) {
 		if len(parsed) > 0 {
 			w.lastListError = ""
 			// Convert to map format for compatibility.
-			result := make([]map[string]interface{}, len(parsed))
+			result := make([]map[string]any, len(parsed))
 			for i, p := range parsed {
-				m := map[string]interface{}{"pane_id": p.PaneID}
+				m := map[string]any{"pane_id": p.PaneID}
 				if p.Title != "" {
 					m["title"] = p.Title
 				}
@@ -407,7 +400,7 @@ func (w *WeztermBackend) listPanes() ([]map[string]interface{}, error) {
 			w.lastListError = "wezterm cli list returned unparseable output"
 			return nil, fmt.Errorf("%s", w.lastListError)
 		}
-		return []map[string]interface{}{}, nil
+		return []map[string]any{}, nil
 	}
 	if exitErr, ok := err2.(*exec.ExitError); ok {
 		errStr := strings.TrimSpace(stderr2.String())
@@ -475,7 +468,7 @@ func cwdMatches(paneCWD string, workDir string) bool {
 	return filepath.Clean(extracted) == filepath.Clean(workDir)
 }
 
-func paneIDByTitleMarker(panes []map[string]interface{}, marker string, cwdHint string) string {
+func paneIDByTitleMarker(panes []map[string]any, marker string, cwdHint string) string {
 	if marker == "" {
 		return ""
 	}
@@ -508,7 +501,7 @@ func paneIDByTitleMarker(panes []map[string]interface{}, marker string, cwdHint 
 	return ""
 }
 
-func paneMapID(pane map[string]interface{}) string {
+func paneMapID(pane map[string]any) string {
 	v, ok := pane["pane_id"]
 	if !ok {
 		return ""

@@ -18,7 +18,7 @@ import (
 
 // ConversationEntry is a single message in a conversation.
 type ConversationEntry struct {
-	Role       string           `json:"role"`       // "user" or "assistant"
+	Role       string           `json:"role"` // "user" or "assistant"
 	Content    string           `json:"content"`
 	UUID       string           `json:"uuid,omitempty"`
 	ParentUUID string           `json:"parent_uuid,omitempty"`
@@ -49,12 +49,12 @@ type SessionStats struct {
 
 // TransferContext holds context prepared for transfer to another provider.
 type TransferContext struct {
-	Conversations  [][2]string    `json:"conversations"` // [user_msg, assistant_msg] pairs
-	SourceSessionID string        `json:"source_session_id"`
-	TokenEstimate  int            `json:"token_estimate"`
-	Metadata       map[string]any `json:"metadata,omitempty"`
-	Stats          *SessionStats  `json:"stats,omitempty"`
-	SourceProvider string         `json:"source_provider"`
+	Conversations   [][2]string    `json:"conversations"` // [user_msg, assistant_msg] pairs
+	SourceSessionID string         `json:"source_session_id"`
+	TokenEstimate   int            `json:"token_estimate"`
+	Metadata        map[string]any `json:"metadata,omitempty"`
+	Stats           *SessionStats  `json:"stats,omitempty"`
+	SourceProvider  string         `json:"source_provider"`
 }
 
 // SessionInfo holds information about a session.
@@ -689,7 +689,7 @@ func (p *ClaudeSessionParser) ParseSession(sessionPath string) ([]ConversationEn
 	errors := 0
 	total := 0
 
-	for _, line := range strings.Split(string(data), "\n") {
+	for line := range strings.SplitSeq(string(data), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue

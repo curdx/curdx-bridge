@@ -153,12 +153,12 @@ func GetProjectHash(workDir string) string {
 
 // GeminiLogState is the cursor into a Gemini session JSON file.
 type GeminiLogState struct {
-	SessionPath   string
-	MsgCount      int
-	Mtime         float64
-	MtimeNs       int64
-	Size          int64
-	LastGeminiID  string
+	SessionPath    string
+	MsgCount       int
+	Mtime          float64
+	MtimeNs        int64
+	Size           int64
+	LastGeminiID   string
 	LastGeminiHash string
 }
 
@@ -168,14 +168,14 @@ type GeminiLogState struct {
 
 // GeminiLogReader reads Gemini session files from ~/.gemini/tmp/<hash>/chats.
 type GeminiLogReader struct {
-	Root             string
-	WorkDir          string
-	projectHash      string
-	allKnownHashes   map[string]bool
-	preferredSession string
-	pollInterval     time.Duration
+	Root              string
+	WorkDir           string
+	projectHash       string
+	allKnownHashes    map[string]bool
+	preferredSession  string
+	pollInterval      time.Duration
 	forceReadInterval time.Duration
-	mu               sync.Mutex
+	mu                sync.Mutex
 }
 
 // NewGeminiLogReader creates a new GeminiLogReader.
@@ -352,16 +352,16 @@ func (r *GeminiLogReader) latestSession() string {
 	return ""
 }
 
-func (r *GeminiLogReader) readSessionJSON(path string) map[string]interface{} {
+func (r *GeminiLogReader) readSessionJSON(path string) map[string]any {
 	if path == "" {
 		return nil
 	}
-	for attempt := 0; attempt < 10; attempt++ {
+	for attempt := range 10 {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil
 		}
-		var result map[string]interface{}
+		var result map[string]any
 		if json.Unmarshal(data, &result) == nil {
 			return result
 		}
@@ -395,7 +395,7 @@ func (r *GeminiLogReader) CaptureState() GeminiLogState {
 		state.MsgCount = -1
 		return state
 	}
-	messages, _ := data["messages"].([]interface{})
+	messages, _ := data["messages"].([]any)
 	state.MsgCount = len(messages)
 
 	lastID, lastContent := extractLastGemini(data)
@@ -441,12 +441,12 @@ func (r *GeminiLogReader) LatestConversations(n int) []ConvPair {
 	if data == nil {
 		return nil
 	}
-	messages, _ := data["messages"].([]interface{})
+	messages, _ := data["messages"].([]any)
 
 	var pairs []ConvPair
 	var pendingQuestion string
 	for _, raw := range messages {
-		msg, ok := raw.(map[string]interface{})
+		msg, ok := raw.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -475,10 +475,7 @@ func (r *GeminiLogReader) readSince(state GeminiLogState, timeout time.Duration,
 	prevLastGeminiID := state.LastGeminiID
 	prevLastGeminiHash := state.LastGeminiHash
 
-	rescanInterval := timeout / 2
-	if rescanInterval < 200*time.Millisecond {
-		rescanInterval = 200 * time.Millisecond
-	}
+	rescanInterval := max(timeout/2, 200*time.Millisecond)
 	if rescanInterval > 2*time.Second {
 		rescanInterval = 2 * time.Second
 	}
@@ -555,7 +552,7 @@ func (r *GeminiLogReader) readSince(state GeminiLogState, timeout time.Duration,
 			continue
 		}
 		lastForcedRead = time.Now()
-		messages, _ := data["messages"].([]interface{})
+		messages, _ := data["messages"].([]any)
 		currentCount := len(messages)
 
 		if unknownBaseline {
@@ -591,7 +588,7 @@ func (r *GeminiLogReader) readSince(state GeminiLogState, timeout time.Duration,
 			var lastGeminiID string
 			var lastGeminiHash string
 			for _, raw := range messages[prevCount:] {
-				msg, ok := raw.(map[string]interface{})
+				msg, ok := raw.(map[string]any)
 				if !ok {
 					continue
 				}
@@ -660,10 +657,10 @@ func (r *GeminiLogReader) readSince(state GeminiLogState, timeout time.Duration,
 }
 
 // extractLastGemini returns the (id, content) of the last gemini message in a session.
-func extractLastGemini(payload map[string]interface{}) (string, string) {
-	messages, _ := payload["messages"].([]interface{})
+func extractLastGemini(payload map[string]any) (string, string) {
+	messages, _ := payload["messages"].([]any)
 	for i := len(messages) - 1; i >= 0; i-- {
-		msg, ok := messages[i].(map[string]interface{})
+		msg, ok := messages[i].(map[string]any)
 		if !ok {
 			continue
 		}

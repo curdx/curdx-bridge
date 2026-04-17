@@ -266,7 +266,7 @@ func (t *TmuxBackend) FindPaneByTitleMarker(marker string, cwdHint string) strin
 	if result == nil || result.ReturnCode != 0 {
 		return ""
 	}
-	for _, line := range strings.Split(result.Stdout, "\n") {
+	for line := range strings.SplitSeq(result.Stdout, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue

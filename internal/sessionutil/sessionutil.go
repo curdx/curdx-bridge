@@ -227,7 +227,7 @@ func isSessionInactive(path string) bool {
 	if err != nil {
 		return false
 	}
-	var obj map[string]interface{}
+	var obj map[string]any
 	if json.Unmarshal(data, &obj) != nil {
 		return false
 	}

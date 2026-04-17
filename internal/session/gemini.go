@@ -9,17 +9,23 @@ import (
 // GeminiProjectSession represents a Gemini provider session.
 type GeminiProjectSession struct {
 	SessionFile string
-	Data        map[string]interface{}
+	Data        map[string]any
 }
 
-func (s *GeminiProjectSession) Terminal() string           { return getTerminal(s.Data) }
-func (s *GeminiProjectSession) PaneID() string             { return getPaneID(s.Data) }
-func (s *GeminiProjectSession) PaneTitleMarker() string    { return getString(s.Data, "pane_title_marker") }
-func (s *GeminiProjectSession) GeminiSessionID() string    { return getString(s.Data, "gemini_session_id") }
-func (s *GeminiProjectSession) GeminiSessionPath() string  { return getString(s.Data, "gemini_session_path") }
-func (s *GeminiProjectSession) WorkDir() string            { return getWorkDir(s.Data, s.SessionFile) }
-func (s *GeminiProjectSession) RuntimeDir() string         { return getRuntimeDir(s.Data, s.SessionFile) }
-func (s *GeminiProjectSession) StartCmd() string           { return getString(s.Data, "start_cmd") }
+func (s *GeminiProjectSession) Terminal() string { return getTerminal(s.Data) }
+func (s *GeminiProjectSession) PaneID() string   { return getPaneID(s.Data) }
+func (s *GeminiProjectSession) PaneTitleMarker() string {
+	return getString(s.Data, "pane_title_marker")
+}
+func (s *GeminiProjectSession) GeminiSessionID() string {
+	return getString(s.Data, "gemini_session_id")
+}
+func (s *GeminiProjectSession) GeminiSessionPath() string {
+	return getString(s.Data, "gemini_session_path")
+}
+func (s *GeminiProjectSession) WorkDir() string    { return getWorkDir(s.Data, s.SessionFile) }
+func (s *GeminiProjectSession) RuntimeDir() string { return getRuntimeDir(s.Data, s.SessionFile) }
+func (s *GeminiProjectSession) StartCmd() string   { return getString(s.Data, "start_cmd") }
 
 // EnsurePane ensures the gemini pane is alive, with full multi-level fallback including tmux respawn.
 func (s *GeminiProjectSession) EnsurePane() EnsurePaneResult {

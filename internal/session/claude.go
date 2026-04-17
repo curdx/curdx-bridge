@@ -1,6 +1,7 @@
 package session
 
 import (
+	"maps"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -13,35 +14,33 @@ import (
 type ClaudeProjectSession struct {
 	SessionFile string
 	mu          sync.RWMutex
-	Data        map[string]interface{}
+	Data        map[string]any
 }
 
 // GetDataKey returns the value for a single key from the Data map (thread-safe).
-func (s *ClaudeProjectSession) GetDataKey(key string) interface{} {
+func (s *ClaudeProjectSession) GetDataKey(key string) any {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.Data[key]
 }
 
 // SetDataKey sets a single key in the Data map (thread-safe).
-func (s *ClaudeProjectSession) SetDataKey(key string, value interface{}) {
+func (s *ClaudeProjectSession) SetDataKey(key string, value any) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.Data == nil {
-		s.Data = make(map[string]interface{})
+		s.Data = make(map[string]any)
 	}
 	s.Data[key] = value
 }
 
 // GetDataSnapshot returns a shallow copy of the Data map (thread-safe).
 // Callers that need a consistent read of multiple keys should use this.
-func (s *ClaudeProjectSession) GetDataSnapshot() map[string]interface{} {
+func (s *ClaudeProjectSession) GetDataSnapshot() map[string]any {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	cp := make(map[string]interface{}, len(s.Data))
-	for k, v := range s.Data {
-		cp[k] = v
-	}
+	cp := make(map[string]any, len(s.Data))
+	maps.Copy(cp, s.Data)
 	return cp
 }
 
@@ -162,7 +161,7 @@ func inferWorkDirFromSessionFile(sessionFile string) string {
 }
 
 // ensureWorkDirFields populates work_dir, work_dir_norm, and curdx_project_id if missing.
-func ensureWorkDirFields(data map[string]interface{}, sessionFile, fallbackWorkDir string) {
+func ensureWorkDirFields(data map[string]any, sessionFile, fallbackWorkDir string) {
 	if data == nil {
 		return
 	}
@@ -194,7 +193,7 @@ func ensureWorkDirFields(data map[string]interface{}, sessionFile, fallbackWorkD
 // ResolveClaudeSessionFunc is a pluggable resolver for the default (non-instance) session.
 // It returns (sessionFile, data) or ("", nil) if not found.
 // Set externally to avoid circular dependency with the clauderesolver package.
-var ResolveClaudeSessionFunc func(workDir string) (string, map[string]interface{})
+var ResolveClaudeSessionFunc func(workDir string) (string, map[string]any)
 
 // FindClaudeSessionFile finds a claude session file for the given work directory.
 func FindClaudeSessionFile(workDir, instance string) string {

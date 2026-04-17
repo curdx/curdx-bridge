@@ -15,7 +15,7 @@ func TestMakeReqIDFormatAndUniqueness(t *testing.T) {
 	seen := make(map[string]struct{}, n)
 	re := regexp.MustCompile(`^\d{8}-\d{6}-\d{3}-\d+-\d+$`)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		ids[i] = MakeReqID()
 	}
 

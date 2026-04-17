@@ -66,10 +66,7 @@ func maybeShrinkLog(path string) {
 		return
 	}
 
-	intervalS := envutil.EnvInt("CURDX_LOG_SHRINK_CHECK_INTERVAL_S", 10)
-	if intervalS < 0 {
-		intervalS = 0
-	}
+	intervalS := max(envutil.EnvInt("CURDX_LOG_SHRINK_CHECK_INTERVAL_S", 10), 0)
 
 	now := time.Now()
 	lastLogShrinkCheckMu.Lock()
@@ -169,7 +166,7 @@ func GetDaemonWorkDir(stateFileName string) string {
 	if err != nil {
 		return ""
 	}
-	var state map[string]interface{}
+	var state map[string]any
 	if err := json.Unmarshal(data, &state); err != nil {
 		return ""
 	}

@@ -181,12 +181,12 @@ func (r *OpenCodeLogReader) workDirCandidates() []string {
 	return candidates
 }
 
-func (r *OpenCodeLogReader) loadJSON(path string) map[string]interface{} {
+func (r *OpenCodeLogReader) loadJSON(path string) map[string]any {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil
 	}
-	var result map[string]interface{}
+	var result map[string]any
 	if json.Unmarshal(data, &result) != nil {
 		return nil
 	}
@@ -205,7 +205,7 @@ func (r *OpenCodeLogReader) detectProjectIDForWorkdir() string {
 
 	type scored struct {
 		id    string
-		score [3]interface{} // (len(worktree), updated, mtime)
+		score [3]any // (len(worktree), updated, mtime)
 		lenWT int
 		upd   int64
 		mt    float64
@@ -256,7 +256,7 @@ func (r *OpenCodeLogReader) detectProjectIDForWorkdir() string {
 		}
 
 		var updatedI int64 = -1
-		if timeObj, ok := payload["time"].(map[string]interface{}); ok {
+		if timeObj, ok := payload["time"].(map[string]any); ok {
 			if v, ok := timeObj["updated"].(float64); ok {
 				updatedI = int64(v)
 			}
@@ -369,7 +369,7 @@ func (r *OpenCodeLogReader) getDB() (*sql.DB, error) {
 }
 
 // fetchOpenCodeDBRows runs a read-only query against opencode.db.
-func (r *OpenCodeLogReader) fetchOpenCodeDBRows(query string, args ...interface{}) ([]map[string]interface{}, error) {
+func (r *OpenCodeLogReader) fetchOpenCodeDBRows(query string, args ...any) ([]map[string]any, error) {
 	db, err := r.getDB()
 	if err != nil {
 		return nil, err
@@ -389,17 +389,17 @@ func (r *OpenCodeLogReader) fetchOpenCodeDBRows(query string, args ...interface{
 		return nil, err
 	}
 
-	var result []map[string]interface{}
+	var result []map[string]any
 	for rows.Next() {
-		values := make([]interface{}, len(cols))
-		ptrs := make([]interface{}, len(cols))
+		values := make([]any, len(cols))
+		ptrs := make([]any, len(cols))
 		for i := range values {
 			ptrs[i] = &values[i]
 		}
 		if err := rows.Scan(ptrs...); err != nil {
 			continue
 		}
-		row := make(map[string]interface{})
+		row := make(map[string]any)
 		for i, col := range cols {
 			row[col] = values[i]
 		}
@@ -519,7 +519,7 @@ func (r *OpenCodeLogReader) getLatestSessionFromFiles() (sessionID string, direc
 			continue
 		}
 		var updatedI int64 = -1
-		if timeObj, ok := payload["time"].(map[string]interface{}); ok {
+		if timeObj, ok := payload["time"].(map[string]any); ok {
 			if v, ok := timeObj["updated"].(float64); ok {
 				updatedI = int64(v)
 			}
@@ -575,7 +575,7 @@ func (r *OpenCodeLogReader) getLatestSessionFromFiles() (sessionID string, direc
 
 // readMessages returns sorted messages for a session.
 // Tries SQLite first, then falls back to JSON files.
-func (r *OpenCodeLogReader) readMessages(sessionID string) []map[string]interface{} {
+func (r *OpenCodeLogReader) readMessages(sessionID string) []map[string]any {
 	messages := r.readMessagesFromDB(sessionID)
 	if len(messages) > 0 {
 		sort.Slice(messages, func(i, j int) bool {
@@ -586,7 +586,7 @@ func (r *OpenCodeLogReader) readMessages(sessionID string) []map[string]interfac
 	return r.readMessagesFromFiles(sessionID)
 }
 
-func (r *OpenCodeLogReader) readMessagesFromDB(sessionID string) []map[string]interface{} {
+func (r *OpenCodeLogReader) readMessagesFromDB(sessionID string) []map[string]any {
 	rows, err := r.fetchOpenCodeDBRows(
 		"SELECT id, session_id, time_created, time_updated, data FROM message WHERE session_id = ? ORDER BY time_created ASC, time_updated ASC, id ASC",
 		sessionID,
@@ -594,11 +594,11 @@ func (r *OpenCodeLogReader) readMessagesFromDB(sessionID string) []map[string]in
 	if err != nil || len(rows) == 0 {
 		return nil
 	}
-	var messages []map[string]interface{}
+	var messages []map[string]any
 	for _, row := range rows {
 		payload := loadJSONBlob(row["data"])
 		if payload == nil {
-			payload = make(map[string]interface{})
+			payload = make(map[string]any)
 		}
 		if _, ok := payload["id"]; !ok {
 			payload["id"] = dbString(row["id"])
@@ -606,9 +606,9 @@ func (r *OpenCodeLogReader) readMessagesFromDB(sessionID string) []map[string]in
 		if _, ok := payload["sessionID"]; !ok {
 			payload["sessionID"] = dbString(row["session_id"])
 		}
-		timeData, _ := payload["time"].(map[string]interface{})
+		timeData, _ := payload["time"].(map[string]any)
 		if timeData == nil {
-			timeData = make(map[string]interface{})
+			timeData = make(map[string]any)
 		}
 		if timeData["created"] == nil {
 			timeData["created"] = dbFloat64(row["time_created"])
@@ -622,7 +622,7 @@ func (r *OpenCodeLogReader) readMessagesFromDB(sessionID string) []map[string]in
 	return messages
 }
 
-func (r *OpenCodeLogReader) readMessagesFromFiles(sessionID string) []map[string]interface{} {
+func (r *OpenCodeLogReader) readMessagesFromFiles(sessionID string) []map[string]any {
 	msgDir := r.messageDir(sessionID)
 	if _, err := os.Stat(msgDir); err != nil {
 		return nil
@@ -631,7 +631,7 @@ func (r *OpenCodeLogReader) readMessagesFromFiles(sessionID string) []map[string
 	if err != nil {
 		return nil
 	}
-	var messages []map[string]interface{}
+	var messages []map[string]any
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasPrefix(e.Name(), "msg_") || filepath.Ext(e.Name()) != ".json" {
 			continue
@@ -655,7 +655,7 @@ func (r *OpenCodeLogReader) readMessagesFromFiles(sessionID string) []map[string
 
 // readParts returns sorted parts for a message.
 // Tries SQLite first, then falls back to JSON files.
-func (r *OpenCodeLogReader) readParts(messageID string) []map[string]interface{} {
+func (r *OpenCodeLogReader) readParts(messageID string) []map[string]any {
 	parts := r.readPartsFromDB(messageID)
 	if len(parts) > 0 {
 		sort.Slice(parts, func(i, j int) bool {
@@ -666,7 +666,7 @@ func (r *OpenCodeLogReader) readParts(messageID string) []map[string]interface{}
 	return r.readPartsFromFiles(messageID)
 }
 
-func (r *OpenCodeLogReader) readPartsFromDB(messageID string) []map[string]interface{} {
+func (r *OpenCodeLogReader) readPartsFromDB(messageID string) []map[string]any {
 	rows, err := r.fetchOpenCodeDBRows(
 		"SELECT id, message_id, session_id, time_created, time_updated, data FROM part WHERE message_id = ? ORDER BY time_created ASC, time_updated ASC, id ASC",
 		messageID,
@@ -674,11 +674,11 @@ func (r *OpenCodeLogReader) readPartsFromDB(messageID string) []map[string]inter
 	if err != nil || len(rows) == 0 {
 		return nil
 	}
-	var parts []map[string]interface{}
+	var parts []map[string]any
 	for _, row := range rows {
 		payload := loadJSONBlob(row["data"])
 		if payload == nil {
-			payload = make(map[string]interface{})
+			payload = make(map[string]any)
 		}
 		if _, ok := payload["id"]; !ok {
 			payload["id"] = dbString(row["id"])
@@ -689,9 +689,9 @@ func (r *OpenCodeLogReader) readPartsFromDB(messageID string) []map[string]inter
 		if _, ok := payload["sessionID"]; !ok {
 			payload["sessionID"] = dbString(row["session_id"])
 		}
-		timeData, _ := payload["time"].(map[string]interface{})
+		timeData, _ := payload["time"].(map[string]any)
 		if timeData == nil {
-			timeData = make(map[string]interface{})
+			timeData = make(map[string]any)
 		}
 		if timeData["start"] == nil {
 			timeData["start"] = dbFloat64(row["time_created"])
@@ -705,7 +705,7 @@ func (r *OpenCodeLogReader) readPartsFromDB(messageID string) []map[string]inter
 	return parts
 }
 
-func (r *OpenCodeLogReader) readPartsFromFiles(messageID string) []map[string]interface{} {
+func (r *OpenCodeLogReader) readPartsFromFiles(messageID string) []map[string]any {
 	partDir := r.partDir(messageID)
 	if _, err := os.Stat(partDir); err != nil {
 		return nil
@@ -714,7 +714,7 @@ func (r *OpenCodeLogReader) readPartsFromFiles(messageID string) []map[string]in
 	if err != nil {
 		return nil
 	}
-	var parts []map[string]interface{}
+	var parts []map[string]any
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasPrefix(e.Name(), "prt_") || filepath.Ext(e.Name()) != ".json" {
 			continue
@@ -737,7 +737,7 @@ func (r *OpenCodeLogReader) readPartsFromFiles(messageID string) []map[string]in
 }
 
 // ExtractText extracts visible text from a list of parts.
-func ExtractText(parts []map[string]interface{}, allowReasoningFallback bool) string {
+func ExtractText(parts []map[string]any, allowReasoningFallback bool) string {
 	collect := func(types map[string]bool) string {
 		var out []string
 		for _, part := range parts {
@@ -908,7 +908,7 @@ func (r *OpenCodeLogReader) readSince(state OpenCodeLogState, timeout time.Durat
 			for i := len(messages) - 1; i >= 0; i-- {
 				msg := messages[i]
 				if strOrEmpty(msg["role"]) == "assistant" && strOrEmpty(msg["id"]) == lastAssistantID {
-					if timeData, ok := msg["time"].(map[string]interface{}); ok {
+					if timeData, ok := msg["time"].(map[string]any); ok {
 						if timeData["completed"] != nil {
 							completed = true
 						}
@@ -965,9 +965,9 @@ func (r *OpenCodeLogReader) readSince(state OpenCodeLogState, timeout time.Durat
 // Sort key helpers
 // ---------------------------------------------------------------------------
 
-func messageSortKey(m map[string]interface{}) string {
+func messageSortKey(m map[string]any) string {
 	var created int64 = -1
-	if timeObj, ok := m["time"].(map[string]interface{}); ok {
+	if timeObj, ok := m["time"].(map[string]any); ok {
 		if v, ok := timeObj["created"].(float64); ok {
 			created = int64(v)
 		}
@@ -979,9 +979,9 @@ func messageSortKey(m map[string]interface{}) string {
 	}, "|")
 }
 
-func partSortKey(p map[string]interface{}) string {
+func partSortKey(p map[string]any) string {
 	var start int64 = -1
-	if timeObj, ok := p["time"].(map[string]interface{}); ok {
+	if timeObj, ok := p["time"].(map[string]any); ok {
 		if v, ok := timeObj["start"].(float64); ok {
 			start = int64(v)
 		}
@@ -1033,7 +1033,7 @@ func itoa64(v int64) string {
 // ---------------------------------------------------------------------------
 
 // dbString extracts a string from a sql.Scan value (which may be int64, float64, []byte, string, or nil).
-func dbString(v interface{}) string {
+func dbString(v any) string {
 	if v == nil {
 		return ""
 	}
@@ -1052,7 +1052,7 @@ func dbString(v interface{}) string {
 }
 
 // dbInt64 extracts an int64 from a sql.Scan value.
-func dbInt64(v interface{}) int64 {
+func dbInt64(v any) int64 {
 	if v == nil {
 		return -1
 	}
@@ -1073,7 +1073,7 @@ func dbInt64(v interface{}) int64 {
 }
 
 // dbFloat64 extracts a float64 from a sql.Scan value.
-func dbFloat64(v interface{}) float64 {
+func dbFloat64(v any) float64 {
 	if v == nil {
 		return -1
 	}
@@ -1119,18 +1119,18 @@ func parseInt64(s string) (int64, bool) {
 }
 
 // loadJSONBlob parses a JSON blob from a sql.Scan value (string, []byte, or already map).
-func loadJSONBlob(v interface{}) map[string]interface{} {
+func loadJSONBlob(v any) map[string]any {
 	if v == nil {
 		return nil
 	}
 	switch val := v.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return val
 	case string:
 		if val == "" {
 			return nil
 		}
-		var result map[string]interface{}
+		var result map[string]any
 		if json.Unmarshal([]byte(val), &result) == nil {
 			return result
 		}
@@ -1139,7 +1139,7 @@ func loadJSONBlob(v interface{}) map[string]interface{} {
 		if len(val) == 0 {
 			return nil
 		}
-		var result map[string]interface{}
+		var result map[string]any
 		if json.Unmarshal(val, &result) == nil {
 			return result
 		}

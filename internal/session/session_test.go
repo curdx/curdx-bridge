@@ -36,7 +36,7 @@ func (b *mockBackend) RespawnPane(paneID, cmd, cwd, stderrLogPath string, remain
 
 func (b *mockBackend) SaveCrashLog(paneID, logPath string, lines int) error { return nil }
 
-func writeSessionFile(t *testing.T, dir, filename string, data map[string]interface{}) string {
+func writeSessionFile(t *testing.T, dir, filename string, data map[string]any) string {
 	t.Helper()
 	os.MkdirAll(dir, 0o755)
 	path := filepath.Join(dir, filename)
@@ -56,11 +56,11 @@ func TestEnsurePaneAlive(t *testing.T) {
 		belongsCwd: true,
 	}
 	oldFn := GetBackendFunc
-	GetBackendFunc = func(data map[string]interface{}) TerminalBackend { return backend }
+	GetBackendFunc = func(data map[string]any) TerminalBackend { return backend }
 	defer func() { GetBackendFunc = oldFn }()
 
 	dir := t.TempDir()
-	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
+	sf := writeSessionFile(t, dir, ".codex-session", map[string]any{
 		"pane_id":  "%1",
 		"terminal": "tmux",
 		"work_dir": dir,
@@ -83,15 +83,15 @@ func TestEnsurePaneMarkerFallback(t *testing.T) {
 		belongsCwd: true,
 	}
 	oldFn := GetBackendFunc
-	GetBackendFunc = func(data map[string]interface{}) TerminalBackend { return backend }
+	GetBackendFunc = func(data map[string]any) TerminalBackend { return backend }
 	defer func() { GetBackendFunc = oldFn }()
 
 	dir := t.TempDir()
-	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
-		"pane_id":            "%dead",
-		"pane_title_marker":  "CURDX_CODEX_123",
-		"terminal":           "tmux",
-		"work_dir":           dir,
+	sf := writeSessionFile(t, dir, ".codex-session", map[string]any{
+		"pane_id":           "%dead",
+		"pane_title_marker": "CURDX_CODEX_123",
+		"terminal":          "tmux",
+		"work_dir":          dir,
 	})
 
 	s := &CodexProjectSession{SessionFile: sf, Data: readJSON(sf)}
@@ -111,11 +111,11 @@ func TestEnsurePaneRespawn(t *testing.T) {
 		belongsCwd: true,
 	}
 	oldFn := GetBackendFunc
-	GetBackendFunc = func(data map[string]interface{}) TerminalBackend { return backend }
+	GetBackendFunc = func(data map[string]any) TerminalBackend { return backend }
 	defer func() { GetBackendFunc = oldFn }()
 
 	dir := t.TempDir()
-	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
+	sf := writeSessionFile(t, dir, ".codex-session", map[string]any{
 		"pane_id":   "%3",
 		"terminal":  "tmux",
 		"work_dir":  dir,
@@ -138,7 +138,7 @@ func TestEnsurePaneNoBackend(t *testing.T) {
 	defer func() { GetBackendFunc = oldFn }()
 
 	dir := t.TempDir()
-	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
+	sf := writeSessionFile(t, dir, ".codex-session", map[string]any{
 		"pane_id":  "%1",
 		"terminal": "tmux",
 		"work_dir": dir,
@@ -159,11 +159,11 @@ func TestClaudeNoRespawn(t *testing.T) {
 		belongsCwd: true,
 	}
 	oldFn := GetBackendFunc
-	GetBackendFunc = func(data map[string]interface{}) TerminalBackend { return backend }
+	GetBackendFunc = func(data map[string]any) TerminalBackend { return backend }
 	defer func() { GetBackendFunc = oldFn }()
 
 	dir := t.TempDir()
-	sf := writeSessionFile(t, dir, ".claude-session", map[string]interface{}{
+	sf := writeSessionFile(t, dir, ".claude-session", map[string]any{
 		"pane_id":   "%4",
 		"terminal":  "tmux",
 		"work_dir":  dir,
@@ -179,9 +179,9 @@ func TestClaudeNoRespawn(t *testing.T) {
 
 func TestComputeSessionKey(t *testing.T) {
 	dir := t.TempDir()
-	sf := writeSessionFile(t, dir, ".codex-session", map[string]interface{}{
+	sf := writeSessionFile(t, dir, ".codex-session", map[string]any{
 		"curdx_project_id": "abc123",
-		"work_dir":       dir,
+		"work_dir":         dir,
 	})
 
 	s := &CodexProjectSession{SessionFile: sf, Data: readJSON(sf)}

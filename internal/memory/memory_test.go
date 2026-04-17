@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -14,9 +15,9 @@ func TestDedupeMessagesRemovesConsecutiveDuplicates(t *testing.T) {
 	// Python's dedupe_messages only removes CONSECUTIVE duplicates
 	entries := []ConversationEntry{
 		{Role: "user", Content: "hello"},
-		{Role: "user", Content: "hello"},         // consecutive duplicate — removed
+		{Role: "user", Content: "hello"}, // consecutive duplicate — removed
 		{Role: "assistant", Content: "hi there"},
-		{Role: "assistant", Content: "hi there"},  // consecutive duplicate — removed
+		{Role: "assistant", Content: "hi there"}, // consecutive duplicate — removed
 		{Role: "user", Content: "something new"},
 	}
 	result := d.DedupeMessages(entries)
@@ -71,11 +72,11 @@ func TestParseSessionBasic(t *testing.T) {
 		`{"type":"user","message":{"content":"hello"},"uuid":"u1"}`,
 		`{"type":"assistant","message":{"content":"hi there"},"uuid":"a1"}`,
 	}
-	content := ""
+	var content strings.Builder
 	for _, l := range lines {
-		content += l + "\n"
+		content.WriteString(l + "\n")
 	}
-	os.WriteFile(sessionFile, []byte(content), 0o644)
+	os.WriteFile(sessionFile, []byte(content.String()), 0o644)
 
 	p := NewClaudeSessionParser(dir)
 	entries, err := p.ParseSession(sessionFile)

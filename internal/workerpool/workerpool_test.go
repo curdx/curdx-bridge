@@ -10,7 +10,7 @@ import (
 type testTask struct {
 	reqID     string
 	cancelled bool
-	result    interface{}
+	result    any
 	done      chan struct{}
 }
 
@@ -21,11 +21,16 @@ func newTestTask(reqID string) *testTask {
 	}
 }
 
-func (t *testTask) ReqID() string        { return t.reqID }
-func (t *testTask) IsCancelled() bool     { return t.cancelled }
-func (t *testTask) SetResult(v interface{}) { t.result = v }
-func (t *testTask) Signal()               { select { case t.done <- struct{}{}: default: } }
-func (t *testTask) Wait()                 { <-t.done }
+func (t *testTask) ReqID() string     { return t.reqID }
+func (t *testTask) IsCancelled() bool { return t.cancelled }
+func (t *testTask) SetResult(v any)   { t.result = v }
+func (t *testTask) Signal() {
+	select {
+	case t.done <- struct{}{}:
+	default:
+	}
+}
+func (t *testTask) Wait() { <-t.done }
 
 // --- tests ---
 
@@ -38,8 +43,8 @@ func TestPerSessionWorkerPoolReusesSameKey(t *testing.T) {
 		started[key]++
 		mu.Unlock()
 		return NewBaseSessionWorker(key,
-			func(task Task) (interface{}, error) { return nil, nil },
-			func(err error, task Task) interface{} { return nil },
+			func(task Task) (any, error) { return nil, nil },
+			func(err error, task Task) any { return nil },
 		)
 	}
 
@@ -70,10 +75,10 @@ func TestPerSessionWorkerPoolReusesSameKey(t *testing.T) {
 
 func TestBaseSessionWorkerProcessesTask(t *testing.T) {
 	w := NewBaseSessionWorker("s1",
-		func(task Task) (interface{}, error) {
+		func(task Task) (any, error) {
 			return "ok:" + task.ReqID(), nil
 		},
-		func(err error, task Task) interface{} {
+		func(err error, task Task) any {
 			return "err:" + task.ReqID() + ":" + err.Error()
 		},
 	)
@@ -92,10 +97,10 @@ func TestBaseSessionWorkerProcessesTask(t *testing.T) {
 
 func TestBaseSessionWorkerExceptionPath(t *testing.T) {
 	w := NewBaseSessionWorker("s1",
-		func(task Task) (interface{}, error) {
+		func(task Task) (any, error) {
 			return nil, &testError{"boom"}
 		},
-		func(err error, task Task) interface{} {
+		func(err error, task Task) any {
 			return "err:" + task.ReqID() + ":" + err.Error()
 		},
 	)
@@ -117,10 +122,10 @@ func TestBaseSessionWorkerExceptionPath(t *testing.T) {
 
 func TestBaseSessionWorkerSkipsCancelledTasks(t *testing.T) {
 	w := NewBaseSessionWorker("s1",
-		func(task Task) (interface{}, error) {
+		func(task Task) (any, error) {
 			return "processed", nil
 		},
-		func(err error, task Task) interface{} { return nil },
+		func(err error, task Task) any { return nil },
 	)
 	w.Start()
 	defer w.Stop()

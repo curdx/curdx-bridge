@@ -20,11 +20,11 @@ import (
 // CodexAdapter implements BaseProviderAdapter for the Codex provider.
 type CodexAdapter struct{}
 
-func (a *CodexAdapter) Key() string                 { return "codex" }
+func (a *CodexAdapter) Key() string                        { return "codex" }
 func (a *CodexAdapter) Spec() providers.ProviderDaemonSpec { return providers.CaskdSpec }
-func (a *CodexAdapter) SessionFilename() string      { return ".codex-session" }
-func (a *CodexAdapter) OnStart()                     {}
-func (a *CodexAdapter) OnStop()                      {}
+func (a *CodexAdapter) SessionFilename() string            { return ".codex-session" }
+func (a *CodexAdapter) OnStart()                           {}
+func (a *CodexAdapter) OnStop()                            {}
 
 func (a *CodexAdapter) LoadSession(workDir string, instance string) (any, error) {
 	s := session.LoadCodexSession(workDir, instance)
@@ -176,10 +176,7 @@ func (a *CodexAdapter) HandleTask(task *QueuedTask) *ProviderResult {
 		var waitStep time.Duration
 		if deadline != nil {
 			remaining := time.Until(*deadline)
-			waitStep = 500 * time.Millisecond
-			if remaining < waitStep {
-				waitStep = remaining
-			}
+			waitStep = min(remaining, 500*time.Millisecond)
 		} else {
 			waitStep = 500 * time.Millisecond
 		}

@@ -11,8 +11,8 @@ import (
 	"github.com/curdx/curdx-bridge/internal/comm"
 	"github.com/curdx/curdx-bridge/internal/completionhook"
 	"github.com/curdx/curdx-bridge/internal/protocol"
-	"github.com/curdx/curdx-bridge/internal/provprotocol"
 	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/provprotocol"
 	"github.com/curdx/curdx-bridge/internal/runtime"
 	"github.com/curdx/curdx-bridge/internal/session"
 	"github.com/curdx/curdx-bridge/internal/terminal"
@@ -241,10 +241,7 @@ func (a *ClaudeAdapter) waitForResponse(
 		var waitStep time.Duration
 		if deadline != nil {
 			remaining := time.Until(*deadline)
-			waitStep = 500 * time.Millisecond
-			if remaining < waitStep {
-				waitStep = remaining
-			}
+			waitStep = min(remaining, 500*time.Millisecond)
 		} else {
 			waitStep = 500 * time.Millisecond
 		}
@@ -731,10 +728,7 @@ func splitToTwoLines(text string) (string, string) {
 		mid := len(words) / 2
 		return strings.TrimSpace(strings.Join(words[:mid], " ")), strings.TrimSpace(strings.Join(words[mid:], " "))
 	}
-	mid := len(text) / 2
-	if mid < 1 {
-		mid = 1
-	}
+	mid := max(len(text)/2, 1)
 	return strings.TrimSpace(text[:mid]), strings.TrimSpace(text[mid:])
 }
 

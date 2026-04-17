@@ -12,8 +12,8 @@ import (
 	"github.com/curdx/curdx-bridge/internal/completionhook"
 	"github.com/curdx/curdx-bridge/internal/processlock"
 	"github.com/curdx/curdx-bridge/internal/protocol"
-	"github.com/curdx/curdx-bridge/internal/provprotocol"
 	"github.com/curdx/curdx-bridge/internal/providers"
+	"github.com/curdx/curdx-bridge/internal/provprotocol"
 	"github.com/curdx/curdx-bridge/internal/runtime"
 	"github.com/curdx/curdx-bridge/internal/session"
 	"github.com/curdx/curdx-bridge/internal/terminal"
@@ -199,10 +199,7 @@ func (a *OpenCodeAdapter) handleTaskLocked(task *QueuedTask, sess *session.OpenC
 		var waitStep time.Duration
 		if deadline != nil {
 			remaining := time.Until(*deadline)
-			waitStep = 1 * time.Second
-			if remaining < waitStep {
-				waitStep = remaining
-			}
+			waitStep = min(remaining, 1*time.Second)
 		} else {
 			waitStep = 1 * time.Second
 		}

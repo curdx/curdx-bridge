@@ -23,10 +23,10 @@ import (
 
 // ProviderDaemons maps provider names to their daemon command names.
 var ProviderDaemons = map[string]string{
-	"gemini":    "cxb-gemini-ask",
-	"codex":     "cxb-codex-ask",
-	"opencode":  "cxb-opencode-ask",
-	"claude":    "cxb-claude-ask",
+	"gemini":   "cxb-gemini-ask",
+	"codex":    "cxb-codex-ask",
+	"opencode": "cxb-opencode-ask",
+	"claude":   "cxb-claude-ask",
 }
 
 // ProviderDisplayNames maps provider names to their display names.
@@ -36,24 +36,24 @@ var ProviderDisplayNames = map[string]string{
 
 // CallerSessionFiles maps caller names to their session file names.
 var CallerSessionFiles = map[string]string{
-	"claude":    ".claude-session",
-	"codex":     ".codex-session",
-	"gemini":    ".gemini-session",
-	"opencode":  ".opencode-session",
+	"claude":   ".claude-session",
+	"codex":    ".codex-session",
+	"gemini":   ".gemini-session",
+	"opencode": ".opencode-session",
 }
 
 // CallerPaneEnvHints maps callers to env vars that may carry their pane info.
 var CallerPaneEnvHints = map[string][2]string{
-	"codex":     {"CODEX_TMUX_SESSION", "CODEX_WEZTERM_PANE"},
-	"gemini":    {"GEMINI_TMUX_SESSION", "GEMINI_WEZTERM_PANE"},
-	"opencode":  {"OPENCODE_TMUX_SESSION", "OPENCODE_WEZTERM_PANE"},
+	"codex":    {"CODEX_TMUX_SESSION", "CODEX_WEZTERM_PANE"},
+	"gemini":   {"GEMINI_TMUX_SESSION", "GEMINI_WEZTERM_PANE"},
+	"opencode": {"OPENCODE_TMUX_SESSION", "OPENCODE_WEZTERM_PANE"},
 }
 
 // CallerEnvHints maps callers to env vars that indicate the caller is active.
 var CallerEnvHints = map[string][2]string{
-	"codex":     {"CODEX_SESSION_ID", "CODEX_RUNTIME_DIR"},
-	"gemini":    {"GEMINI_SESSION_ID", "GEMINI_RUNTIME_DIR"},
-	"opencode":  {"OPENCODE_SESSION_ID", "OPENCODE_RUNTIME_DIR"},
+	"codex":    {"CODEX_SESSION_ID", "CODEX_RUNTIME_DIR"},
+	"gemini":   {"GEMINI_SESSION_ID", "GEMINI_RUNTIME_DIR"},
+	"opencode": {"OPENCODE_SESSION_ID", "OPENCODE_RUNTIME_DIR"},
 }
 
 var validCallers = map[string]bool{
@@ -137,12 +137,12 @@ func normalizeCaller(raw string) string {
 	return ""
 }
 
-func loadJSONDict(path string) map[string]interface{} {
+func loadJSONDict(path string) map[string]any {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal(data, &m); err != nil {
 		return nil
 	}
@@ -360,8 +360,8 @@ func sendViaUnifiedDaemon(provider, message string, timeout float64, noWrap bool
 
 	callerPaneID, callerTerminal := callerPaneInfo()
 
-	req := map[string]interface{}{
-		"type":             "cxb-ask.request",
+	req := map[string]any{
+		"type":            "cxb-ask.request",
 		"v":               1,
 		"id":              makeTaskID(),
 		"token":           token,
@@ -383,7 +383,7 @@ func sendViaUnifiedDaemon(provider, message string, timeout float64, noWrap bool
 
 	// Try with one retry on connection failure
 	requestSent := false
-	for attempt := 0; attempt < 2; attempt++ {
+	for attempt := range 2 {
 		var connTimeout time.Duration
 		if timeout > 0 {
 			connTimeout = time.Duration(timeout+10) * time.Second
@@ -440,7 +440,7 @@ func sendViaUnifiedDaemon(provider, message string, timeout float64, noWrap bool
 		}
 		conn.Close()
 
-		var resp map[string]interface{}
+		var resp map[string]any
 		if err := json.Unmarshal([]byte(strings.TrimSpace(string(data))), &resp); err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] %v\n", err)
 			return cliutil.ExitError
@@ -457,7 +457,7 @@ func sendViaUnifiedDaemon(provider, message string, timeout float64, noWrap bool
 	return cliutil.ExitError
 }
 
-func getStringField(m map[string]interface{}, key string) string {
+func getStringField(m map[string]any, key string) string {
 	v, ok := m[key]
 	if !ok || v == nil {
 		return ""
@@ -469,7 +469,7 @@ func getStringField(m map[string]interface{}, key string) string {
 	return fmt.Sprintf("%v", v)
 }
 
-func getIntField(m map[string]interface{}, key string) int {
+func getIntField(m map[string]any, key string) int {
 	v, ok := m[key]
 	if !ok || v == nil {
 		return 0
@@ -787,4 +787,3 @@ func mustGetwd() string {
 	}
 	return cwd
 }
-

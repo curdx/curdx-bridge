@@ -27,7 +27,7 @@ func acquireLock(lockPath string) (*fileLock, error) {
 		return nil, fmt.Errorf("lock held by another process")
 	}
 	// Write PID
-	pidBytes := []byte(fmt.Sprintf("%d", os.Getpid()))
+	pidBytes := fmt.Appendf(nil, "%d", os.Getpid())
 	_, _ = syscall.Seek(fd, 0, 0)
 	_, _ = syscall.Write(fd, pidBytes)
 	_ = syscall.Ftruncate(fd, int64(len(pidBytes)))

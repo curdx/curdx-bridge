@@ -251,7 +251,7 @@ func findProjectDir(repo string) string {
 	// Fallback: search by repo name hint
 	repoName := filepath.Base(repo)
 	hints := map[string]bool{
-		repoName:                                true,
+		repoName:                               true,
 		strings.ReplaceAll(repoName, "_", "-"): true,
 	}
 
@@ -362,10 +362,7 @@ func readLastJSONLWithUsage(path string) (string, map[string]any) {
 	pos := size
 
 	for pos > 0 {
-		readSize := blockSize
-		if pos < readSize {
-			readSize = pos
-		}
+		readSize := min(pos, blockSize)
 		pos -= readSize
 
 		chunk := make([]byte, readSize)
@@ -433,7 +430,7 @@ func parseModelsToml(path string) []modelEntry {
 
 	var entries []modelEntry
 	var current *modelEntry
-	for _, rawLine := range strings.Split(string(data), "\n") {
+	for rawLine := range strings.SplitSeq(string(data), "\n") {
 		line := strings.TrimSpace(rawLine)
 		if line == "[[models]]" {
 			if current != nil && current.pattern != "" && current.contextLimit > 0 {
@@ -678,8 +675,8 @@ func runOnceLocked(
 
 	if cursor.Type == "none" {
 		_ = atomicWriteJSON(stateFile, map[string]any{
-			"last_cursor":    cursorJSON,
-			"task_complete":  true,
+			"last_cursor":     cursorJSON,
+			"task_complete":   true,
 			"last_trigger_ts": lastTS,
 		})
 		return runResult{0, map[string]any{"status": "ok", "taskComplete": true, "cursor": cursorJSON}}
@@ -687,8 +684,8 @@ func runOnceLocked(
 
 	if !hasRemainingWork(state) {
 		_ = atomicWriteJSON(stateFile, map[string]any{
-			"last_cursor":    cursorJSON,
-			"task_complete":  true,
+			"last_cursor":     cursorJSON,
+			"task_complete":   true,
 			"last_trigger_ts": lastTS,
 		})
 		return runResult{0, map[string]any{"status": "ok", "taskComplete": true, "cursor": cursorJSON}}
@@ -708,8 +705,8 @@ func runOnceLocked(
 
 	if !shouldTrigger {
 		_ = atomicWriteJSON(stateFile, map[string]any{
-			"last_cursor":    cursorJSON,
-			"task_complete":  false,
+			"last_cursor":     cursorJSON,
+			"task_complete":   false,
 			"last_trigger_ts": lastTS,
 		})
 		return runResult{0, map[string]any{"status": "noop", "reason": "cursor unchanged", "cursor": cursorJSON}}
@@ -719,8 +716,8 @@ func runOnceLocked(
 	doClear := usage > threshold
 	trigger(repo, doClear)
 	_ = atomicWriteJSON(stateFile, map[string]any{
-		"last_cursor":    cursorJSON,
-		"task_complete":  false,
+		"last_cursor":     cursorJSON,
+		"task_complete":   false,
 		"last_trigger_ts": int(time.Now().Unix()),
 	})
 	return runResult{0, map[string]any{"status": "triggered", "didClear": doClear, "contextPercent": usage, "cursor": cursorJSON}}
@@ -779,8 +776,8 @@ func daemon(
 					"subIndex":  cursor.SubIndex,
 				}
 				_ = atomicWriteJSON(stateFile, map[string]any{
-					"last_cursor":    cursorJSON,
-					"task_complete":  false,
+					"last_cursor":     cursorJSON,
+					"task_complete":   false,
 					"last_trigger_ts": 0,
 				})
 
@@ -790,8 +787,8 @@ func daemon(
 					doClear := usage > threshold
 					trigger(repo, doClear)
 					_ = atomicWriteJSON(stateFile, map[string]any{
-						"last_cursor":    cursorJSON,
-						"task_complete":  false,
+						"last_cursor":     cursorJSON,
+						"task_complete":   false,
 						"last_trigger_ts": int(time.Now().Unix()),
 					})
 					printJSON(map[string]any{

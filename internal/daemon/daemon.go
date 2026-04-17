@@ -54,7 +54,7 @@ func newSessionWorker(sessionKey string, a adapter.BaseProviderAdapter) *workerp
 	)
 }
 
-func (s *sessionWorkerAdapter) handleTask(task workerpool.Task) (interface{}, error) {
+func (s *sessionWorkerAdapter) handleTask(task workerpool.Task) (any, error) {
 	qt, ok := task.(*queuedTaskAdapter)
 	if !ok {
 		return nil, fmt.Errorf("unexpected task type")
@@ -63,7 +63,7 @@ func (s *sessionWorkerAdapter) handleTask(task workerpool.Task) (interface{}, er
 	return result, nil
 }
 
-func (s *sessionWorkerAdapter) handleError(err error, task workerpool.Task) interface{} {
+func (s *sessionWorkerAdapter) handleError(err error, task workerpool.Task) any {
 	qt, ok := task.(*queuedTaskAdapter)
 	if !ok {
 		return adapter.DefaultHandleException(s.adapterInst.Key(), err, nil)
@@ -77,7 +77,7 @@ func (s *sessionWorkerAdapter) handleError(err error, task workerpool.Task) inte
 
 type queuedTaskAdapter struct {
 	inner  *adapter.QueuedTask
-	result interface{}
+	result any
 }
 
 func (q *queuedTaskAdapter) ReqID() string {
@@ -88,7 +88,7 @@ func (q *queuedTaskAdapter) IsCancelled() bool {
 	return q.inner.IsCancelled()
 }
 
-func (q *queuedTaskAdapter) SetResult(value interface{}) {
+func (q *queuedTaskAdapter) SetResult(value any) {
 	q.result = value
 	if r, ok := value.(*adapter.ProviderResult); ok {
 		q.inner.SetResult(r)

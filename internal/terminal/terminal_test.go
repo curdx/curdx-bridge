@@ -225,7 +225,7 @@ func TestTmuxFindPaneByTitleMarkerParsesListPanes(t *testing.T) {
 	}
 
 	findPane := func(marker string) string {
-		for _, line := range strings.Split(result.Stdout, "\n") {
+		for line := range strings.SplitSeq(result.Stdout, "\n") {
 			line = strings.TrimSpace(line)
 			if line == "" {
 				continue
@@ -583,19 +583,19 @@ func TestGetShellType(t *testing.T) {
 }
 
 func TestGetBackendForSession(t *testing.T) {
-	tmuxSession := map[string]interface{}{"terminal": "tmux"}
+	tmuxSession := map[string]any{"terminal": "tmux"}
 	b := GetBackendForSession(tmuxSession)
 	if _, ok := b.(*TmuxBackend); !ok {
 		t.Error("expected TmuxBackend for tmux session")
 	}
 
-	weztermSession := map[string]interface{}{"terminal": "wezterm"}
+	weztermSession := map[string]any{"terminal": "wezterm"}
 	b = GetBackendForSession(weztermSession)
 	if _, ok := b.(*WeztermBackend); !ok {
 		t.Error("expected WeztermBackend for wezterm session")
 	}
 
-	emptySession := map[string]interface{}{}
+	emptySession := map[string]any{}
 	b = GetBackendForSession(emptySession)
 	if _, ok := b.(*TmuxBackend); !ok {
 		t.Error("expected TmuxBackend for empty session (default)")
@@ -604,19 +604,19 @@ func TestGetBackendForSession(t *testing.T) {
 
 func TestGetPaneIDFromSession(t *testing.T) {
 	// tmux with pane_id
-	s := map[string]interface{}{"terminal": "tmux", "pane_id": "%1"}
+	s := map[string]any{"terminal": "tmux", "pane_id": "%1"}
 	if got := GetPaneIDFromSession(s); got != "%1" {
 		t.Errorf("expected %%1, got %s", got)
 	}
 
 	// tmux legacy with tmux_session
-	s = map[string]interface{}{"terminal": "tmux", "tmux_session": "mysession"}
+	s = map[string]any{"terminal": "tmux", "tmux_session": "mysession"}
 	if got := GetPaneIDFromSession(s); got != "mysession" {
 		t.Errorf("expected mysession, got %s", got)
 	}
 
 	// wezterm
-	s = map[string]interface{}{"terminal": "wezterm", "pane_id": "42"}
+	s = map[string]any{"terminal": "wezterm", "pane_id": "42"}
 	if got := GetPaneIDFromSession(s); got != "42" {
 		t.Errorf("expected 42, got %s", got)
 	}
@@ -661,7 +661,7 @@ func TestCleanupPaneLogs(t *testing.T) {
 	// Create temp directory with some files.
 	tmpDir := t.TempDir()
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		path := filepath.Join(tmpDir, fmt.Sprintf("pane-%d.log", i))
 		os.WriteFile(path, []byte("test"), 0o644)
 	}

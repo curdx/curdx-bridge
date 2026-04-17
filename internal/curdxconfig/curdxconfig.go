@@ -31,7 +31,7 @@ func GetBackendEnv() string {
 	path := filepath.Join(cwd, ".curdx-config.json")
 	data, err := os.ReadFile(path)
 	if err == nil {
-		var obj map[string]interface{}
+		var obj map[string]any
 		if json.Unmarshal(data, &obj) == nil {
 			if raw, ok := obj["BackendEnv"]; ok {
 				if s, ok := raw.(string); ok {
@@ -69,7 +69,7 @@ func wslProbeDistroAndHome() (string, string) {
 	cmd2.Env = os.Environ()
 	output2, err := runWithTimeout(cmd2, 5*time.Second)
 	if err == nil {
-		for _, line := range strings.Split(strings.TrimSpace(output2), "\n") {
+		for line := range strings.SplitSeq(strings.TrimSpace(output2), "\n") {
 			d := strings.TrimSpace(strings.Trim(line, "\x00"))
 			if d != "" {
 				distro = d

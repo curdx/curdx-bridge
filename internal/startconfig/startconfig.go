@@ -5,6 +5,7 @@ package startconfig
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -22,7 +23,7 @@ var DefaultProviders = []string{"claude", "codex", "gemini", "opencode"}
 
 // StartConfig holds parsed start configuration data.
 type StartConfig struct {
-	Data map[string]interface{}
+	Data map[string]any
 	Path string // empty string means no path (None equivalent)
 }
 
@@ -39,7 +40,7 @@ func parseTokens(raw string) []string {
 		return nil
 	}
 	var lines []string
-	for _, line := range strings.Split(raw, "\n") {
+	for line := range strings.SplitSeq(raw, "\n") {
 		stripped := line
 		if idx := strings.Index(stripped, "//"); idx >= 0 {
 			stripped = stripped[:idx]
@@ -94,13 +95,11 @@ func normalizeProviders(tokens []string) ([]string, bool) {
 }
 
 // parseConfigObj parses a decoded JSON value into a config map.
-func parseConfigObj(obj interface{}) map[string]interface{} {
+func parseConfigObj(obj any) map[string]any {
 	switch v := obj.(type) {
-	case map[string]interface{}:
-		data := make(map[string]interface{})
-		for k, val := range v {
-			data[k] = val
-		}
+	case map[string]any:
+		data := make(map[string]any)
+		maps.Copy(data, v)
 
 		rawProviders, hasProviders := data["providers"]
 		var tokens []string
@@ -109,7 +108,7 @@ func parseConfigObj(obj interface{}) map[string]interface{} {
 			switch rp := rawProviders.(type) {
 			case string:
 				tokens = parseTokens(rp)
-			case []interface{}:
+			case []any:
 				for _, p := range rp {
 					if p != nil {
 						tokens = append(tokens, stringify(p))
@@ -133,7 +132,7 @@ func parseConfigObj(obj interface{}) map[string]interface{} {
 		}
 		return data
 
-	case []interface{}:
+	case []any:
 		var tokens []string
 		for _, p := range v {
 			if p != nil {
@@ -141,7 +140,7 @@ func parseConfigObj(obj interface{}) map[string]interface{} {
 			}
 		}
 		providers, cmdEnabled := normalizeProviders(tokens)
-		data := map[string]interface{}{
+		data := map[string]any{
 			"providers": toInterfaceSlice(providers),
 		}
 		if cmdEnabled {
@@ -152,7 +151,7 @@ func parseConfigObj(obj interface{}) map[string]interface{} {
 	case string:
 		tokens := parseTokens(v)
 		providers, cmdEnabled := normalizeProviders(tokens)
-		data := map[string]interface{}{
+		data := map[string]any{
 			"providers": toInterfaceSlice(providers),
 		}
 		if cmdEnabled {
@@ -161,29 +160,29 @@ func parseConfigObj(obj interface{}) map[string]interface{} {
 		return data
 	}
 
-	return map[string]interface{}{}
+	return map[string]any{}
 }
 
 // readConfig reads and parses a config file.
-func readConfig(path string) map[string]interface{} {
+func readConfig(path string) map[string]any {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return map[string]interface{}{}
+		return map[string]any{}
 	}
 	// Strip UTF-8 BOM if present (utf-8-sig)
 	raw := string(data)
 	raw = strings.TrimPrefix(raw, "\xef\xbb\xbf")
 
 	if strings.TrimSpace(raw) == "" {
-		return map[string]interface{}{}
+		return map[string]any{}
 	}
 
-	var obj interface{}
+	var obj any
 	if err := json.Unmarshal([]byte(raw), &obj); err != nil {
 		// Not valid JSON; parse as plain text tokens
 		tokens := parseTokens(raw)
 		providers, cmdEnabled := normalizeProviders(tokens)
-		result := map[string]interface{}{
+		result := map[string]any{
 			"providers": toInterfaceSlice(providers),
 		}
 		if cmdEnabled {
@@ -221,7 +220,7 @@ func LoadStartConfig(workDir string) StartConfig {
 	if _, err := os.Stat(globalPath); err == nil {
 		return StartConfig{Data: readConfig(globalPath), Path: globalPath}
 	}
-	return StartConfig{Data: map[string]interface{}{}, Path: ""}
+	return StartConfig{Data: map[string]any{}, Path: ""}
 }
 
 // EnsureDefaultStartConfig ensures a default start config file exists.
@@ -260,7 +259,7 @@ func EnsureDefaultStartConfig(workDir string) (string, bool) {
 }
 
 // stringify converts an interface value to a string.
-func stringify(v interface{}) string {
+func stringify(v any) string {
 	switch s := v.(type) {
 	case string:
 		return s
@@ -274,8 +273,8 @@ func stringify(v interface{}) string {
 }
 
 // toInterfaceSlice converts a string slice to an interface slice.
-func toInterfaceSlice(ss []string) []interface{} {
-	result := make([]interface{}, len(ss))
+func toInterfaceSlice(ss []string) []any {
+	result := make([]any, len(ss))
 	for i, s := range ss {
 		result[i] = s
 	}

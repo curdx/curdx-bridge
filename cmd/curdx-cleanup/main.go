@@ -46,7 +46,7 @@ func cleanupStaleStateFiles() []string {
 			fmt.Fprintf(os.Stderr, "Error processing %s: %s\n", stateFile, err)
 			continue
 		}
-		var obj map[string]interface{}
+		var obj map[string]any
 		if err := json.Unmarshal(data, &obj); err != nil {
 			fmt.Fprintf(os.Stderr, "Error processing %s: %s\n", stateFile, err)
 			continue
@@ -116,7 +116,7 @@ func listRunningDaemons() []daemonInfo {
 		if err != nil {
 			continue
 		}
-		var obj map[string]interface{}
+		var obj map[string]any
 		if err := json.Unmarshal(data, &obj); err != nil {
 			continue
 		}
@@ -145,7 +145,7 @@ func listRunningDaemons() []daemonInfo {
 	return daemons
 }
 
-func intFromJSON(obj map[string]interface{}, key string) int {
+func intFromJSON(obj map[string]any, key string) int {
 	v, ok := obj[key]
 	if !ok || v == nil {
 		return 0

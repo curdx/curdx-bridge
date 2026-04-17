@@ -363,9 +363,9 @@ func resolveWorkDirWithRegistry(
 		if rec != nil {
 			sessionFile := ""
 			if providersRaw, ok := rec["providers"]; ok {
-				if provMap, ok := providersRaw.(map[string]interface{}); ok {
+				if provMap, ok := providersRaw.(map[string]any); ok {
 					if entry, ok := provMap[strings.ToLower(provider)]; ok {
-						if entryMap, ok := entry.(map[string]interface{}); ok {
+						if entryMap, ok := entry.(map[string]any); ok {
 							if sf, ok := entryMap["session_file"].(string); ok && strings.TrimSpace(sf) != "" {
 								sessionFile = strings.TrimSpace(sf)
 							}
@@ -424,7 +424,7 @@ func stateFileFromEnv(envName string) string {
 	return raw
 }
 
-func readState(stateFile string) map[string]interface{} {
+func readState(stateFile string) map[string]any {
 	if stateFile == "" {
 		return nil
 	}
@@ -501,7 +501,7 @@ func tryDaemonRequest(
 		return nil
 	}
 
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"type":      spec.ProtocolPrefix + ".request",
 		"v":         1,
 		"id":        fmt.Sprintf("%s-%d-%d", spec.ProtocolPrefix, os.Getpid(), time.Now().UnixMilli()),
@@ -548,7 +548,7 @@ func tryDaemonRequest(
 		// No deadline for negative timeout
 		deadline = time.Time{}
 	} else {
-		deadline = time.Now().Add(time.Duration((timeout+5.0)*float64(time.Second)))
+		deadline = time.Now().Add(time.Duration((timeout + 5.0) * float64(time.Second)))
 	}
 
 	for {
@@ -578,7 +578,7 @@ func tryDaemonRequest(
 	}
 	line := string(buf[:idx])
 
-	var resp map[string]interface{}
+	var resp map[string]any
 	if err := json.Unmarshal([]byte(line), &resp); err != nil {
 		return nil
 	}
@@ -785,7 +785,7 @@ func getExecutorFromRoles() string {
 		if err != nil {
 			continue
 		}
-		var obj map[string]interface{}
+		var obj map[string]any
 		if err := json.Unmarshal(data, &obj); err != nil {
 			continue
 		}
@@ -891,7 +891,7 @@ func ResolveWorkDir(sessionFile string) string {
 
 // ── Pend Commands ──
 
-func readSessionJSON(path string) (map[string]interface{}, error) {
+func readSessionJSON(path string) (map[string]any, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -899,7 +899,7 @@ func readSessionJSON(path string) (map[string]interface{}, error) {
 	if len(raw) >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF {
 		raw = raw[3:]
 	}
-	var obj map[string]interface{}
+	var obj map[string]any
 	if err := json.Unmarshal(raw, &obj); err != nil {
 		return nil, err
 	}
