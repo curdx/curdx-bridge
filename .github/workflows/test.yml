@@ -1,0 +1,102 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go build
+        env:
+          CGO_ENABLED: '0'
+        run: go build ./...
+
+      - name: go test -race
+        # The race detector requires CGO. On Linux/macOS the system toolchain
+        # ships a C compiler; on windows-latest the mingw-w64 gcc from the
+        # runner image is used.
+        env:
+          CGO_ENABLED: '1'
+        run: go test -race -timeout=5m ./...
+
+  cross-compile:
+    name: cross-compile / ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: linux
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Cross-compile
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: go build ./...
+
+  markers:
+    name: protocol marker check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure CURDX_* markers still emitted
+        # Skills in claude_skills/ and codex_skills/ depend on exact
+        # string markers (CURDX_ASYNC_SUBMITTED, CURDX_TASK_START, etc.)
+        # If a refactor drops one, downstream AI flows silently break.
+        # This check guarantees the well-known markers remain in-source.
+        run: |
+          required=(
+            CURDX_ASYNC_SUBMITTED
+            CURDX_ASYNC_PID
+            CURDX_ASYNC_STATUS_FILE
+            CURDX_ASYNC_LOG_FILE
+            CURDX_TASK_START
+            CURDX_TASK_END
+            CURDX_CALLER
+          )
+          fail=0
+          for m in "${required[@]}"; do
+            if ! grep -rq "$m" cmd/ internal/; then
+              echo "::error ::required protocol marker $m not found in cmd/ or internal/"
+              fail=1
+            fi
+          done
+          exit "$fail"
