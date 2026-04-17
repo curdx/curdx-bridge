@@ -2,20 +2,20 @@
 dist/
 *.exe
 
-# OS-compiled binaries in repo root (from cross-compilation)
+# OS-compiled binaries in repo root (from cross-compilation or
+# local go-build invocations). Use glob patterns so any new cmd/
+# addition is covered automatically.
+/curdx
+/curdx-*
+/cxb-*
+
+# Legacy binary names from the Python -> Go migration era. Kept so
+# stale local builds don't get tracked if someone pulls an old branch.
 /ask
 /askd
 /autoloop
 /autonew
 /cask
-/curdx
-/curdx-arch
-/curdx-cleanup
-/curdx-completion-hook
-/curdx-installer-helper
-/curdx-mcp-delegation
-/curdx-mounted
-/curdx-ping
 /cpend
 /cping
 /ctx-transfer
