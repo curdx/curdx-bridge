@@ -359,9 +359,12 @@ func readJSON(path string) map[string]any {
 func writeJSON(path string, data map[string]any) {
 	b, err := json.Marshal(data)
 	if err != nil {
+		logMsg(fmt.Sprintf("writeJSON: marshal failed path=%s err=%v", path, err))
 		return
 	}
-	os.WriteFile(path, b, 0644)
+	if err := os.WriteFile(path, b, 0o600); err != nil {
+		logMsg(fmt.Sprintf("writeJSON: write failed path=%s err=%v", path, err))
+	}
 }
 
 // ---------- background spawn ----------
