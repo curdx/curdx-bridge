@@ -177,6 +177,22 @@ func WrapClaudePrompt(message, reqID string) string {
 
 // ── Common reply extraction ──
 
+// markerIDOf checks whether line is a well-formed CURDX marker with the
+// given prefix (e.g. "CURDX_DONE:" or "CURDX_BEGIN:"), and if so returns
+// the trimmed request ID after the prefix. Returns ("", false) otherwise.
+// Matches the semantics of `(?i)^\s*<prefix>\s*<id>\s*$` without allocating
+// a new regex per call.
+func markerIDOf(line, prefix string) (string, bool) {
+	s := strings.TrimSpace(line)
+	if len(s) < len(prefix) {
+		return "", false
+	}
+	if !strings.EqualFold(s[:len(prefix)], prefix) {
+		return "", false
+	}
+	return strings.TrimSpace(s[len(prefix):]), true
+}
+
 // ExtractReplyStandard extracts the reply segment for reqID using the standard
 // algorithm shared by gemini and opencode.
 // This is the common pattern from *askd_protocol.py.
@@ -186,15 +202,15 @@ func ExtractReplyStandard(text, reqID string, stripDone func(string, string) str
 		return ""
 	}
 
-	targetRe := regexp.MustCompile(`(?i)^\s*CURDX_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
 	var doneIdxs []int
 	var targetIdxs []int
 	for i, ln := range lines {
-		if AnyDoneLineRe.MatchString(ln) {
-			doneIdxs = append(doneIdxs, i)
-			if targetRe.MatchString(ln) {
-				targetIdxs = append(targetIdxs, i)
-			}
+		if !AnyDoneLineRe.MatchString(ln) {
+			continue
+		}
+		doneIdxs = append(doneIdxs, i)
+		if id, ok := markerIDOf(ln, DonePrefix); ok && strings.EqualFold(id, reqID) {
+			targetIdxs = append(targetIdxs, i)
 		}
 	}
 
@@ -228,17 +244,15 @@ func ExtractReplyForClaude(text, reqID string, stripDone func(string, string) st
 		return ""
 	}
 
-	targetRe := regexp.MustCompile(`(?i)^\s*CURDX_DONE:\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
-	beginRe := regexp.MustCompile(`(?i)^\s*` + regexp.QuoteMeta(BeginPrefix) + `\s*` + regexp.QuoteMeta(reqID) + `\s*$`)
-
 	var doneIdxs []int
 	var targetIdxs []int
 	for i, ln := range lines {
-		if AnyDoneLineRe.MatchString(ln) {
-			doneIdxs = append(doneIdxs, i)
-			if targetRe.MatchString(ln) {
-				targetIdxs = append(targetIdxs, i)
-			}
+		if !AnyDoneLineRe.MatchString(ln) {
+			continue
+		}
+		doneIdxs = append(doneIdxs, i)
+		if id, ok := markerIDOf(ln, DonePrefix); ok && strings.EqualFold(id, reqID) {
+			targetIdxs = append(targetIdxs, i)
 		}
 	}
 
@@ -251,7 +265,7 @@ func ExtractReplyForClaude(text, reqID string, stripDone func(string, string) st
 	// Look for BEGIN marker
 	beginI := -1
 	for i := targetI - 1; i >= 0; i-- {
-		if beginRe.MatchString(lines[i]) {
+		if id, ok := markerIDOf(lines[i], BeginPrefix); ok && strings.EqualFold(id, reqID) {
 			beginI = i
 			break
 		}

@@ -154,3 +154,69 @@ func TestProviderResultDefaults(t *testing.T) {
 		t.Error("DoneMs should be nil by default")
 	}
 }
+
+// Tests added to pin down the pre-compiled regex → string-compare refactor.
+// These exercise whitespace handling, case folding, and the BEGIN-marker
+// fallback path where behavioral equivalence with the old regex form matters.
+
+func TestExtractReplyStandardWhitespaceAroundMarker(t *testing.T) {
+	reqID := makeTestReqID(30)
+	// Leading spaces and trailing spaces around the DONE line must still
+	// match (the old `(?i)^\s*CURDX_DONE:\s*<id>\s*$` regex supported this).
+	text := fmt.Sprintf("body\n   CURDX_DONE:  %s   \n", reqID)
+	reply := ExtractReplyStandard(text, reqID, stubStripDone)
+	if !strings.Contains(reply, "body") {
+		t.Errorf("expected 'body' in reply, got %q", reply)
+	}
+}
+
+func TestExtractReplyStandardCaseInsensitivePrefix(t *testing.T) {
+	reqID := makeTestReqID(31)
+	// Prefix was matched case-insensitively by the old regex ((?i) flag).
+	// The refactor uses strings.EqualFold on the CURDX_DONE: prefix, so the
+	// relaxed case must still be recognised.
+	text := fmt.Sprintf("body\ncurdx_done: %s\n", reqID)
+	reply := ExtractReplyStandard(text, reqID, stubStripDone)
+	// AnyDoneLineRe's `(?i)` allows "curdx_done:" too, so the line *should*
+	// match. If the refactor regresses this, reply would be "" because the
+	// line wouldn't be recognised as a DONE marker at all.
+	if !strings.Contains(reply, "body") {
+		t.Errorf("expected case-insensitive match to find 'body', got %q", reply)
+	}
+}
+
+func TestExtractReplyForClaudeFallsBackWithoutBegin(t *testing.T) {
+	// When Claude's reply lacks a BEGIN marker, extraction should fall
+	// back to the DONE-anchored logic (same as Standard path). This
+	// exercises the second branch in ExtractReplyForClaude.
+	req1 := makeTestReqID(40)
+	req2 := makeTestReqID(41)
+	text := fmt.Sprintf(
+		"intro\nCURDX_DONE: %s\nthe reply\nCURDX_DONE: %s\n",
+		req1, req2)
+	reply := ExtractReplyForClaude(text, req2, stubStripDone)
+	if !strings.Contains(reply, "the reply") {
+		t.Errorf("expected 'the reply' in fallback path, got %q", reply)
+	}
+	if strings.Contains(reply, "intro") {
+		t.Errorf("should not leak previous DONE segment, got %q", reply)
+	}
+}
+
+// BenchmarkExtractReplyStandard gives us a number to compare against if
+// future changes reintroduce per-call regex compilation.
+func BenchmarkExtractReplyStandard(b *testing.B) {
+	reqID := makeTestReqID(99)
+	// 100-line conversation with a single DONE marker at the end.
+	var sb strings.Builder
+	for i := 0; i < 100; i++ {
+		fmt.Fprintf(&sb, "content line %d\n", i)
+	}
+	fmt.Fprintf(&sb, "CURDX_DONE: %s\n", reqID)
+	text := sb.String()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = ExtractReplyStandard(text, reqID, stubStripDone)
+	}
+}
