@@ -549,12 +549,19 @@ func run(argv []string) int {
 		cmd.Env = env
 		cmd.Stdout = nil
 		cmd.Stderr = nil
+		if err := cmd.Start(); err != nil {
+			debugLog(fmt.Sprintf("ask --notify fallback failed to start: %v", err))
+			return 0
+		}
 		done := make(chan error, 1)
-		cmd.Start()
 		go func() { done <- cmd.Wait() }()
 		select {
-		case <-done:
+		case err := <-done:
+			if err != nil {
+				debugLog(fmt.Sprintf("ask --notify fallback wait err: %v", err))
+			}
 		case <-time.After(time.Duration(timeout * float64(time.Second))):
+			debugLog(fmt.Sprintf("ask --notify fallback timed out after %.1fs", timeout))
 		}
 		debugLog(fmt.Sprintf("ask --notify fallback completed"))
 		return 0
@@ -581,12 +588,19 @@ func run(argv []string) int {
 	cmd.Env = env
 	cmd.Stdout = nil
 	cmd.Stderr = nil
+	if err := cmd.Start(); err != nil {
+		debugLog(fmt.Sprintf("post-failure ask --notify failed to start: %v", err))
+		return 0
+	}
 	done := make(chan error, 1)
-	_ = cmd.Start()
 	go func() { done <- cmd.Wait() }()
 	select {
-	case <-done:
+	case err := <-done:
+		if err != nil {
+			debugLog(fmt.Sprintf("post-failure ask --notify wait err: %v", err))
+		}
 	case <-time.After(time.Duration(timeout * float64(time.Second))):
+		debugLog(fmt.Sprintf("post-failure ask --notify timed out after %.1fs", timeout))
 	}
 	debugLog("post-failure ask --notify completed")
 	return 0
