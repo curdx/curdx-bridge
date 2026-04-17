@@ -15,9 +15,11 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -752,13 +754,36 @@ func daemon(
 	}
 	defer lock.release()
 
+	// On SIGINT/SIGTERM, close sigCh so waitOrExit returns true and the
+	// daemon returns normally. Without this, the process is killed abruptly
+	// before `defer lock.release()` can run (on Windows the lock file
+	// handle is kernel-released anyway, but PID-file content is left stale
+	// and the next invocation has no way to tell a clean shutdown from a
+	// crash).
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigCh)
+
 	pollDuration := time.Duration(pollS * float64(time.Second))
+	// waitOrExit sleeps up to pollDuration; returns true if a signal
+	// arrived during the wait, in which case the caller should return.
+	waitOrExit := func() bool {
+		select {
+		case <-sigCh:
+			return true
+		case <-time.After(pollDuration):
+			return false
+		}
+	}
+
 	var lastMtime *time.Time
 
 	for {
 		info, err := os.Stat(statePath)
 		if err != nil {
-			time.Sleep(pollDuration)
+			if waitOrExit() {
+				return 0
+			}
 			continue
 		}
 
@@ -800,19 +825,25 @@ func daemon(
 					})
 				}
 			}
-			time.Sleep(pollDuration)
+			if waitOrExit() {
+				return 0
+			}
 			continue
 		}
 
 		if mtime.Equal(*lastMtime) {
-			time.Sleep(pollDuration)
+			if waitOrExit() {
+				return 0
+			}
 			continue
 		}
 
 		lastMtime = &mtime
 		result := runOnceLocked(repo, statePath, stateFile, threshold, contextLimit, cooldownS, false)
 		printJSON(result.summary)
-		time.Sleep(pollDuration)
+		if waitOrExit() {
+			return 0
+		}
 	}
 }
 
